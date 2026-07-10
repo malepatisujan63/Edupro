@@ -1,0 +1,341 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* iOS 18 Liquid Glass & Instagram Sunset Dark Theme Tokens */
+    --canvas-bg-1: #000000;
+    --canvas-bg-2: #0A0A0A;
+    --canvas-bg-3: #121212;
+    --glass-fill: rgba(18, 18, 18, 0.75);
+    --glass-border: rgba(255, 255, 255, 0.18);
+    --coral-blaze: #E1306C;
+    --coral-blaze-end: #FD1D1D;
+    --ocean-mist: #5AC8FA;
+    --success-green: #34C759;
+    --badge-red: #FF3B30;
+    --ink: #FFFFFF;
+    --muted: rgba(255, 255, 255, 0.60);
+  }
+
+  body {
+    background: #000000 !important;
+    background-attachment: fixed;
+    color: #FFFFFF;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", sans-serif;
+    font-weight: 480;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 590;
+    color: #FFFFFF;
+    letter-spacing: -0.02em;
+  }
+}
+
+/* iOS 18 Liquid Glass Panels & Surfaces (Instagram Dark Theme - Pure Glossy No Border) */
+@layer components {
+  /* Main Cards, Profiles, Post Widgets (28px radius, NO outer border, glossy specular inset) */
+  .glass-card, .glass-panel {
+    background: rgba(18, 18, 18, 0.92);
+    backdrop-filter: blur(28px) saturate(200%);
+    -webkit-backdrop-filter: blur(28px) saturate(200%);
+    border: none !important;
+    border-radius: 28px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.9), inset 0 1px 1px rgba(255, 255, 255, 0.16) !important;
+    color: #FFFFFF;
+    transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .glass-card:hover {
+    background: rgba(26, 26, 26, 0.96);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.95), inset 0 1px 1px rgba(255, 255, 255, 0.22) !important;
+    transform: translateY(-2px);
+  }
+
+  /* Compact Chips & Small Widgets (18px radius, NO outer border) */
+  .glass-chip {
+    background: rgba(28, 28, 30, 0.88);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: none !important;
+    border-radius: 18px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.14) !important;
+    color: #FFFFFF;
+  }
+
+  /* Floating Dock & Pill Nav Bar (26px radius or full pill, NO outer border, crystal clear glossy iOS 18 transparency) */
+  .glass-pill {
+    background: rgba(255, 255, 255, 0.12) !important;
+    backdrop-filter: blur(36px) saturate(240%) brightness(1.15) !important;
+    -webkit-backdrop-filter: blur(36px) saturate(240%) brightness(1.15) !important;
+    border: none !important;
+    border-radius: 9999px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), inset 0 1.5px 2px rgba(255, 255, 255, 0.35), inset 0 -1.5px 2px rgba(0, 0, 0, 0.6) !important;
+    color: #FFFFFF;
+  }
+
+  /* iOS 18 Segmented Control Groups (Grouped Neighbor Buttons inside capsule, NO outer border, glossy transparency) */
+  .segmented-glass-group {
+    background: rgba(255, 255, 255, 0.12) !important;
+    backdrop-filter: blur(36px) saturate(240%) brightness(1.15) !important;
+    -webkit-backdrop-filter: blur(36px) saturate(240%) brightness(1.15) !important;
+    border: none !important;
+    border-radius: 999px;
+    padding: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.8), inset 0 1.5px 2px rgba(255, 255, 255, 0.35), inset 0 -1px 2px rgba(0, 0, 0, 0.6) !important;
+  }
+
+  .segmented-glass-btn {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 480;
+    color: rgba(255, 255, 255, 0.75);
+    transition: all 150ms ease-out;
+  }
+
+  .segmented-glass-btn:hover {
+    color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.18);
+  }
+
+  .segmented-glass-btn:active {
+    transform: scale(0.96);
+  }
+
+  .segmented-glass-btn-active {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 590;
+    background: #262626;
+    color: #FFFFFF;
+    border: none !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.2) !important;
+    transition: all 150ms ease-out;
+  }
+
+  /* iOS 18 BUTTON SPECIFICATIONS */
+  /* Primary Button (Instagram Sunset gradient, pill shape, glossy highlight over top third) */
+  .glass-action-btn-primary, .btn-primary {
+    border-radius: 999px;
+    background: linear-gradient(135deg, #E1306C 0%, #FD1D1D 50%, #FCB045 100%);
+    color: #FFFFFF;
+    font-weight: 590;
+    font-size: 13px;
+    padding: 10px 20px;
+    box-shadow: 0 4px 14px rgba(225, 48, 108, 0.35);
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform 120ms ease-out, filter 120ms ease-out, box-shadow 120ms ease-out;
+    border: none;
+    cursor: pointer;
+  }
+
+  .glass-action-btn-primary::before, .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 35%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.30) 0%, rgba(255, 255, 255, 0) 100%);
+    pointer-events: none;
+  }
+
+  .glass-action-btn-primary:active, .btn-primary:active {
+    transform: scale(0.97);
+    filter: brightness(1.08);
+    box-shadow: 0 2px 8px rgba(225, 48, 108, 0.45);
+  }
+
+  /* Secondary Button (Dark glass pill, white text, NO outer border) */
+  .glass-action-btn, .btn-secondary {
+    border-radius: 999px;
+    background: rgba(28, 28, 30, 0.90);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: none !important;
+    color: #FFFFFF;
+    font-weight: 480;
+    font-size: 13px;
+    padding: 10px 20px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.16) !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform 120ms ease-out, background 120ms ease-out;
+    cursor: pointer;
+  }
+
+  .glass-action-btn:hover, .btn-secondary:hover {
+    background: rgba(44, 44, 46, 0.95);
+  }
+
+  .glass-action-btn:active, .btn-secondary:active {
+    transform: scale(0.97);
+    background: rgba(58, 58, 60, 0.98);
+  }
+
+  /* Icon Buttons (Circular 44px dark glass chip, white icon, NO outer border) */
+  .btn-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(28, 28, 30, 0.90);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: none !important;
+    color: #FFFFFF;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.16) !important;
+    transition: transform 120ms ease-out, background 120ms ease-out;
+    cursor: pointer;
+  }
+
+  .btn-icon:hover {
+    background: rgba(44, 44, 46, 0.95);
+  }
+
+  .btn-icon:active {
+    transform: scale(0.95);
+  }
+
+  /* Destructive Button */
+  .btn-destructive {
+    border-radius: 999px;
+    background: rgba(255, 59, 48, 0.22);
+    border: none !important;
+    color: #FF3B30;
+    font-weight: 590;
+    font-size: 13px;
+    padding: 10px 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 14px rgba(255, 59, 48, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
+    transition: transform 120ms ease-out, background 120ms ease-out;
+    cursor: pointer;
+  }
+
+  .btn-destructive:active {
+    transform: scale(0.97);
+    background: rgba(255, 59, 48, 0.32);
+  }
+
+  /* Chat Bubbles (20px radius, max-width 75%, generous padding, NO outer border) */
+  .chat-bubble-sent {
+    border-radius: 20px 20px 4px 20px;
+    background: linear-gradient(135deg, #E1306C 0%, #FD1D1D 100%);
+    color: #FFFFFF;
+    border: none !important;
+    padding: 12px 16px;
+    box-shadow: 0 4px 14px rgba(225, 48, 108, 0.25);
+    max-width: 75%;
+  }
+
+  .chat-bubble-received {
+    border-radius: 20px 20px 20px 4px;
+    background: rgba(28, 28, 30, 0.90);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: none !important;
+    color: #FFFFFF;
+    padding: 12px 16px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.16) !important;
+    max-width: 75%;
+  }
+}
+
+/* Global utility override to strip ANY white border across all components when requested */
+@layer utilities {
+  [class*="border-white"],
+  [class*="border-[#"],
+  [class*="border-slate"],
+  [class*="border-gray"],
+  [class*="border-neutral"],
+  [class*="border-zinc"] {
+    border-color: transparent !important;
+    border-width: 0px !important;
+  }
+}
+
+/* Animations */
+@keyframes panelRise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes springIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  70% {
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-20px, 15px) scale(1.05);
+  }
+}
+
+.animate-panelRise {
+  animation: panelRise 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-springIn {
+  animation: springIn 350ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-floatSlow {
+  animation: floatSlow 12s ease-in-out infinite;
+}
+
+/* Custom smooth scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(50, 50, 50, 0.6);
+  border-radius: 9999px;
+  border: none;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(225, 48, 108, 0.8);
+}

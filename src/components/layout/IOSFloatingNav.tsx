@@ -1,0 +1,233 @@
+import React, { useState } from 'react';
+import {
+  Home,
+  Play,
+  Share2,
+  Search,
+  User,
+  MessageSquare,
+  HelpCircle,
+} from 'lucide-react';
+import { globalPlatformTrie, type TrieItem } from '../../dsa-engine';
+
+export type NavTab = 'home' | 'communities' | 'qna' | 'messaging' | 'resources' | 'profile';
+
+interface IOSFloatingNavProps {
+  activeTab: NavTab;
+  onSelectTab: (tab: NavTab) => void;
+  onOpenAuth?: () => void;
+  onOpenDSAHUD?: () => void;
+  onOpenTimer?: () => void;
+  onOpenCodeSandbox?: () => void;
+  onOpenAIBuddy?: () => void;
+  currentUser: { name: string; avatarUrl?: string } | null;
+}
+
+export const IOSFloatingNav: React.FC<IOSFloatingNavProps> = ({
+  activeTab,
+  onSelectTab,
+  currentUser,
+}) => {
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<{ results: TrieItem[]; latencyMs: number; pathString: string } | null>(null);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const q = e.target.value;
+    setSearchQuery(q);
+    if (q.trim()) {
+      const res = globalPlatformTrie.searchPrefix(q, 10);
+      setSearchResults(res);
+    } else {
+      setSearchResults(null);
+    }
+  };
+
+  const tabs: Array<{ id: NavTab; label: string; icon: React.ReactNode; badge?: boolean }> = [
+    { id: 'home', label: 'Home Feed', icon: <Home className="w-5 h-5" /> },
+    { id: 'resources', label: 'Notes & Videos', icon: <Play className="w-5 h-5 fill-current" /> },
+    { id: 'communities', label: 'Study Hubs', icon: <Share2 className="w-5 h-5" /> },
+    { id: 'qna', label: 'Doubt Q&A', icon: <HelpCircle className="w-5 h-5" /> },
+    { id: 'messaging', label: 'Chat & Audio', icon: <MessageSquare className="w-5 h-5" />, badge: true },
+  ];
+
+  return (
+    <>
+      {/* Top App Brand Floating Badge (Official EduNetwork Logo, No Oval Container, Large & Crisp) */}
+      <div className="fixed top-3 left-4 sm:left-6 z-40 pointer-events-auto flex items-center">
+        <img
+          src="/logo.png"
+          alt="EduNetwork"
+          className="h-14 sm:h-16 w-auto object-contain transition-transform hover:scale-105 drop-shadow-[0_4px_16px_rgba(0,0,0,0.85)]"
+        />
+      </div>
+
+      {/* iOS 18 Floating Liquid Glass Pill Navigation Dock (No Scroll Bar, Minimal Icons Only, High Transparency) */}
+      <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 w-auto max-w-[96%] pointer-events-none">
+        <div className="pointer-events-auto mx-auto glass-pill p-1.5 sm:p-2 flex items-center justify-center gap-1 sm:gap-1.5 transition-all duration-300 shadow-2xl overflow-visible">
+          
+          {/* Main Pill Tabs: Icon only for sleek minimal fit */}
+          <div className="flex items-center gap-1 shrink-0">
+            {tabs.map((tab) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => onSelectTab(tab.id)}
+                  title={tab.label}
+                  className={`relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full transition-all duration-300 ${
+                    isActive
+                      ? 'bg-gradient-to-tr from-[#E1306C] to-[#FD1D1D] shadow-lg text-white scale-110 font-bold'
+                      : 'text-white/75 hover:text-white hover:bg-white/15'
+                  }`}
+                >
+                  <span className="shrink-0">
+                    {tab.icon}
+                  </span>
+                  {tab.badge && !isActive && (
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#FD1D1D] animate-ping" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Navigation Bar Profile Search trigger */}
+          <div className="flex items-center gap-1 pl-1.5 border-l border-white/15 shrink-0">
+            <button
+              onClick={() => setIsSearchOpen(true)}
+              title="Search Profile / Students ($O(L)$ Trie)"
+              className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center text-white transition-all shrink-0 shadow-sm active:scale-95"
+            >
+              <Search className="w-4 h-4 text-[#E1306C]" />
+            </button>
+          </div>
+
+          {/* User Profile Tab Trigger with online dot */}
+          <div className="flex items-center pl-1 sm:pl-1.5 border-l border-white/20 shrink-0">
+            <button
+              onClick={() => onSelectTab('profile')}
+              title={`Profile: ${currentUser?.name || 'Student'}`}
+              className={`relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full transition-all border ${
+                activeTab === 'profile'
+                  ? 'btn-primary shadow-md scale-105'
+                  : 'bg-[#181818] hover:bg-[#262626] text-white border-white/20'
+              }`}
+            >
+              {currentUser?.avatarUrl ? (
+                <img src={currentUser.avatarUrl} alt="avatar" className="w-full h-full rounded-full object-cover border-2 border-white/30 shadow-sm" />
+              ) : (
+                <User className="w-5 h-5 text-[#E1306C]" />
+              )}
+              <span className="w-2.5 h-2.5 rounded-full bg-[#34C759] border-2 border-[#121212] absolute -top-0.5 -right-0.5" />
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      {/* Interactive Profile & Student Trie Search Modal ($O(L)$) */}
+      {isSearchOpen && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 px-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+          <div className="w-full max-w-xl glass-card rounded-[28px] shadow-2xl overflow-hidden animate-scaleUp border border-white/20 bg-[#121212]">
+            
+            <div className="p-4 border-b border-white/20 flex items-center gap-3 bg-[#181818]">
+              <Search className="w-5 h-5 text-[#E1306C]" />
+              <input
+                type="text"
+                autoFocus
+                placeholder="Search student profiles ($O(L)$ Trie)... e.g. 'aarav', 'dsa', 'profile'"
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className="w-full bg-transparent text-white text-sm outline-none font-medium placeholder:text-white/50"
+              />
+              <button
+                onClick={() => setIsSearchOpen(false)}
+                className="px-3 py-1 rounded-full bg-[#262626] border border-white/20 text-white text-xs font-bold hover:bg-[#333333] shadow-sm"
+              >
+                ESC
+              </button>
+            </div>
+
+            {/* Trie Execution Metrics HUD */}
+            {searchResults && (
+              <div className="px-4 py-2 bg-[#181818] border-b border-white/20 text-xs flex flex-wrap items-center justify-between gap-2 text-white">
+                <div>
+                  ⚡ <span className="font-bold text-[#E1306C]">Trie Traversal Path:</span>{' '}
+                  <code className="bg-[#262626] px-2 py-0.5 rounded-md text-[11px] font-mono text-white shadow-inner border border-white/20">{searchResults.pathString}</code>
+                </div>
+                <div className="flex items-center gap-3 font-semibold">
+                  <span className="text-[#34C759]">Latency: {searchResults.latencyMs} ms</span>
+                  <span className="text-[#833AB4]">Found: {searchResults.results.length} profiles</span>
+                </div>
+              </div>
+            )}
+
+            <div className="max-h-[60vh] overflow-y-auto p-2.5 divide-y divide-white/10">
+              {!searchQuery.trim() && (
+                <div className="p-8 text-center text-white/60 text-sm">
+                  <User className="w-10 h-10 text-[#E1306C] mx-auto mb-2" />
+                  <p className="font-bold text-white">Search Student Profiles</p>
+                  <p className="text-xs mt-1 font-normal">
+                    Instantly find classmates, seniors, and study partners using $O(L)$ Trie character paths.
+                  </p>
+                </div>
+              )}
+
+              {searchResults?.results.length === 0 && searchQuery.trim() && (
+                <div className="p-6 text-center text-white text-sm font-medium">
+                  No profile found matching "{searchQuery}".
+                </div>
+              )}
+
+              {searchResults?.results.map((item) => (
+                <div
+                  key={item.id}
+                  onClick={() => {
+                    setIsSearchOpen(false);
+                    if (item.type === 'user') onSelectTab('profile');
+                    else if (item.type === 'question') onSelectTab('qna');
+                    else if (item.type === 'group') onSelectTab('communities');
+                    else onSelectTab('resources');
+                  }}
+                  className="p-3.5 hover:bg-[#181818] rounded-[20px] transition-all cursor-pointer flex items-center justify-between gap-3 group border border-transparent hover:border-white/20 shadow-sm"
+                >
+                  <div className="flex items-center gap-3">
+                    {item.avatarUrl ? (
+                      <img src={item.avatarUrl} alt="" className="w-10 h-10 rounded-full object-cover border-2 border-white/20 shadow-sm" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-[#E1306C]/15 border border-[#E1306C]/30 flex items-center justify-center text-[#E1306C] font-bold uppercase shadow-sm">
+                        {item.title[0]}
+                      </div>
+                    )}
+                    <div>
+                      <h4 className="text-sm font-bold text-white group-hover:text-[#E1306C] transition-colors flex items-center gap-2">
+                        {item.title}
+                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-[#262626] text-white border border-white/20">
+                          {item.type}
+                        </span>
+                      </h4>
+                      {item.subtitle && <p className="text-xs text-white/60 font-normal">{item.subtitle}</p>}
+                    </div>
+                  </div>
+
+                  {item.tags && (
+                    <div className="flex items-center gap-1">
+                      {item.tags.slice(0, 2).map((t) => (
+                        <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-[#833AB4]/10 text-[#833AB4] border border-[#833AB4]/20 font-semibold">
+                          #{t}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+

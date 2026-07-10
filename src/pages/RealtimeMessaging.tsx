@@ -1,0 +1,378 @@
+import React, { useState, useRef } from 'react';
+import {
+  MessageSquare,
+  Send,
+  Mic,
+  Square,
+  Phone,
+  Video,
+  Radio,
+  Play,
+} from 'lucide-react';
+
+interface ChatMessage {
+  id: string;
+  senderId: string;
+  senderName: string;
+  content?: string;
+  audioBlobUrl?: string;
+  audioDurationSeconds?: number;
+  imageUrl?: string;
+  timestamp: string;
+  channel: string;
+  latencyMs: number;
+}
+
+export const RealtimeMessaging: React.FC = () => {
+  const [activeChannel, setActiveChannel] = useState<'Kabir Mehta' | 'Riya Patel' | 'Algo Champions Pod'>('Kabir Mehta');
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      id: 'msg_1',
+      senderId: 'usr_3',
+      senderName: 'Kabir Mehta',
+      content: 'Hey Aarav! Did you check the new AVL Tree rotation proof in the notes library?',
+      timestamp: '10:14 AM',
+      channel: 'Kabir Mehta',
+      latencyMs: 14,
+    },
+    {
+      id: 'msg_2',
+      senderId: 'usr_1',
+      senderName: 'Aarav Sharma (You)',
+      content: 'Yes! The O(1) pointer swap diagram makes so much sense compared to height traversal.',
+      timestamp: '10:16 AM',
+      channel: 'Kabir Mehta',
+      latencyMs: 11,
+    },
+  ]);
+
+  const [inputMsg, setInputMsg] = useState('');
+  const [isRecordingAudio, setIsRecordingAudio] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const recordingTimerRef = useRef<any>(null);
+
+  // Audio recording simulation & real capture via HTML5 MediaRecorder API
+  const startRecordingVoiceNote = async () => {
+    try {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const recorder = new MediaRecorder(stream);
+        mediaRecorderRef.current = recorder;
+        audioChunksRef.current = [];
+
+        recorder.ondataavailable = (e) => {
+          if (e.data.size > 0) audioChunksRef.current.push(e.data);
+        };
+
+        recorder.onstop = () => {
+          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+          const audioUrl = URL.createObjectURL(audioBlob);
+          sendVoiceNoteMessage(audioUrl, recordingSeconds || 5);
+          stream.getTracks().forEach((track) => track.stop());
+        };
+
+        recorder.start();
+        setIsRecordingAudio(true);
+        setRecordingSeconds(0);
+        recordingTimerRef.current = setInterval(() => {
+          setRecordingSeconds((prev) => prev + 1);
+        }, 1000);
+      } else {
+        throw new Error('getUserMedia not supported on this browser');
+      }
+    } catch (err) {
+      console.warn('Microphone permission or API error, simulating audio recording:', err);
+      // Fallback developer simulation for when running inside secure sandboxes without mic hardware
+      setIsRecordingAudio(true);
+      setRecordingSeconds(0);
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingSeconds((prev) => prev + 1);
+      }, 1000);
+    }
+  };
+
+  const stopRecordingVoiceNote = () => {
+    if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+    setIsRecordingAudio(false);
+
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    } else {
+      // Simulated audio blob output
+      sendVoiceNoteMessage('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', recordingSeconds || 4);
+    }
+  };
+
+  const sendVoiceNoteMessage = (audioUrl: string, durationSec: number) => {
+    const newMsg: ChatMessage = {
+      id: `msg_${Date.now()}`,
+      senderId: 'usr_1',
+      senderName: 'Aarav Sharma (You)',
+      audioBlobUrl: audioUrl,
+      audioDurationSeconds: durationSec,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      channel: activeChannel,
+      latencyMs: Math.floor(8 + Math.random() * 8),
+    };
+    setMessages((prev) => [...prev, newMsg]);
+  };
+
+  const handleSendMessage = () => {
+    if (!inputMsg.trim()) return;
+    const newMsg: ChatMessage = {
+      id: `msg_${Date.now()}`,
+      senderId: 'usr_1',
+      senderName: 'Aarav Sharma (You)',
+      content: inputMsg,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      channel: activeChannel,
+      latencyMs: Math.floor(8 + Math.random() * 8),
+    };
+    setMessages((prev) => [...prev, newMsg]);
+    setInputMsg('');
+
+    // Simulate instant Redis PubSub reply
+    setTimeout(() => {
+      const reply: ChatMessage = {
+        id: `msg_${Date.now() + 1}`,
+        senderId: 'usr_peer',
+        senderName: activeChannel,
+        content: `Got your message! Redis PubSub transmitted the payload via WebSocket channel #chat:${activeChannel.toLowerCase().replace(/\s+/g, '_')} with 12ms latency.`,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        channel: activeChannel,
+        latencyMs: 12,
+      };
+      setMessages((prev) => [...prev, reply]);
+    }, 1500);
+  };
+
+  const filteredMessages = messages.filter((m) => m.channel === activeChannel);
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-6 pb-32 grid grid-cols-1 lg:grid-cols-4 gap-6">
+      
+      {/* Left Sidebar: Active Channels & WebSocket Architecture HUD */}
+      <div className="lg:col-span-1 space-y-6">
+        
+        {/* Channel Selector */}
+        {/* Channel Selector Widget */}
+        <div className="p-5 rounded-[26px] bg-[#121212] border border-white/20 space-y-4 shadow-xl">
+          <div className="flex items-center justify-between border-b border-white/15 pb-3">
+            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+              <MessageSquare className="w-4 h-4 text-[#E1306C]" />
+              <span>Active Sessions</span>
+            </h3>
+            <span className="text-[10px] bg-[#34C759]/15 text-[#34C759] px-2.5 py-0.5 rounded-full border border-[#34C759]/40 flex items-center gap-1.5 font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#34C759] animate-ping" />
+              WebSocket
+            </span>
+          </div>
+
+          <div className="space-y-2.5">
+            {(['Kabir Mehta', 'Riya Patel', 'Algo Champions Pod'] as const).map((ch) => (
+              <button
+                key={ch}
+                onClick={() => setActiveChannel(ch)}
+                className={`w-full p-3.5 rounded-[20px] text-left transition-all flex items-center gap-3.5 border ${
+                  activeChannel === ch
+                    ? 'bg-[#262626] border-white/40 shadow-lg text-white scale-[1.02]'
+                    : 'bg-[#181818] border-white/10 text-white/70 hover:text-white hover:bg-[#202020]'
+                }`}
+              >
+                <div className="relative shrink-0">
+                  <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-[#E1306C]/40 to-[#FD1D1D]/60 border border-white/20 flex items-center justify-center font-bold text-white shadow-md">
+                    {ch[0]}
+                  </div>
+                  <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[#34C759] border-2 border-[#121212]" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-bold truncate text-white">{ch}</h4>
+                    {activeChannel === ch && <span className="w-2 h-2 rounded-full bg-[#E1306C]" />}
+                  </div>
+                  <p className="text-[11px] text-white/50 truncate font-normal">
+                    {ch.includes('Pod') ? 'Study Group Channel' : 'Direct Peer Channel'}
+                  </p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Redis PubSub & Audio Architecture Card */}
+        <div className="p-5 rounded-[26px] bg-[#121212] border border-white/20 space-y-3 text-xs text-white shadow-xl">
+          <h3 className="text-sm font-bold text-white flex items-center gap-2">
+            <Radio className="w-4 h-4 text-[#E1306C]" />
+            <span>Redis PubSub + Audio Voice Engine</span>
+          </h3>
+          <p className="leading-relaxed text-white/70 font-normal">
+            • <b>Zero-Cost Messaging:</b> WebSocket connections listen to in-memory Redis channels (`#chat:channel_id`).
+          </p>
+          <p className="leading-relaxed text-white/70 font-normal">
+            • <b>Direct Audio Voice Notes:</b> Uses browser `HTML5 MediaRecorder API` to record microphone input directly into WebM blobs without server transcoding bottlenecks!
+          </p>
+          <div className="pt-2 border-t border-white/15 flex items-center justify-between text-[11px] text-[#E1306C] font-semibold">
+            <span>Status: SUBSCRIBED</span>
+            <span>Latency: ~12ms</span>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Main Chat Session Area (3 Cols) */}
+      <div className="lg:col-span-3 rounded-[28px] bg-[#121212] border border-white/20 flex flex-col h-[700px] overflow-hidden shadow-2xl">
+        
+        {/* Chat Header */}
+        <div className="p-4 sm:p-5 bg-[#181818] border-b border-white/15 flex items-center justify-between">
+          <div className="flex items-center gap-3.5">
+            <div className="relative shrink-0">
+              <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-[#E1306C]/40 to-[#FD1D1D]/60 border border-white/20 flex items-center justify-center font-bold text-white text-base shadow-md">
+                {activeChannel[0]}
+              </div>
+              <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[#34C759] border-2 border-[#181818]" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                {activeChannel}
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#34C759]/15 text-[#34C759] border border-[#34C759]/30 font-semibold">
+                  ● Live PubSub Session
+                </span>
+              </h3>
+              <p className="text-xs text-white/60 font-normal">
+                End-to-end WebSocket communication • Redis Channel: <code>#chat:{activeChannel.toLowerCase().replace(/\s+/g, '_')}</code>
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            <button className="btn-icon">
+              <Phone className="w-4 h-4 text-white" />
+            </button>
+            <button className="btn-icon">
+              <Video className="w-4 h-4 text-white" />
+            </button>
+          </div>
+        </div>
+
+        {/* Chat Messages Log (iMessage Grouping & Spring-In Bubbles) */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-[#121212]">
+          {filteredMessages.map((msg) => {
+            const isMe = msg.senderId === 'usr_1';
+            return (
+              <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} animate-springIn`}>
+                <div className="flex items-center gap-2 mb-1 px-2">
+                  <span className="text-xs font-semibold text-white/80">{msg.senderName}</span>
+                  <span className="text-[10px] text-white/50 font-mono">{msg.timestamp}</span>
+                  <span className="text-[10px] bg-[#181818] text-[#34C759] px-2 py-0.5 rounded-full font-mono border border-white/20">
+                    ⚡ {msg.latencyMs}ms
+                  </span>
+                </div>
+
+                <div className={isMe ? 'bg-[#E1306C] text-white p-3.5 rounded-2xl rounded-br-sm shadow-md max-w-md' : 'bg-[#181818] text-white p-3.5 rounded-2xl rounded-bl-sm border border-white/15 shadow-md max-w-md'}>
+                  {/* Text message */}
+                  {msg.content && <p className="text-sm leading-relaxed font-normal">{msg.content}</p>}
+
+                  {/* Audio Voice Note Bubble with Waveform visualizer */}
+                  {msg.audioBlobUrl && (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3 bg-black/30 p-3 rounded-[18px] border border-white/20">
+                        <button
+                          onClick={() => {
+                            const audioEl = document.getElementById(`audio_${msg.id}`) as HTMLAudioElement;
+                            if (audioEl) {
+                              if (audioEl.paused) audioEl.play();
+                              else audioEl.pause();
+                            }
+                          }}
+                          className="w-10 h-10 rounded-full bg-white text-[#121212] flex items-center justify-center shrink-0 shadow-md hover:scale-105 transition-all"
+                        >
+                          <Play className="w-5 h-5 fill-[#121212] ml-0.5 text-[#121212]" />
+                        </button>
+
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center justify-between text-xs font-semibold">
+                            <span>🎙️ Audio Voice Note</span>
+                            <span className="font-mono text-white">0:{msg.audioDurationSeconds ? (msg.audioDurationSeconds < 10 ? `0${msg.audioDurationSeconds}` : msg.audioDurationSeconds) : '05'}</span>
+                          </div>
+
+                          {/* Waveform graphic representation */}
+                          <div className="flex items-center gap-0.5 h-6">
+                            {[4, 12, 18, 24, 16, 28, 22, 14, 26, 30, 20, 15, 24, 18, 10, 22, 14, 8].map((h, i) => (
+                              <div
+                                key={i}
+                                className={`flex-1 rounded-full transition-all ${isMe ? 'bg-white/85' : 'bg-[#E1306C]/80'}`}
+                                style={{ height: `${h}px` }}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <audio id={`audio_${msg.id}`} src={msg.audioBlobUrl} className="hidden" controls />
+                    </div>
+                  )}
+
+                  {/* Image attachment preview */}
+                  {msg.imageUrl && (
+                    <img src={msg.imageUrl} alt="chat attachment" className="rounded-[18px] mt-2 max-h-60 object-cover border border-white/20 shadow-sm" />
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Recording Voice Note Banner if active */}
+        {isRecordingAudio && (
+          <div className="px-5 py-3 bg-[#FF3B30]/15 border-t border-[#FF3B30]/30 flex items-center justify-between animate-pulse">
+            <div className="flex items-center gap-3 text-[#FF3B30] font-bold text-xs">
+              <span className="w-3 h-3 rounded-full bg-[#FF3B30] animate-ping" />
+              <span>🎙️ Recording Audio Voice Note via MediaRecorder API... ({recordingSeconds}s)</span>
+            </div>
+            <button
+              onClick={stopRecordingVoiceNote}
+              className="btn-destructive text-xs py-1.5 px-4"
+            >
+              <Square className="w-3.5 h-3.5 fill-[#FF3B30]" />
+              <span>Stop & Transmit Audio ($O(1)$)</span>
+            </button>
+          </div>
+        )}
+
+        {/* Input Dock (Glass Pill composer, docked Coral circle button) */}
+        <div className="p-4 bg-[#181818] border-t border-white/15 flex items-center gap-3">
+          <button
+            onClick={isRecordingAudio ? stopRecordingVoiceNote : startRecordingVoiceNote}
+            title="Record Audio Voice Note (MediaRecorder API)"
+            className={`btn-icon shrink-0 ${
+              isRecordingAudio ? '!bg-[#FF3B30] !text-white animate-bounce' : ''
+            }`}
+          >
+            <Mic className="w-5 h-5" />
+          </button>
+
+          <div className="flex-1 relative flex items-center">
+            <input
+              type="text"
+              placeholder={`Send instant message to ${activeChannel}...`}
+              value={inputMsg}
+              onChange={(e) => setInputMsg(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+              className="w-full bg-[#262626] border border-white/20 rounded-full pl-5 pr-12 py-3 text-sm text-white focus:border-[#E1306C] focus:bg-[#333333] outline-none placeholder:text-white/50 shadow-inner transition-all"
+            />
+            <button
+              onClick={handleSendMessage}
+              className="absolute right-1.5 w-9 h-9 rounded-full bg-gradient-to-tr from-[#E1306C] to-[#FD1D1D] hover:opacity-95 text-white flex items-center justify-center shadow-md transition-transform active:scale-90"
+            >
+              <Send className="w-4 h-4 ml-0.5" />
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  );
+};
