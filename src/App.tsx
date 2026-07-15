@@ -9,13 +9,13 @@ import { QnAPlatform } from './pages/QnAPlatform';
 import { RealtimeMessaging } from './pages/RealtimeMessaging';
 import { StudentProfile } from './pages/StudentProfile';
 import { preloadPlatformData } from './dsa-engine';
-import { uploadFile, createPost, backgroundUploadAndAttach, compressImage } from './lib/firestoreService';
+import { createPost, backgroundUploadAndAttach } from './lib/firestoreService';
 import { AppleTimerExtension } from './components/extensions/AppleTimerExtension';
 import { checkRateLimit } from './utils/rateLimiter';
 import { validateContentSafety, verifyFileMagicBytes } from './utils/safetyFilter';
 import { accountManager } from './models/AccountManager';
 import { type StudentAccount } from './models/StudentAccount';
-import { ShieldCheck, Lock, ArrowRight, CheckCircle2, Bell, Plus, X, Image as ImageIcon, FileText, Send, Video, Trash2, Loader, Clock, Sparkles } from 'lucide-react';
+import { ShieldCheck, Lock, ArrowRight, CheckCircle2, Bell, Plus, X, Image as ImageIcon, FileText, Send, Video, Trash2, Loader } from 'lucide-react';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<NavTab>('home');
@@ -28,8 +28,7 @@ export const App: React.FC = () => {
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
   const [attachedMediaUrl, setAttachedMediaUrl] = useState<string | null>(null);
   const [attachedMediaType, setAttachedMediaType] = useState<'image' | 'video' | 'pdf' | null>(null);
-  const [isPosting, setIsPosting] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const isPosting = false;
   const [uploadStatus, setUploadStatus] = useState<{ fileName: string; progress: number; status: 'uploading' | 'completed' } | null>(null);
 
   // Mandatory Login Gate: start as null so user MUST login before opening
@@ -439,7 +438,7 @@ export const App: React.FC = () => {
                 className="btn-primary text-xs py-2 px-6 font-bold flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-wait"
               >
                 {isPosting ? (
-                  <><Loader className="w-3.5 h-3.5 animate-spin" /><span>{uploadProgress > 0 ? `Uploading ${uploadProgress}%` : 'Posting...'}</span></>
+                  <><Loader className="w-3.5 h-3.5 animate-spin" /><span>Posting...</span></>
                 ) : (
                   <><Send className="w-3.5 h-3.5" /><span>Share Post</span></>
                 )}

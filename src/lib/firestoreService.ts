@@ -2,7 +2,7 @@
 // ─── All Firestore + Firebase Storage operations for EduNetwork ───
 
 import {
-  collection, doc, setDoc, getDoc, addDoc, updateDoc,
+  collection, doc, setDoc, getDoc, updateDoc,
   onSnapshot, query, orderBy, limit,
   serverTimestamp, getDocs, where, runTransaction, arrayUnion, arrayRemove
 } from 'firebase/firestore';

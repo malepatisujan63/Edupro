@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Download, Search, Heart, MessageCircle, Share2, Bookmark, FileText, Play, Zap, Plus, Image as ImageIcon, Video, X } from 'lucide-react';
+import { Download, Search, Heart, MessageCircle, Share2, Bookmark, FileText, Play, Zap, Plus } from 'lucide-react';
 import { subscribeToPosts, createPost, backgroundUploadAndAttach, type FirestorePost } from '../lib/firestoreService';
 
 interface ResourceLibraryProps {
