@@ -203,7 +203,10 @@ export async function createPost(post: Omit<FirestorePost, 'id' | 'createdAt'>):
     createdAt: serverTimestamp(),
   };
 
-  const docRef = await addDoc(collection(db, 'posts'), sanitised);
+  const docRef = doc(collection(db, 'posts'));
+  
+  // Non-blocking optimistic background write (latency compensation is instant)
+  setDoc(docRef, sanitised).catch((err) => console.error('Background post write error:', err));
 
   window.dispatchEvent(new CustomEvent('edunetwork:refresh'));
   return docRef.id;
@@ -332,7 +335,8 @@ export async function createCommunity(community: Omit<FirestoreCommunity, 'id' |
     category: community.category.trim(),
     createdAt: serverTimestamp(),
   };
-  const docRef = await addDoc(collection(db, 'communities'), sanitised);
+  const docRef = doc(collection(db, 'communities'));
+  setDoc(docRef, sanitised).catch((err) => console.error('Background community write error:', err));
   return docRef.id;
 }
 
@@ -371,7 +375,8 @@ export async function addComment(comment: Omit<FirestoreComment, 'id' | 'created
     content: comment.content.trim(),
     createdAt: serverTimestamp(),
   };
-  const docRef = await addDoc(collection(db, 'qna_comments'), sanitised);
+  const docRef = doc(collection(db, 'qna_comments'));
+  setDoc(docRef, sanitised).catch((err) => console.error('Background comment write error:', err));
   return docRef.id;
 }
 
