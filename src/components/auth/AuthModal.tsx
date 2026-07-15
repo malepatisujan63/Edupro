@@ -302,47 +302,58 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     LOGGED_IN: 'Authenticated successfully',
   };
 
-  const OtpBoxes = ({ onSubmit }: { onSubmit: () => void }) => (
-    <div className="space-y-4">
-      {successMsg && (
-        <div className="flex items-center gap-2 text-[11px] text-[#00CFFF] font-bold px-1">
-          <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /><span>{successMsg}</span>
-        </div>
-      )}
-      <div className="flex gap-2 justify-center">
-        {otpDigits.map((d, i) => (
-          <input key={i}
-            ref={el => { otpRefs.current[i] = el; }}
-            type="text" inputMode="numeric" maxLength={1} value={d}
-            onChange={e => handleOtpDigit(i, e.target.value)}
-            onKeyDown={e => handleOtpKeyDown(i, e)}
-            className="w-11 h-14 text-center text-xl font-black rounded-2xl border-2 bg-[#0D0D0D] text-white outline-none transition-all
-              border-[rgba(99,179,237,0.2)] focus:border-[#00CFFF] focus:shadow-[0_0_0_3px_rgba(108,99,255,0.25)]"
-          />
-        ))}
-      </div>
-      <div className="flex items-center justify-between text-xs px-1">
-        <span className="text-white/40">
-          {countdown > 0 ? `Expires in ${Math.floor(countdown/60)}:${String(countdown%60).padStart(2,'0')}` : 'OTP expired'}
-        </span>
-        {canResend && (
-          <button onClick={() => step === 'OTP_VERIFY_REG'
-            ? generateAndSendOtp(googleUser!.email, googleUser!.name, 'registration')
-            : generateAndSendOtp(loginUser?.email, loginUser?.name, 'login')}
-            disabled={isSendingOtp}
-            className="text-[#00CFFF] font-bold hover:text-[#4169E1] transition-colors">
-            {isSendingOtp ? 'Sending...' : 'Resend OTP'}
-          </button>
+  const OtpBoxes = ({ onSubmit }: { onSubmit: () => void }) => {
+    // Automatically submit when all 6 digits are entered
+    useEffect(() => {
+      const entered = getEnteredOtp();
+      if (entered.length === 6 && !entered.includes('')) {
+        const timer = setTimeout(() => onSubmit(), 300);
+        return () => clearTimeout(timer);
+      }
+    }, [otpDigits, onSubmit]);
+
+    return (
+      <div className="space-y-4">
+        {successMsg && (
+          <div className="flex items-center gap-2 text-[11px] text-[#00CFFF] font-bold px-1">
+            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /><span>{successMsg}</span>
+          </div>
         )}
+        <div className="flex gap-2 justify-center">
+          {otpDigits.map((d, i) => (
+            <input key={i}
+              ref={el => { otpRefs.current[i] = el; }}
+              type="text" inputMode="numeric" maxLength={1} value={d}
+              onChange={e => handleOtpDigit(i, e.target.value)}
+              onKeyDown={e => handleOtpKeyDown(i, e)}
+              className="w-11 h-14 text-center text-xl font-black rounded-2xl border-2 bg-[#0D0D0D] text-white outline-none transition-all
+                border-[rgba(99,179,237,0.2)] focus:border-[#00CFFF] focus:shadow-[0_0_0_3px_rgba(108,99,255,0.25)]"
+            />
+          ))}
+        </div>
+        <div className="flex items-center justify-between text-xs px-1">
+          <span className="text-white/40">
+            {countdown > 0 ? `Expires in ${Math.floor(countdown/60)}:${String(countdown%60).padStart(2,'0')}` : 'OTP expired'}
+          </span>
+          {canResend && (
+            <button onClick={() => step === 'OTP_VERIFY_REG'
+              ? generateAndSendOtp(googleUser!.email, googleUser!.name, 'registration')
+              : generateAndSendOtp(loginUser?.email, loginUser?.name, 'login')}
+              disabled={isSendingOtp}
+              className="text-[#00CFFF] font-bold hover:text-[#4169E1] transition-colors">
+              {isSendingOtp ? 'Sending...' : 'Resend OTP'}
+            </button>
+          )}
+        </div>
+        <button onClick={onSubmit} disabled={getEnteredOtp().length < 6 || isLoading}
+          className="w-full py-3.5 rounded-2xl font-black text-sm text-white transition-all
+            bg-gradient-to-r from-[#00CFFF] via-[#9B5DE5] to-[#4169E1] hover:opacity-90
+            shadow-lg shadow-[#00CFFF]/20 disabled:opacity-50 flex items-center justify-center gap-2">
+          {isLoading ? <Loader className="w-4 h-4 animate-spin" /> : <span>Verify & Continue →</span>}
+        </button>
       </div>
-      <button onClick={onSubmit} disabled={getEnteredOtp().length < 6 || isLoading}
-        className="w-full py-3.5 rounded-2xl font-black text-sm text-white transition-all
-          bg-gradient-to-r from-[#00CFFF] via-[#9B5DE5] to-[#4169E1] hover:opacity-90
-          disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-[#00CFFF]/20">
-        {isLoading ? <Loader className="w-4 h-4 animate-spin mx-auto" /> : 'Verify & Continue →'}
-      </button>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-2xl animate-fadeIn">
