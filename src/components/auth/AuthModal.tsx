@@ -326,6 +326,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               type="text" inputMode="numeric" maxLength={1} value={d}
               onChange={e => handleOtpDigit(i, e.target.value)}
               onKeyDown={e => handleOtpKeyDown(i, e)}
+              onFocus={e => e.target.select()}
               className="w-11 h-14 text-center text-xl font-black rounded-2xl border-2 bg-[#0D0D0D] text-white outline-none transition-all
                 border-[rgba(99,179,237,0.2)] focus:border-[#00CFFF] focus:shadow-[0_0_0_3px_rgba(108,99,255,0.25)]"
             />

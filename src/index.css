@@ -345,16 +345,10 @@
    The spinning conic-gradient that flows around every focused input/button
    ════════════════════════════════════════════════════════════════════════════ */
 
-/* Animate the --kx-angle custom property for the conic-gradient spin */
-@property --kx-angle {
-  syntax: '<angle>';
-  initial-value: 0deg;
-  inherits: false;
-}
-
-@keyframes kxFlow {
-  from { --kx-angle: 0deg; }
-  to   { --kx-angle: 360deg; }
+/* ── PANNING FLOW ANIMATION (Cross-Browser) ── */
+@keyframes panFlow {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: -200% 50%; }
 }
 
 /* ── KX FIELD (wrapper div — activates on focus-within) ─────────────────── */
@@ -367,17 +361,12 @@
 }
 
 .kx-field:focus-within {
-  --kx-angle: 0deg;
   border: 1.5px solid transparent;
   background:
     linear-gradient(#000000, #000000) padding-box,
-    conic-gradient(from var(--kx-angle),
-      #00CFFF  0%,
-      #4169E1  33%,
-      #9B5DE5  66%,
-      #00CFFF  100%
-    ) border-box;
-  animation: kxFlow 2.4s linear infinite;
+    linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
+  background-size: 200% 100%;
+  animation: panFlow 2.5s linear infinite;
   box-shadow:
     0 0 12px rgba(0, 207, 255, 0.35),
     0 0 28px rgba(65, 105, 225, 0.25),
@@ -404,13 +393,9 @@
   border: 1.5px solid transparent;
   background:
     linear-gradient(#000000, #000000) padding-box,
-    conic-gradient(from var(--kx-angle),
-      #00CFFF  0%,
-      #4169E1  33%,
-      #9B5DE5  66%,
-      #00CFFF  100%
-    ) border-box;
-  animation: kxFlow 2.4s linear infinite;
+    linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
+  background-size: 200% 100%;
+  animation: panFlow 2.5s linear infinite;
   box-shadow:
     0 0 10px rgba(0, 207, 255, 0.30),
     0 0 24px rgba(65, 105, 225, 0.20),
@@ -419,7 +404,6 @@
 
 /* ── KX PILL (pill-shaped flowing border — nav/buttons) ──────────────────── */
 .kx-pill-flow {
-  --kx-angle: 0deg;
   border: 1.5px solid rgba(65, 105, 225, 0.2);
   border-radius: 9999px;
   background: #000000;
@@ -432,13 +416,9 @@
   border: 1.5px solid transparent;
   background:
     linear-gradient(#000000, #000000) padding-box,
-    conic-gradient(from var(--kx-angle),
-      #00CFFF  0%,
-      #4169E1  33%,
-      #9B5DE5  66%,
-      #00CFFF  100%
-    ) border-box;
-  animation: kxFlow 2s linear infinite;
+    linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
+  background-size: 200% 100%;
+  animation: panFlow 2s linear infinite;
   box-shadow:
     0 0 14px rgba(0, 207, 255, 0.35),
     0 0 32px rgba(65, 105, 225, 0.25);
@@ -446,7 +426,6 @@
 
 /* ── KX NAV DOCK (bottom navigation bar container) ───────────────────────── */
 .kx-nav-dock {
-  --kx-angle: 0deg;
   border-radius: 9999px;
   backdrop-filter: blur(24px) saturate(180%);
   transition: all 0.3s ease;
@@ -454,10 +433,9 @@
   border: 1.5px solid transparent;
   background:
     linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)) padding-box,
-    conic-gradient(from var(--kx-angle),
-      #00CFFF 0%, #4169E1 33%, #9B5DE5 66%, #00CFFF 100%
-    ) border-box;
-  animation: kxFlow 3s linear infinite;
+    linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
+  background-size: 200% 100%;
+  animation: panFlow 3.5s linear infinite;
   box-shadow:
     0 0 16px rgba(0, 207, 255, 0.25),
     0 0 36px rgba(65, 105, 225, 0.15);
@@ -465,15 +443,13 @@
 
 /* ── KX FLOW CARD (glowing spinning border for cards/modals) ─────────────── */
 .kx-flow-card {
-  --kx-angle: 0deg;
   backdrop-filter: blur(24px) saturate(180%);
   border: 1.5px solid transparent;
   background:
     linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)) padding-box,
-    conic-gradient(from var(--kx-angle),
-      #00CFFF 0%, #4169E1 33%, #9B5DE5 66%, #00CFFF 100%
-    ) border-box;
-  animation: kxFlow 4s linear infinite;
+    linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
+  background-size: 200% 100%;
+  animation: panFlow 4s linear infinite;
   box-shadow:
     0 0 16px rgba(0, 207, 255, 0.2),
     0 0 40px rgba(65, 105, 225, 0.15);
@@ -490,14 +466,12 @@
 }
 
 .kx-field-pill:focus-within {
-  --kx-angle: 0deg;
   border: 1.5px solid transparent;
   background:
     linear-gradient(#000000, #000000) padding-box,
-    conic-gradient(from var(--kx-angle),
-      #00CFFF 0%, #4169E1 33%, #9B5DE5 66%, #00CFFF 100%
-    ) border-box;
-  animation: kxFlow 2.4s linear infinite;
+    linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
+  background-size: 200% 100%;
+  animation: panFlow 2.5s linear infinite;
   box-shadow:
     0 0 12px rgba(0, 207, 255, 0.35),
     0 0 28px rgba(65, 105, 225, 0.25),
@@ -536,10 +510,9 @@
 .kx-search-header:focus-within {
   background:
     linear-gradient(#050505, #050505) padding-box,
-    conic-gradient(from var(--kx-angle),
-      #00CFFF 0%, #4169E1 33%, #9B5DE5 66%, #00CFFF 100%
-    ) border-box;
-  animation: kxFlow 2.4s linear infinite;
+    linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
+  background-size: 200% 100%;
+  animation: panFlow 2.5s linear infinite;
   box-shadow:
     0 0 16px rgba(0, 207, 255, 0.3),
     0 0 40px rgba(65, 105, 225, 0.2),
