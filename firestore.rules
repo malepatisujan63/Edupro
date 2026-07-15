@@ -8,16 +8,16 @@ service cloud.firestore {
       allow write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Posts: authenticated users can read and create; only owner can delete
+    // Posts: authenticated users can read, create, and update likes/attachments
     match /posts/{postId} {
       allow read: if request.auth != null;
       allow create: if request.auth != null
-        && request.resource.data.authorId == request.auth.uid
-        && request.resource.data.title.size() <= 2000
-        && request.resource.data.title.size() > 0;
+        && request.resource.data.authorId == request.auth.uid;
       allow delete: if request.auth != null
         && resource.data.authorId == request.auth.uid;
-      allow update: if false; // no direct post edits allowed
+      allow update: if request.auth != null
+        && (resource.data.authorId == request.auth.uid
+            || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['upvotes', 'commentsCount', 'mediaUrl', 'storagePath']));
 
       // Likes subcollection: strictly 1 doc per user ID (= 1 like per user)
       match /likes/{likeUserId} {

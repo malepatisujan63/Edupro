@@ -262,23 +262,24 @@ export async function createPost(post: Omit<FirestorePost, 'id' | 'createdAt'>):
   // Sanitise input
   const sanitised = {
     ...post,
-    title: post.title.trim().slice(0, 2000),
+    title: (post.title || 'Campus Post').trim().slice(0, 2000),
     upvotes: 0,
     commentsCount: 0,
-    createdAt: serverTimestamp(),
+    createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    timestamp: Date.now(),
   };
 
   const docRef = doc(collection(db, 'posts'));
   
-  // Non-blocking optimistic background write (latency compensation is instant)
-  setDoc(docRef, sanitised).catch((err) => console.error('Background post write error:', err));
+  // Await Firestore document creation to ensure guaranteed storage
+  await setDoc(docRef, sanitised);
 
   window.dispatchEvent(new CustomEvent('edunetwork:refresh'));
   return docRef.id;
 }
 
 /**
- * Subscribe to live post feed from Firestore (top 50 by upvotes).
+ * Subscribe to live post feed from Firestore (up to 100 recent & top posts).
  * Returns an unsubscribe function — call it on component unmount.
  */
 export function subscribeToPosts(
@@ -286,15 +287,31 @@ export function subscribeToPosts(
 ): () => void {
   const q = query(
     collection(db, 'posts'),
-    orderBy('upvotes', 'desc'),
-    limit(50)
+    limit(100)
   );
 
   return onSnapshot(q, (snap) => {
-    const posts: FirestorePost[] = snap.docs.map((d) => ({
-      id: d.id,
-      ...(d.data() as Omit<FirestorePost, 'id'>),
-    }));
+    const posts: FirestorePost[] = snap.docs.map((d) => {
+      const data = d.data();
+      return {
+        id: d.id,
+        ...(data as Omit<FirestorePost, 'id'>),
+      };
+    });
+
+    // Sort clean so newest creations and top upvotes are always visible at the top
+    posts.sort((a: any, b: any) => {
+      const timeA = a.timestamp || 0;
+      const timeB = b.timestamp || 0;
+      // If either post was created within the last 30 minutes, give it priority
+      const now = Date.now();
+      const isFreshA = now - timeA < 30 * 60 * 1000;
+      const isFreshB = now - timeB < 30 * 60 * 1000;
+      if (isFreshA && !isFreshB) return -1;
+      if (!isFreshA && isFreshB) return 1;
+      if (isFreshA && isFreshB) return timeB - timeA;
+      return (b.upvotes || 0) - (a.upvotes || 0);
+    });
 
     // Sync into in-memory MaxHeap for DSA-based re-sorting
     posts.forEach((p) => {
@@ -314,6 +331,8 @@ export function subscribeToPosts(
     });
 
     callback(posts);
+  }, (err) => {
+    console.error('Firestore posts subscription error:', err);
   });
 }
 

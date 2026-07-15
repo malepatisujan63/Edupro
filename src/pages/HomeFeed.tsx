@@ -220,16 +220,22 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ currentUser, account }) => {
 
   // ── Memoised personalised feed sort — O(n log n) only when posts/dwell changes
   const visiblePosts = useMemo(() => {
-    // Use account's personalised heap if available, else fall back to upvote sort
+    // Use account's personalised heap if available, plus freshness & author priority
     const dwellScores = account?.getDwellScores() ?? {};
+    const now = Date.now();
     return [...posts]
       .sort((a, b) => {
-        const scoreA = (a.upvotes * 3) + ((dwellScores[a.category] || 0) * 4);
-        const scoreB = (b.upvotes * 3) + ((dwellScores[b.category] || 0) * 4);
+        const isFreshA = now - ((a as any).timestamp || 0) < 30 * 60 * 1000;
+        const isFreshB = now - ((b as any).timestamp || 0) < 30 * 60 * 1000;
+        const isMineA = a.authorId === currentUser?.uid;
+        const isMineB = b.authorId === currentUser?.uid;
+
+        const scoreA = (a.upvotes * 3) + ((dwellScores[a.category] || 0) * 4) + (isFreshA ? 500 : 0) + (isMineA ? 200 : 0);
+        const scoreB = (b.upvotes * 3) + ((dwellScores[b.category] || 0) * 4) + (isFreshB ? 500 : 0) + (isMineB ? 200 : 0);
         return scoreB - scoreA;
       })
       .slice(0, visibleCount);
-  }, [posts, visibleCount, account]);
+  }, [posts, visibleCount, account, currentUser?.uid]);
 
   // ── Like toggle (rate-limited, 1-per-user, Firestore-enforced)
   const handleLikeToggle = useCallback(async (post: FirestorePost) => {

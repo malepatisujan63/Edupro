@@ -194,8 +194,14 @@ export const ResourceLibrary: React.FC<ResourceLibraryProps> = ({ currentUser })
     .filter((res) => !searchQuery.trim() || res.title.toLowerCase().includes(searchQuery.toLowerCase()) || res.category?.toLowerCase().includes(searchQuery.toLowerCase()))
     .sort((a, b) => {
       if (sortBy === 'dsa') {
-        const scoreA = ((a.upvotes || 0) * 2) + ((dwellScores[a.category || 'DSA'] || 0) * 5);
-        const scoreB = ((b.upvotes || 0) * 2) + ((dwellScores[b.category || 'DSA'] || 0) * 5);
+        const now = Date.now();
+        const isFreshA = now - ((a as any).timestamp || 0) < 30 * 60 * 1000;
+        const isFreshB = now - ((b as any).timestamp || 0) < 30 * 60 * 1000;
+        const isMineA = a.authorId === currentUser?.uid;
+        const isMineB = b.authorId === currentUser?.uid;
+
+        const scoreA = ((a.upvotes || 0) * 2) + ((dwellScores[a.category || 'DSA'] || 0) * 5) + (isFreshA ? 500 : 0) + (isMineA ? 200 : 0);
+        const scoreB = ((b.upvotes || 0) * 2) + ((dwellScores[b.category || 'DSA'] || 0) * 5) + (isFreshB ? 500 : 0) + (isMineB ? 200 : 0);
         return scoreB - scoreA;
       }
       return 0;
