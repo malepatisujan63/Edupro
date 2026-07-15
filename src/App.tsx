@@ -11,17 +11,21 @@ import { StudentProfile } from './pages/StudentProfile';
 import { preloadPlatformData } from './dsa-engine';
 import { uploadFile, createPost } from './lib/firestoreService';
 import { AppleTimerExtension } from './components/extensions/AppleTimerExtension';
+import { AppleAIBuddy } from './components/extensions/AppleAIBuddy';
+import { AppleCodeSandbox } from './components/extensions/AppleCodeSandbox';
 import { checkRateLimit } from './utils/rateLimiter';
 import { validateContentSafety, verifyFileMagicBytes } from './utils/safetyFilter';
 import { accountManager } from './models/AccountManager';
 import { type StudentAccount } from './models/StudentAccount';
-import { ShieldCheck, Lock, ArrowRight, CheckCircle2, Bell, Plus, X, Image as ImageIcon, FileText, Send, Video, Trash2, Loader } from 'lucide-react';
+import { ShieldCheck, Lock, ArrowRight, CheckCircle2, Bell, Plus, X, Image as ImageIcon, FileText, Send, Video, Trash2, Loader, Bot, Code, Clock, Sparkles } from 'lucide-react';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<NavTab>('home');
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isDSAHUDOpen, setIsDSAHUDOpen] = useState(false);
   const [isTimerOpen, setIsTimerOpen] = useState(false);
+  const [isAIBuddyOpen, setIsAIBuddyOpen] = useState(false);
+  const [isCodeSandboxOpen, setIsCodeSandboxOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
   const [postContent, setPostContent] = useState('');
@@ -462,12 +466,41 @@ export const App: React.FC = () => {
       {/* Study Pomodoro Timer Overlay Modal */}
       <AppleTimerExtension isOpen={isTimerOpen} onClose={() => setIsTimerOpen(false)} />
 
+      {/* visionOS AI Copilot & Study Assistant Modal */}
+      <AppleAIBuddy isOpen={isAIBuddyOpen} onClose={() => setIsAIBuddyOpen(false)} onNavigateTab={setActiveTab} />
+
+      {/* visionOS Interactive Code Sandbox Modal */}
+      <AppleCodeSandbox isOpen={isCodeSandboxOpen} onClose={() => setIsCodeSandboxOpen(false)} currentUser={currentUser} />
+
       {/* Live DSA & Compression Intelligence HUD */}
       <DSAIntelligenceHUD
         isOpen={isDSAHUDOpen}
         onClose={() => setIsDSAHUDOpen(false)}
         onOpenFullLab={() => setActiveTab('resources')}
       />
+
+      {/* ── Sleek Floating "Koinexa Study Hub & AI Copilot Dock" ── */}
+      <div className="fixed bottom-24 right-5 sm:right-7 z-40 flex flex-col items-end gap-2.5 pointer-events-auto animate-fadeIn">
+        {/* AI Copilot Button */}
+        <button
+          onClick={() => setIsAIBuddyOpen(true)}
+          className="group flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#0D0D18]/90 hover:bg-[#141424] border border-[#00CFFF]/40 hover:border-[#00CFFF] text-white text-xs font-black shadow-[0_0_25px_rgba(0,207,255,0.25)] hover:shadow-[0_0_35px_rgba(0,207,255,0.5)] transition-all scale-100 hover:scale-105 active:scale-95 backdrop-blur-2xl"
+        >
+          <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#00CFFF] to-[#9B5DE5] flex items-center justify-center text-white shadow-sm group-hover:rotate-12 transition-transform">
+            <Bot className="w-3.5 h-3.5" />
+          </div>
+          <span className="bg-gradient-to-r from-white via-cyan-100 to-[#00CFFF] bg-clip-text text-transparent">AI Study Copilot</span>
+        </button>
+
+        {/* Code Sandbox Button */}
+        <button
+          onClick={() => setIsCodeSandboxOpen(true)}
+          className="group flex items-center gap-2 px-4 py-2 rounded-full bg-[#0A0A12]/85 hover:bg-[#121220] border border-white/15 hover:border-[#9B5DE5]/60 text-white/90 hover:text-white text-xs font-bold shadow-xl transition-all scale-100 hover:scale-105 active:scale-95 backdrop-blur-xl"
+        >
+          <Code className="w-4 h-4 text-[#9B5DE5] group-hover:scale-110 transition-transform" />
+          <span>Code Sandbox</span>
+        </button>
+      </div>
 
     </div>
   );

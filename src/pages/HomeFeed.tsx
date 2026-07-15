@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Heart, MessageCircle, Share2, Bookmark, BookmarkCheck, FileText, Code, Zap, Flame, ExternalLink, Play, UserPlus } from 'lucide-react';
 import {
   subscribeToPosts, likePost, unlikePost,
-  fetchLikedPostIds, sendStudyMateRequest, type FirestorePost,
+  fetchLikedPostIds, sendStudyMateRequest, subscribeToComments, addComment, type FirestorePost, type FirestoreComment,
 } from '../lib/firestoreService';
 import { checkRateLimit } from '../utils/rateLimiter';
 import { type StudentAccount } from '../models/StudentAccount';
@@ -66,6 +66,106 @@ const HeartBurst: React.FC<{ trigger: boolean }> = ({ trigger }) => (
   ) : null
 );
 
+// ── Interactive Real-Time Post Comments & Discussion Drawer
+const PostCommentsModal: React.FC<{
+  post: FirestorePost | null;
+  onClose: () => void;
+  currentUser: any | null;
+}> = ({ post, onClose, currentUser }) => {
+  const [comments, setComments] = useState<FirestoreComment[]>([]);
+  const [newCommentText, setNewCommentText] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!post?.id) return;
+    const unsub = subscribeToComments((allComments) => {
+      setComments(allComments.filter(c => c.parentId === post.id));
+    });
+    return () => unsub();
+  }, [post?.id]);
+
+  if (!post) return null;
+
+  const handlePostReply = async () => {
+    if (!newCommentText.trim()) return;
+    setIsSubmitting(true);
+    try {
+      await addComment({
+        parentId: post.id!,
+        authorId: currentUser?.uid || 'anon',
+        authorName: currentUser?.name || 'Academic Student',
+        authorCollege: currentUser?.college || 'Koinexa Campus',
+        authorAvatarUrl: currentUser?.avatarUrl || `https://ui-avatars.com/api/?name=Student&background=6C63FF&color=fff`,
+        content: newCommentText.trim(),
+        upvotes: 1,
+      });
+      setNewCommentText('');
+    } catch (err: any) {
+      alert(`Could not post reply: ${err.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-2xl animate-fadeIn" onClick={onClose}>
+      <div className="w-full max-w-[520px] kx-flow-card rounded-[32px] overflow-hidden flex flex-col max-h-[85vh] animate-scaleUp bg-[#0A0A0F]" onClick={e => e.stopPropagation()}>
+        <div className="p-5 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
+          <div>
+            <span className="text-[10px] uppercase font-black text-[#00CFFF] tracking-wider">Academic Discussion</span>
+            <h3 className="text-base font-black text-white line-clamp-1">{post.title}</h3>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-white/80 hover:text-white flex items-center justify-center font-bold text-sm">✕</button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar min-h-[260px] max-h-[50vh]">
+          {comments.length === 0 ? (
+            <div className="text-center py-12 space-y-2">
+              <MessageCircle className="w-10 h-10 text-white/20 mx-auto animate-bounce" />
+              <p className="text-sm font-bold text-white/60">No academic discussions yet</p>
+              <p className="text-xs text-white/40">Be the first to share an insight or question!</p>
+            </div>
+          ) : (
+            comments.map((comment) => (
+              <div key={comment.id || Math.random()} className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2 hover:border-[#00CFFF]/40 transition-all">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <img src={comment.authorAvatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(comment.authorName)}`} alt="" className="w-7 h-7 rounded-full object-cover border border-[#00CFFF]/40" />
+                    <div>
+                      <span className="text-xs font-black text-white">{comment.authorName}</span>
+                      <span className="text-[10px] text-white/40 block">{comment.authorCollege}</span>
+                    </div>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full bg-[#00CFFF]/15 text-[#00CFFF] text-[9px] font-bold border border-[#00CFFF]/30">Verified Reply</span>
+                </div>
+                <p className="text-xs text-white/85 leading-relaxed pl-9">{comment.content}</p>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="p-4 border-t border-white/10 bg-[#0D0D14] flex gap-2 items-center">
+          <input
+            type="text"
+            placeholder="Write a helpful reply or follow-up question..."
+            value={newCommentText}
+            onChange={e => setNewCommentText(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handlePostReply()}
+            className="flex-1 py-3 px-4 rounded-2xl bg-white/5 border border-white/10 text-xs text-white placeholder:text-white/30 outline-none focus:border-[#00CFFF] transition-all font-medium"
+          />
+          <button
+            onClick={handlePostReply}
+            disabled={!newCommentText.trim() || isSubmitting}
+            className="py-3 px-5 rounded-2xl bg-gradient-to-r from-[#00CFFF] via-[#9B5DE5] to-[#4169E1] text-white font-black text-xs hover:opacity-90 transition-all shadow-lg shadow-[#00CFFF]/20 disabled:opacity-40"
+          >
+            Reply
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const HomeFeed: React.FC<HomeFeedProps> = ({ currentUser, account }) => {
   const [posts,           setPosts]           = useState<FirestorePost[]>([]);
   const [likedPostIds,    setLikedPostIds]    = useState<Set<string>>(new Set());
@@ -74,6 +174,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ currentUser, account }) => {
   const [heartBurst,      setHeartBurst]      = useState<string | null>(null);
   const [isLoading,       setIsLoading]       = useState(true);
   const [visibleCount,    setVisibleCount]    = useState(8);
+  const [activeCommentPost, setActiveCommentPost] = useState<FirestorePost | null>(null);
 
   const loaderRef = useRef<HTMLDivElement>(null);
 
@@ -345,7 +446,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ currentUser, account }) => {
 
                   {/* Comment */}
                   <button
-                    onClick={(e) => { e.stopPropagation(); alert('Open Q&A thread for this post.'); }}
+                    onClick={(e) => { e.stopPropagation(); setActiveCommentPost(post); }}
                     className="flex items-center gap-1.5 text-sm font-bold text-white/60 hover:text-[#00CFFF] transition-all active:scale-90"
                   >
                     <MessageCircle className="w-6 h-6" />
@@ -391,6 +492,12 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ currentUser, account }) => {
           <><span className="text-[#00CFFF]">✓</span><span>All {posts.length} posts shown</span></>
         )}
       </div>
+
+      <PostCommentsModal
+        post={activeCommentPost}
+        onClose={() => setActiveCommentPost(null)}
+        currentUser={currentUser}
+      />
     </div>
   );
 };
