@@ -138,15 +138,11 @@ export const App: React.FC = () => {
             </div>
 
             <div className="space-y-3">
-              <img
-                src="/logo.png"
-                alt="EduNetwork"
-                className="h-20 sm:h-24 mx-auto object-contain drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)] mb-3"
-              />
-              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight text-white">
-                Welcome to EduNetwork
+              <img src="/koinexa-logo.png" alt="Koinexa" className="w-24 h-24 mb-4 object-contain mx-auto" />
+              <h1 className="text-4xl sm:text-5xl font-black text-white leading-[1.1] tracking-tight">
+                Welcome to Koinexa
               </h1>
-              <p className="text-sm text-white/70 max-w-md mx-auto leading-relaxed font-normal">
+              <p className="text-white/60 text-sm sm:text-base font-medium max-w-sm mx-auto mt-4 leading-relaxed">
                 The student social platform for India's top colleges. Sign in with your Google account to get started.
               </p>
             </div>
@@ -155,35 +151,11 @@ export const App: React.FC = () => {
             <div className="pt-2 space-y-3">
               <button
                 onClick={() => setIsAuthOpen(true)}
-                className="w-full py-4 rounded-[18px] bg-gradient-to-r from-[#00CFFF] via-[#4169E1] to-[#9B5DE5] text-white font-black text-sm hover:opacity-90 transition-all shadow-lg shadow-[#4169E1]/30 flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-[18px] bg-gradient-to-r from-[#00CFFF] via-[#4169E1] to-[#9B5DE5] text-white font-black text-sm hover:opacity-90 transition-all shadow-[0_0_20px_rgba(0,207,255,0.4)] hover:shadow-[0_0_30px_rgba(155,93,229,0.6)] flex items-center justify-center gap-2"
               >
                 <ShieldCheck className="w-5 h-5" />
                 <span>Continue with Google</span>
                 <ArrowRight className="w-4 h-4 ml-auto mr-2" />
-              </button>
-
-              <button
-                onClick={() => {
-                  const testUser = { 
-                    uid: 'test-guest-123', 
-                    email: 'guest@edunetwork.test', 
-                    name: 'Guest Tester', 
-                    avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Guest',
-                    phone: '',
-                    college: 'Test College',
-                    department: 'CS',
-                    year: '1',
-                    bio: 'Testing the app!',
-                    skills: [],
-                    joinedAt: null
-                  };
-                  setCurrentUser(testUser);
-                  const account = accountManager.createAccount(testUser as any);
-                  setCurrentAccount(account);
-                }}
-                className="w-full py-4 rounded-[18px] bg-white/5 border border-white/10 text-white font-bold text-sm hover:bg-white/10 transition-all flex items-center justify-center gap-2"
-              >
-                <span>Test App as Guest User</span>
               </button>
             </div>
 

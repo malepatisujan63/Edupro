@@ -165,6 +165,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   // ── OTP box input handler
   const handleOtpDigit = (idx: number, val: string) => {
     if (!/^\d*$/.test(val)) return;
+    
+    // Support copy-paste of full 6 digits
+    if (val.length === 6) {
+      setOtpDigits(val.split(''));
+      otpRefs.current[5]?.focus();
+      return;
+    }
+
     const next = [...otpDigits];
     next[idx] = val.slice(-1);
     setOtpDigits(next);
@@ -283,7 +291,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   const stepLabel: Record<Step, string> = {
-    SIGN_IN: 'Sign In to EduNetwork',
+    SIGN_IN: 'Sign In to Koinexa',
     GOOGLE_OAUTH: 'Register via Google',
     REG_PASSWORD: 'Create Password',
     REG_DETAILS: 'Setup Student Profile',
@@ -338,20 +346,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-2xl animate-fadeIn">
       <div className="w-full max-w-[420px] glass-panel rounded-[32px] overflow-hidden animate-scaleUp">
 
-        {/* Header — EduNetwork gradient */}
-        <div className="relative p-6 bg-gradient-to-br from-[#00CFFF]/90 via-[#9B5DE5] to-[#4169E1]/70 text-white">
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjA4KSIvPjwvc3ZnPg==')] opacity-50" />
-          <button onClick={onClose} className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/80 hover:text-white transition-all text-sm font-bold z-10">✕</button>
-          <div className="relative flex items-center gap-2 mb-1">
-            <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center">
-              <ShieldCheck className="w-4 h-4 text-white" />
-            </div>
-            <h2 className="text-base font-black tracking-tight">EduNetwork</h2>
+        {/* Header — Sleek Minimalist Koinexa */}
+        <div className="relative p-6 pb-2 text-white flex items-center justify-between border-b border-white/5">
+          <button onClick={onClose} className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/80 hover:text-white transition-all text-sm font-bold z-10">✕</button>
+          
+          <div className="flex flex-col items-center justify-center w-full mt-2">
+            <img src="/koinexa-logo.png" alt="Koinexa" className="w-16 h-16 object-contain mb-3 drop-shadow-[0_0_15px_rgba(0,207,255,0.3)]" />
+            <h2 className="text-xl font-black tracking-tight text-white">{stepLabel[step]}</h2>
           </div>
-          <p className="relative text-xs text-white/75 font-medium ml-10">{stepLabel[step]}</p>
         </div>
 
-        <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+        <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
           {/* Error banner */}
           {errorMsg && (
             <div className="p-3 rounded-2xl bg-[#00CFFF]/10 border border-[#00CFFF]/30 text-[#00CFFF] text-xs flex items-start gap-2">
@@ -363,20 +368,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {step === 'SIGN_IN' && (
             <div className="space-y-4">
               <div className="space-y-3">
-                {/* Email — kx-field: flowing gradient border on focus */}
-                <div className="kx-field flex items-center gap-2 px-3.5">
-                  <Mail className="w-4 h-4 text-[#4169E1] shrink-0" />
+                {/* Email — Flowing gradient glow */}
+                <div className="flex items-center gap-2 px-3.5 rounded-2xl bg-black/40 border border-[rgba(99,179,237,0.15)] focus-within:border-[#00CFFF] focus-within:shadow-[0_0_15px_rgba(0,207,255,0.3)] transition-all overflow-hidden relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#00CFFF]/0 via-[#4169E1]/10 to-[#9B5DE5]/0 -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                  <Mail className="w-4 h-4 text-[#00CFFF] shrink-0 relative z-10" />
                   <input type="email" placeholder="Student email address" value={email}
                     onChange={e => setEmail(e.target.value)}
-                    className="flex-1 bg-transparent py-3 text-sm text-white placeholder:text-white/30 outline-none font-medium" />
+                    className="flex-1 bg-transparent py-3.5 text-sm text-white placeholder:text-white/30 outline-none font-medium relative z-10" />
                 </div>
-                {/* Password */}
-                <div className="kx-field flex items-center gap-2 px-3.5">
-                  <Lock className="w-4 h-4 text-[#4169E1] shrink-0" />
+                {/* Password — Flowing gradient glow */}
+                <div className="flex items-center gap-2 px-3.5 rounded-2xl bg-black/40 border border-[rgba(99,179,237,0.15)] focus-within:border-[#00CFFF] focus-within:shadow-[0_0_15px_rgba(0,207,255,0.3)] transition-all overflow-hidden relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#00CFFF]/0 via-[#4169E1]/10 to-[#9B5DE5]/0 -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                  <Lock className="w-4 h-4 text-[#00CFFF] shrink-0 relative z-10" />
                   <input type="password" placeholder="Password" value={password}
                     onChange={e => setPassword(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && handleCustomLogin()}
-                    className="flex-1 bg-transparent py-3 text-sm text-white placeholder:text-white/30 outline-none font-medium" />
+                    className="flex-1 bg-transparent py-3.5 text-sm text-white placeholder:text-white/30 outline-none font-medium relative z-10" />
                 </div>
               </div>
 
@@ -584,7 +591,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <div className="pt-3 border-t border-white/8 flex flex-col gap-2">
                 <button onClick={onClose}
                   className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#00CFFF] via-[#9B5DE5] to-[#4169E1] text-white font-black text-sm hover:opacity-90 shadow-lg shadow-[#00CFFF]/20">
-                  Enter EduNetwork →
+                  Enter Koinexa →
                 </button>
                 <button onClick={() => { if (confirm('Delete your account permanently?')) { onDeleteAccount(); onClose(); } }}
                   className="w-full py-2 rounded-2xl bg-[#00CFFF]/10 hover:bg-[#00CFFF]/20 border border-[#00CFFF]/25 text-[#00CFFF] text-xs font-bold flex items-center justify-center gap-1.5 transition-all">
