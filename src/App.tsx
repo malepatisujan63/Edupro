@@ -138,7 +138,7 @@ export const App: React.FC = () => {
             </div>
 
             <div className="space-y-3">
-              <img src="/koinexa-logo.png" alt="Koinexa" className="w-24 h-24 mb-4 object-contain mx-auto" />
+              <img src="/koinexa-logo.jpg" alt="Koinexa" className="w-24 h-24 mb-4 object-contain mx-auto" />
               <h1 className="text-4xl sm:text-5xl font-black text-white leading-[1.1] tracking-tight">
                 Welcome to Koinexa
               </h1>

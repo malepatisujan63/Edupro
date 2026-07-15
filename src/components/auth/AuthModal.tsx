@@ -169,14 +169,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     // Support copy-paste of full 6 digits
     if (val.length === 6) {
       setOtpDigits(val.split(''));
-      otpRefs.current[5]?.focus();
+      setTimeout(() => otpRefs.current[5]?.focus(), 10);
       return;
     }
 
     const next = [...otpDigits];
     next[idx] = val.slice(-1);
     setOtpDigits(next);
-    if (val && idx < 5) otpRefs.current[idx + 1]?.focus();
+    if (val && idx < 5) {
+      setTimeout(() => otpRefs.current[idx + 1]?.focus(), 10);
+    }
   };
   const handleOtpKeyDown = (idx: number, e: React.KeyboardEvent) => {
     if (e.key === 'Backspace' && !otpDigits[idx] && idx > 0) otpRefs.current[idx - 1]?.focus();
@@ -351,7 +353,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <button onClick={onClose} className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/80 hover:text-white transition-all text-sm font-bold z-10">✕</button>
           
           <div className="flex flex-col items-center justify-center w-full mt-2">
-            <img src="/koinexa-logo.png" alt="Koinexa" className="w-16 h-16 object-contain mb-3 drop-shadow-[0_0_15px_rgba(0,207,255,0.3)]" />
+            <img src="/koinexa-logo.jpg" alt="Koinexa" className="w-16 h-16 object-contain mb-3 drop-shadow-[0_0_15px_rgba(0,207,255,0.3)]" />
             <h2 className="text-xl font-black tracking-tight text-white">{stepLabel[step]}</h2>
           </div>
         </div>
