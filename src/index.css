@@ -463,6 +463,22 @@
     0 0 36px rgba(65, 105, 225, 0.15);
 }
 
+/* ── KX FLOW CARD (glowing spinning border for cards/modals) ─────────────── */
+.kx-flow-card {
+  --kx-angle: 0deg;
+  backdrop-filter: blur(24px) saturate(180%);
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)) padding-box,
+    conic-gradient(from var(--kx-angle),
+      #00CFFF 0%, #4169E1 33%, #9B5DE5 66%, #00CFFF 100%
+    ) border-box;
+  animation: kxFlow 4s linear infinite;
+  box-shadow:
+    0 0 16px rgba(0, 207, 255, 0.2),
+    0 0 40px rgba(65, 105, 225, 0.15);
+}
+
 /* ── KX FIELD PILL (fully rounded search bar wrapper) ────────────────────── */
 .kx-field-pill {
   position: relative;

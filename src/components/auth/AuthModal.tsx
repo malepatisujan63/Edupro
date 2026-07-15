@@ -346,7 +346,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-2xl animate-fadeIn">
-      <div className="w-full max-w-[420px] glass-panel rounded-[32px] overflow-hidden animate-scaleUp">
+      <div className="w-full max-w-[420px] kx-flow-card rounded-[32px] overflow-hidden animate-scaleUp">
 
         {/* Header — Sleek Minimalist Koinexa */}
         <div className="relative p-6 pb-2 text-white flex items-center justify-between border-b border-white/5">
@@ -370,22 +370,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {step === 'SIGN_IN' && (
             <div className="space-y-4">
               <div className="space-y-3">
-                {/* Email — Flowing gradient glow */}
-                <div className="flex items-center gap-2 px-3.5 rounded-2xl bg-black/40 border border-[rgba(99,179,237,0.15)] focus-within:border-[#00CFFF] focus-within:shadow-[0_0_15px_rgba(0,207,255,0.3)] transition-all overflow-hidden relative group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#00CFFF]/0 via-[#4169E1]/10 to-[#9B5DE5]/0 -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                  <Mail className="w-4 h-4 text-[#00CFFF] shrink-0 relative z-10" />
+                {/* Email — kx-field: flowing gradient border on focus */}
+                <div className="kx-field flex items-center gap-2 px-3.5">
+                  <Mail className="w-4 h-4 text-[#00CFFF] shrink-0" />
                   <input type="email" placeholder="Student email address" value={email}
                     onChange={e => setEmail(e.target.value)}
-                    className="flex-1 bg-transparent py-3.5 text-sm text-white placeholder:text-white/30 outline-none font-medium relative z-10" />
+                    className="flex-1 bg-transparent py-3.5 text-sm text-white placeholder:text-white/30 outline-none font-medium" />
                 </div>
-                {/* Password — Flowing gradient glow */}
-                <div className="flex items-center gap-2 px-3.5 rounded-2xl bg-black/40 border border-[rgba(99,179,237,0.15)] focus-within:border-[#00CFFF] focus-within:shadow-[0_0_15px_rgba(0,207,255,0.3)] transition-all overflow-hidden relative group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#00CFFF]/0 via-[#4169E1]/10 to-[#9B5DE5]/0 -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                  <Lock className="w-4 h-4 text-[#00CFFF] shrink-0 relative z-10" />
+                {/* Password */}
+                <div className="kx-field flex items-center gap-2 px-3.5">
+                  <Lock className="w-4 h-4 text-[#00CFFF] shrink-0" />
                   <input type="password" placeholder="Password" value={password}
                     onChange={e => setPassword(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && handleCustomLogin()}
-                    className="flex-1 bg-transparent py-3.5 text-sm text-white placeholder:text-white/30 outline-none font-medium relative z-10" />
+                    className="flex-1 bg-transparent py-3.5 text-sm text-white placeholder:text-white/30 outline-none font-medium" />
                 </div>
               </div>
 
@@ -452,17 +450,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </div>
               </div>
               <div className="space-y-3">
-                <div className="relative">
-                  <Lock className="w-4 h-4 text-white/30 absolute left-3.5 top-3.5" />
+                <div className="kx-field flex items-center gap-2 px-3.5">
+                  <Lock className="w-4 h-4 text-[#00CFFF] shrink-0" />
                   <input type="password" placeholder="Create password (min 6 chars)" value={registerPassword}
                     onChange={e => setRegisterPassword(e.target.value)}
-                    className="w-full bg-[#0D0D0D] border border-[rgba(99,179,237,0.15)] rounded-2xl pl-10 pr-4 py-3 text-sm text-white placeholder:text-white/25 outline-none focus:border-[#00CFFF] transition-all font-medium" />
+                    className="flex-1 bg-transparent py-3.5 text-sm text-white placeholder:text-white/30 outline-none font-medium" />
                 </div>
-                <div className="relative">
-                  <Lock className="w-4 h-4 text-white/30 absolute left-3.5 top-3.5" />
+                <div className="kx-field flex items-center gap-2 px-3.5">
+                  <Lock className="w-4 h-4 text-[#00CFFF] shrink-0" />
                   <input type="password" placeholder="Confirm password" value={confirmPassword}
                     onChange={e => setConfirmPassword(e.target.value)}
-                    className="w-full bg-[#0D0D0D] border border-[rgba(99,179,237,0.15)] rounded-2xl pl-10 pr-4 py-3 text-sm text-white placeholder:text-white/25 outline-none focus:border-[#00CFFF] transition-all font-medium" />
+                    className="flex-1 bg-transparent py-3.5 text-sm text-white placeholder:text-white/30 outline-none font-medium" />
                 </div>
               </div>
               <button onClick={handleNextToDetails}
