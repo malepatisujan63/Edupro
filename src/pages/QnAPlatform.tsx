@@ -1,48 +1,139 @@
-import React, { useState } from 'react';
-import { HelpCircle, Heart, MessageCircle, Share2, Bookmark, CheckCircle2, Send, Sparkles } from 'lucide-react';
-import { globalQnATree, type CommentNode } from '../dsa-engine';
+import React, { useState, useEffect } from 'react';
+import { HelpCircle, Heart, MessageCircle, Share2, Bookmark, CheckCircle2, Send, Sparkles, UserPlus } from 'lucide-react';
+import { type CommentNode } from '../dsa-engine';
+import { sendStudyMateRequest, addComment, subscribeToComments } from '../lib/firestoreService';
+import { checkRateLimit } from '../utils/rateLimiter';
+import { validateContentSafety } from '../utils/safetyFilter';
 
-export const QnAPlatform: React.FC = () => {
-  const [rootComments, setRootComments] = useState<CommentNode[]>(globalQnATree.getRootComments());
+export const QnAPlatform: React.FC<{ currentUser?: any }> = ({ currentUser }) => {
+  const [rootComments, setRootComments] = useState<CommentNode[]>([]);
   const [replyingToId, setReplyingToId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
   const [newDoubtTitle, setNewDoubtTitle] = useState('');
   const [newDoubtContent, setNewDoubtContent] = useState('');
   const [isAsking, setIsAsking] = useState(false);
 
-  const handleAddReply = (parentId: string) => {
-    if (!replyText.trim()) return;
-    const newReply: CommentNode = {
-      id: `cmt_${Date.now()}`,
-      authorName: 'Aarav Sharma',
-      authorCollege: 'IIT Bombay • CSE',
-      content: replyText,
-      upvotes: 1,
-      timestamp: 'Just now',
-      children: [],
-    };
+  useEffect(() => {
+    const unsub = subscribeToComments((flatComments) => {
+      const map = new Map<string, CommentNode>();
+      const roots: CommentNode[] = [];
 
-    const success = globalQnATree.addReply(parentId, newReply);
-    if (success) {
-      setRootComments(globalQnATree.getRootComments());
-      setReplyingToId(null);
-      setReplyText('');
+      // Pass 1: Create nodes
+      flatComments.forEach(fc => {
+        map.set(fc.id!, {
+          id: fc.id!,
+          authorId: fc.authorId,
+          authorAvatarUrl: fc.authorAvatarUrl,
+          authorName: fc.authorName,
+          authorCollege: fc.authorCollege,
+          content: fc.content,
+          upvotes: fc.upvotes,
+          timestamp: 'Just now', // Could be formatted from fc.createdAt
+          isAcceptedAnswer: fc.isAcceptedAnswer,
+          children: []
+        });
+      });
+
+      // Pass 2: Build tree
+      flatComments.forEach(fc => {
+        const node = map.get(fc.id!);
+        if (node) {
+          if (fc.parentId) {
+            const parent = map.get(fc.parentId);
+            if (parent) parent.children.push(node);
+          } else {
+            roots.push(node);
+          }
+        }
+      });
+      setRootComments(roots);
+    });
+    return () => unsub();
+  }, []);
+
+  const handleStudyMateRequest = async (authorId: string) => {
+    if (!currentUser?.uid) {
+      alert('Please sign in to send Study Mate requests.');
+      return;
+    }
+    if (authorId === currentUser.uid) return;
+    try {
+      await sendStudyMateRequest(currentUser.uid, authorId);
+      alert('Study Mate request sent!');
+    } catch (e) {
+      console.error(e);
+      alert('Failed to send request.');
     }
   };
 
-  const handleAskNewDoubt = () => {
+  const handleAddReply = async (parentId: string) => {
+    if (!replyText.trim()) return;
+
+    // Safety Layer: Rate Limiting comments (Max 5 comments/replies per minute)
+    const rateLimit = checkRateLimit(`add_reply:global_user`, 5, 60000);
+    if (!rateLimit.allowed) {
+      const remainingSeconds = Math.ceil((rateLimit.resetTimeMs - Date.now()) / 1000);
+      alert(`Rate Limit Triggered: Please wait ${remainingSeconds} seconds before replying again.`);
+      return;
+    }
+
+    // Safety Layer: Content Safety & Moderation filter
+    const contentCheck = validateContentSafety(replyText);
+    if (!contentCheck.isSafe) {
+      alert(`Safety Alert: Your answer contains flagged word: "${contentCheck.flaggedWord}". Please keep posts academic and campus-friendly.`);
+      return;
+    }
+
+    const isSchool = currentUser?.studentType === 'school';
+    const loc = isSchool ? `${currentUser?.schoolClass} • ${currentUser?.board}` : `${currentUser?.college || 'Student'} • ${currentUser?.department || ''}`;
+
+    await addComment({
+      parentId,
+      authorId: currentUser?.uid || `anon_${Date.now()}`,
+      authorAvatarUrl: currentUser?.avatarUrl,
+      authorName: currentUser?.name || 'Student Explorer',
+      authorCollege: loc,
+      content: replyText.trim(),
+      upvotes: 0,
+    });
+    
+    setReplyingToId(null);
+    setReplyText('');
+  };
+
+  const handleAskNewDoubt = async () => {
     if (!newDoubtTitle.trim() || !newDoubtContent.trim()) return;
-    const newRoot: CommentNode = {
-      id: `cmt_root_${Date.now()}`,
-      authorName: 'Aarav Sharma',
-      authorCollege: 'IIT Bombay • CSE',
+
+    // Safety Layer: Rate Limiting comments (Max 5 comments/replies per minute)
+    const rateLimit = checkRateLimit(`add_doubt:global_user`, 5, 60000);
+    if (!rateLimit.allowed) {
+      const remainingSeconds = Math.ceil((rateLimit.resetTimeMs - Date.now()) / 1000);
+      alert(`Rate Limit Triggered: Please wait ${remainingSeconds} seconds before asking a new doubt.`);
+      return;
+    }
+
+    // Safety Layer: Content Safety & Moderation filter on Title and Content
+    const titleCheck = validateContentSafety(newDoubtTitle);
+    const contentCheck = validateContentSafety(newDoubtContent);
+    if (!titleCheck.isSafe || !contentCheck.isSafe) {
+      const flagged = titleCheck.flaggedWord || contentCheck.flaggedWord;
+      alert(`Safety Alert: Your doubt contains flagged word: "${flagged}". Please keep posts academic and campus-friendly.`);
+      return;
+    }
+
+    const isSchool = currentUser?.studentType === 'school';
+    const loc = isSchool ? `${currentUser?.schoolClass} • ${currentUser?.board}` : `${currentUser?.college || 'Student'} • ${currentUser?.department || ''}`;
+
+    await addComment({
+      parentId: null,
+      authorId: currentUser?.uid || `anon_${Date.now()}`,
+      authorAvatarUrl: currentUser?.avatarUrl,
+      authorName: currentUser?.name || 'Student Explorer',
+      authorCollege: loc,
       content: `${newDoubtTitle} — ${newDoubtContent}`,
       upvotes: 1,
-      timestamp: 'Just now',
-      children: [],
-    };
-    globalQnATree.addRootComment(newRoot);
-    setRootComments(globalQnATree.getRootComments());
+    });
+    
     setNewDoubtTitle('');
     setNewDoubtContent('');
     setIsAsking(false);
@@ -55,25 +146,34 @@ export const QnAPlatform: React.FC = () => {
         key={node.id}
         className={`transition-all ${
           depth > 0
-            ? 'ml-6 sm:ml-10 border-l-2 border-[#E1306C]/40 pl-4 mt-4 space-y-3'
-            : 'pb-8 border-b border-white/15 space-y-4 pt-4'
+            ? 'ml-6 sm:ml-10 border-l-2 border-[#00CFFF]/40 pl-4 mt-4 space-y-3'
+            : 'kx-card mb-6 pb-4 p-4 sm:p-5 space-y-4'
         }`}
       >
         {/* Author Header */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="relative shrink-0">
-              <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-[#E1306C] via-[#FD1D1D] to-[#FCB045] p-0.5 shadow-sm">
-                <div className="w-full h-full bg-[#121212] rounded-full flex items-center justify-center font-extrabold text-sm text-white">
-                  {node.authorName[0]}
-                </div>
+              <div className="kx-avatar-ring w-10 h-10 sm:w-11 sm:h-11">
+                {node.authorAvatarUrl ? (
+                  <img src={node.authorAvatarUrl} alt="" className="w-full h-full rounded-full object-cover bg-black" />
+                ) : (
+                  <div className="w-full h-full bg-[#000000] rounded-full flex items-center justify-center font-extrabold text-sm text-white">
+                    {node.authorName[0]}
+                  </div>
+                )}
               </div>
-              <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[#34C759] border-2 border-[#121212] shadow-sm" />
+              <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[#22C55E] border-2 border-black shadow-sm" />
             </div>
             <div>
               <h4 className="text-sm font-extrabold text-white flex items-center gap-1.5">
                 {node.authorName}
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#181818] border border-white/20 text-white font-bold shadow-2xs">
+                {currentUser?.uid && node.authorId && node.authorId !== currentUser.uid && (
+                  <button onClick={() => handleStudyMateRequest(node.authorId!)} className="ml-1 p-1 rounded-full bg-white/5 hover:bg-[#00CFFF]/20 text-[#00CFFF] transition-all border border-white/10 hover:border-[#00CFFF]/40" title="Send Study Mate Request">
+                    <UserPlus className="w-3.5 h-3.5" />
+                  </button>
+                )}
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#0D0D0D] border border-white/20 text-white font-bold shadow-2xs">
                   {node.authorCollege}
                 </span>
                 {node.isAcceptedAnswer && (
@@ -100,15 +200,15 @@ export const QnAPlatform: React.FC = () => {
           <div className="flex items-center gap-5">
             <button
               onClick={() => alert('Upvoted!')}
-              className="flex items-center gap-2 text-sm font-extrabold text-white hover:text-[#FD1D1D] transition-all active:scale-90 group/btn"
+              className="flex items-center gap-2 text-sm font-extrabold text-white hover:text-[#9B5DE5] transition-all active:scale-90 group/btn"
             >
-              <Heart className="w-6 h-6 fill-[#FD1D1D] text-[#FD1D1D] transition-transform group-hover/btn:scale-110" />
+              <Heart className="w-6 h-6 fill-[#9B5DE5] text-[#9B5DE5] transition-transform group-hover/btn:scale-110" />
               <span>{node.upvotes}</span>
             </button>
 
             <button
               onClick={() => setReplyingToId(isReplying ? null : node.id)}
-              className="flex items-center gap-2 text-sm font-bold text-white hover:text-[#833AB4] transition-all active:scale-90"
+              className="flex items-center gap-2 text-sm font-bold text-white hover:text-[#4169E1] transition-all active:scale-90"
             >
               <MessageCircle className="w-6 h-6 text-white" />
               <span>{isReplying ? 'Cancel' : 'Reply'}</span>
@@ -118,13 +218,13 @@ export const QnAPlatform: React.FC = () => {
           <div className="flex items-center gap-4">
             <button
               onClick={() => alert('Doubt thread link copied!')}
-              className="text-white hover:text-[#E1306C] transition-all active:scale-90"
+              className="text-white hover:text-[#00CFFF] transition-all active:scale-90"
             >
               <Share2 className="w-6 h-6 text-white" />
             </button>
             <button
               onClick={() => alert('Saved to bookmarked doubts!')}
-              className="text-white hover:text-[#E1306C] transition-all active:scale-90"
+              className="text-white hover:text-[#00CFFF] transition-all active:scale-90"
             >
               <Bookmark className="w-6 h-6 text-white" />
             </button>
@@ -133,14 +233,16 @@ export const QnAPlatform: React.FC = () => {
 
         {/* Reply Form */}
         {isReplying && (
-          <div className="mt-3 p-4 rounded-[22px] glass-card border border-white/20 space-y-3 animate-panelRise shadow-md">
-            <textarea
-              rows={2}
-              placeholder={`Write your answer or solution for ${node.authorName}...`}
-              value={replyText}
-              onChange={(e) => setReplyText(e.target.value)}
-              className="w-full bg-[#121212]/90 border border-white/20 rounded-[16px] p-3 text-sm text-white placeholder:text-white/50 outline-none focus:border-[#E1306C] focus:bg-[#181818] shadow-inner font-medium"
-            />
+          <div className="mt-3 p-4 rounded-[22px] kx-card space-y-3 animate-panelRise">
+            <div className="kx-field">
+              <textarea
+                rows={2}
+                placeholder={`Write your answer for ${node.authorName}…`}
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                className="w-full bg-transparent p-3 text-sm text-white placeholder:text-white/30 outline-none resize-none font-medium"
+              />
+            </div>
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setReplyingToId(null)}
@@ -175,7 +277,7 @@ export const QnAPlatform: React.FC = () => {
       {/* Doubts Head & Ask Button */}
       <div className="flex items-center justify-between px-2">
         <h1 className="text-xl sm:text-2xl font-extrabold text-white flex items-center gap-2">
-          <HelpCircle className="w-6 h-6 text-[#E1306C]" />
+          <HelpCircle className="w-6 h-6 text-[#00CFFF]" />
           <span>Doubts</span>
         </h1>
 
@@ -190,24 +292,28 @@ export const QnAPlatform: React.FC = () => {
 
       {/* Ask New Doubt Box */}
       {isAsking && (
-        <div className="p-6 rounded-[28px] glass-card shadow-2xl space-y-4 animate-panelRise border border-white/20">
+        <div className="p-6 rounded-[28px] kx-card shadow-2xl space-y-4 animate-panelRise">
           <h3 className="text-base font-bold text-white">
             Post your Doubt or Coding Question
           </h3>
-          <input
-            type="text"
-            placeholder="Doubt Title: e.g. 'How does Dijkstra algorithm handle negative edge weights?'"
-            value={newDoubtTitle}
-            onChange={(e) => setNewDoubtTitle(e.target.value)}
-            className="w-full bg-[#121212]/90 border border-white/20 rounded-[18px] px-4 py-3 text-sm text-white focus:border-[#E1306C] focus:bg-[#181818] outline-none shadow-inner font-medium placeholder:text-white/50"
-          />
-          <textarea
-            rows={4}
-            placeholder="Provide code snippets, context, or exact error logs where you are stuck..."
-            value={newDoubtContent}
-            onChange={(e) => setNewDoubtContent(e.target.value)}
-            className="w-full bg-[#121212]/90 border border-white/20 rounded-[18px] p-4 text-sm text-white focus:border-[#E1306C] focus:bg-[#181818] outline-none shadow-inner font-medium placeholder:text-white/50"
-          />
+          <div className="kx-field">
+            <input
+              type="text"
+              placeholder="Doubt Title: e.g. 'How does Dijkstra algorithm handle negative edge weights?'"
+              value={newDoubtTitle}
+              onChange={(e) => setNewDoubtTitle(e.target.value)}
+              className="w-full bg-transparent px-4 py-3 text-sm text-white outline-none font-medium placeholder:text-white/30"
+            />
+          </div>
+          <div className="kx-field">
+            <textarea
+              rows={4}
+              placeholder="Provide code snippets, context, or exact error logs where you are stuck..."
+              value={newDoubtContent}
+              onChange={(e) => setNewDoubtContent(e.target.value)}
+              className="w-full bg-transparent p-4 text-sm text-white outline-none font-medium placeholder:text-white/30 resize-none"
+            />
+          </div>
           <div className="flex justify-end gap-3 pt-2">
             <button
               onClick={() => setIsAsking(false)}

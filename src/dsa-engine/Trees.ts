@@ -1,7 +1,9 @@
 export interface CommentNode {
   id: string;
+  authorId?: string;
   authorName: string;
   authorCollege: string;
+  authorAvatarUrl?: string;
   content: string;
   upvotes: number;
   timestamp: string;

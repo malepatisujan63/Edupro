@@ -8,9 +8,14 @@ import { SubjectCommunities } from './pages/SubjectCommunities';
 import { QnAPlatform } from './pages/QnAPlatform';
 import { RealtimeMessaging } from './pages/RealtimeMessaging';
 import { StudentProfile } from './pages/StudentProfile';
-import { preloadPlatformData, globalTrendingHeap, globalPlatformTrie, type HeapItem } from './dsa-engine';
+import { preloadPlatformData } from './dsa-engine';
+import { uploadFile, createPost } from './lib/firestoreService';
 import { AppleTimerExtension } from './components/extensions/AppleTimerExtension';
-import { ShieldCheck, Sparkles, Lock, ArrowRight, CheckCircle2, Bell, Plus, X, Image as ImageIcon, FileText, Send, Video, Trash2 } from 'lucide-react';
+import { checkRateLimit } from './utils/rateLimiter';
+import { validateContentSafety, verifyFileMagicBytes } from './utils/safetyFilter';
+import { accountManager } from './models/AccountManager';
+import { type StudentAccount } from './models/StudentAccount';
+import { ShieldCheck, Lock, ArrowRight, CheckCircle2, Bell, Plus, X, Image as ImageIcon, FileText, Send, Video, Trash2, Loader } from 'lucide-react';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<NavTab>('home');
@@ -23,15 +28,33 @@ export const App: React.FC = () => {
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
   const [attachedMediaUrl, setAttachedMediaUrl] = useState<string | null>(null);
   const [attachedMediaType, setAttachedMediaType] = useState<'image' | 'video' | 'pdf' | null>(null);
-  
-  // Mandatory Login Gate: start as null so user MUST login before opening
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [isPosting, setIsPosting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'video' | 'pdf') => {
+  // Mandatory Login Gate: start as null so user MUST login before opening
+  const [currentUser,    setCurrentUser]    = useState<any>(null);
+  const [currentAccount, setCurrentAccount] = useState<StudentAccount | null>(null);
+  const [isInitialized,  setIsInitialized]  = useState(false);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'video' | 'pdf') => {
     const files = e.target.files;
     if (files && files[0]) {
       const file = files[0];
+
+      // Safety Layer: Magic Bytes verification to block renamed executables/malware
+      try {
+        const safetyCheck = await verifyFileMagicBytes(file);
+        if (!safetyCheck.isValid) {
+          alert('Security Alert: The attached file has a mismatched or invalid binary signature. Upload blocked.');
+          e.target.value = '';
+          return;
+        }
+      } catch (err) {
+        alert('Security check failed to read file headers.');
+        e.target.value = '';
+        return;
+      }
+
       setAttachedFile(file);
       setAttachedMediaType(type);
       if (type === 'image' || type === 'video') {
@@ -50,24 +73,12 @@ export const App: React.FC = () => {
     }
   }, [isInitialized]);
 
-  const handleQuickDemoLogin = () => {
-    setCurrentUser({
-      id: 'usr_1',
-      name: 'Aarav Sharma',
-      email: 'aarav.sharma@iitb.ac.in',
-      phone: '+91 9876543210',
-      college: 'IIT Bombay',
-      department: 'Computer Science & Engineering',
-      semester: 5,
-      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
-      role: 'student',
-      reputationPoints: 1240,
-      badges: ['DSA Expert', 'Top Contributor', 'Verified Student'],
-    });
-  };
+
 
   const handleLogout = () => {
+    if (currentUser?.uid) accountManager.destroyAccount(currentUser.uid);
     setCurrentUser(null);
+    setCurrentAccount(null);
     alert('You have successfully logged out. Mandatory Authentication Gate reactivated.');
   };
 
@@ -78,25 +89,36 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen text-white bg-[#000000] font-sans selection:bg-[#E1306C] selection:text-white relative overflow-x-hidden">
+    <div className="min-h-screen text-white bg-[#000000] font-sans selection:bg-[#4169E1]/40 selection:text-white relative overflow-x-hidden">
       
-      {/* Top-Right Neighborhood Grouped Capsule (Notification Bell & Post + Button - Pure Glossy No Border) */}
+      {/* Koinexa Ambient Orbs — Subtle depth glow matching logo gradient */}
+      <div className="fixed -bottom-32 -left-32 w-[500px] h-[500px] bg-gradient-to-tr from-[#00CFFF]/8 to-[#4169E1]/4 rounded-full blur-[120px] pointer-events-none z-0" />
+      <div className="fixed -top-32 -right-32 w-[400px] h-[400px] bg-gradient-to-bl from-[#9B5DE5]/8 to-[#4169E1]/4 rounded-full blur-[100px] pointer-events-none z-0" />
+      <div className="fixed bottom-1/3 right-0 w-[300px] h-[300px] bg-[#4169E1]/4 rounded-full blur-[90px] pointer-events-none z-0" />
+
+      {/* Top-Right Actions Capsule — single clean gradient border, no nesting */}
       {currentUser && (
         <div className="fixed top-4 right-4 sm:right-6 z-40 pointer-events-auto">
-          <div className="segmented-glass-group shadow-xl p-1.5 flex items-center gap-1.5 bg-[#121212]/95">
+          <div className="kx-capsule">
+            {/* Notification Bell */}
             <button
               onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-              className={`segmented-glass-btn flex items-center gap-1.5 px-3.5 py-2 rounded-full transition-all text-xs font-bold ${
-                isNotificationsOpen ? 'bg-[#262626] text-[#E1306C] shadow-md' : 'text-white hover:bg-[#181818]'
+              className={`kx-pill-flow flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold transition-all ${
+                isNotificationsOpen ? 'active' : ''
               }`}
             >
-              <Bell className="w-4 h-4 text-[#FD1D1D]" />
-              <span className="hidden sm:inline">Notifications</span>
-              <span className="w-2 h-2 rounded-full bg-[#E1306C] animate-pulse" />
+              <Bell className="w-4 h-4 text-[#9B5DE5]" />
+              <span className="hidden sm:inline text-white">Notifications</span>
+              <span className="w-2 h-2 rounded-full bg-[#00CFFF] animate-pulse" />
             </button>
+
+            {/* Post Button — gradient fill */}
             <button
               onClick={() => setIsCreatePostOpen(true)}
-              className="segmented-glass-btn flex items-center gap-1.5 px-3.5 py-2 rounded-full transition-all text-xs font-extrabold text-white bg-gradient-to-r from-[#E1306C] to-[#FD1D1D] hover:opacity-95 shadow-lg"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-extrabold text-white transition-all
+                bg-gradient-to-r from-[#00CFFF] via-[#4169E1] to-[#9B5DE5]
+                hover:opacity-90 hover:shadow-[0_0_20px_rgba(65,105,225,0.5)]
+                shadow-[0_0_12px_rgba(65,105,225,0.3)]"
             >
               <Plus className="w-4 h-4 stroke-[3]" />
               <span>Post</span>
@@ -108,10 +130,10 @@ export const App: React.FC = () => {
       {/* If currentUser is null, enforce the Mandatory iOS 18 Frosted Glass Login Portal */}
       {!currentUser ? (
         <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 relative z-10">
-          <div className="w-full max-w-xl glass-card p-8 sm:p-10 text-center space-y-8 animate-panelRise relative overflow-hidden bg-[#121212]">
+          <div className="w-full max-w-xl glass-panel p-8 sm:p-10 text-center space-y-8 animate-panelRise relative overflow-hidden">
             
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#181818] text-xs font-semibold text-white shadow-inner">
-              <Lock className="w-3.5 h-3.5 text-[#E1306C]" />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black border border-[#4169E1]/30 text-xs font-semibold text-white shadow-inner">
+            <Lock className="w-3.5 h-3.5 text-[#00CFFF]" />
               <span>Mandatory Authentication Gate • iOS 18 Liquid Glass</span>
             </div>
 
@@ -125,27 +147,43 @@ export const App: React.FC = () => {
                 Welcome to EduNetwork
               </h1>
               <p className="text-sm text-white/70 max-w-md mx-auto leading-relaxed font-normal">
-                An Instagram-like student social platform built with **Data Structures & Algorithms** and **iOS 18 Liquid Glass Lock Screen widgets**. Please verify your identity or select demo entry.
+                The student social platform for India's top colleges. Sign in with your Google account to get started.
               </p>
             </div>
 
-            {/* Grouped Apple Glass Login Buttons */}
-            <div className="space-y-4 pt-2">
+            {/* Action Buttons */}
+            <div className="pt-2 space-y-3">
               <button
                 onClick={() => setIsAuthOpen(true)}
-                className="w-full btn-primary py-4 text-sm font-bold shadow-lg"
+                className="w-full py-4 rounded-[18px] bg-gradient-to-r from-[#00CFFF] via-[#4169E1] to-[#9B5DE5] text-white font-black text-sm hover:opacity-90 transition-all shadow-lg shadow-[#4169E1]/30 flex items-center justify-center gap-2"
               >
                 <ShieldCheck className="w-5 h-5" />
-                <span>Sign in with Google OAuth + Mobile OTP</span>
-                <ArrowRight className="w-4 h-4 ml-auto" />
+                <span>Continue with Google</span>
+                <ArrowRight className="w-4 h-4 ml-auto mr-2" />
               </button>
 
               <button
-                onClick={handleQuickDemoLogin}
-                className="w-full btn-secondary py-3.5 text-sm font-semibold"
+                onClick={() => {
+                  const testUser = { 
+                    uid: 'test-guest-123', 
+                    email: 'guest@edunetwork.test', 
+                    name: 'Guest Tester', 
+                    avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Guest',
+                    phone: '',
+                    college: 'Test College',
+                    department: 'CS',
+                    year: '1',
+                    bio: 'Testing the app!',
+                    skills: [],
+                    joinedAt: null
+                  };
+                  setCurrentUser(testUser);
+                  const account = accountManager.createAccount(testUser as any);
+                  setCurrentAccount(account);
+                }}
+                className="w-full py-4 rounded-[18px] bg-white/5 border border-white/10 text-white font-bold text-sm hover:bg-white/10 transition-all flex items-center justify-center gap-2"
               >
-                <Sparkles className="w-4 h-4 text-[#E1306C]" />
-                <span>Quick Demo Entry (Bypass OTP as Aarav Sharma)</span>
+                <span>Test App as Guest User</span>
               </button>
             </div>
 
@@ -180,10 +218,10 @@ export const App: React.FC = () => {
 
           {/* Main Content View Switcher */}
           <main className="transition-all duration-300 relative z-10 pt-16">
-            {activeTab === 'home' && <HomeFeed />}
+            {activeTab === 'home' && <HomeFeed currentUser={currentUser} account={currentAccount} />}
             {activeTab === 'resources' && <ResourceLibrary />}
-            {activeTab === 'communities' && <SubjectCommunities />}
-            {activeTab === 'qna' && <QnAPlatform />}
+            {activeTab === 'communities' && <SubjectCommunities currentUser={currentUser} />}
+            {activeTab === 'qna' && <QnAPlatform currentUser={currentUser} />}
             {activeTab === 'messaging' && <RealtimeMessaging />}
             {activeTab === 'profile' && (
               <StudentProfile
@@ -199,49 +237,25 @@ export const App: React.FC = () => {
       {/* Slide-Over Notification Panel ($O(1)$ Queue Feed) */}
       {isNotificationsOpen && (
         <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm animate-fadeIn">
-          <div className="w-full max-w-sm h-full bg-[#121212] border-l border-white/20 p-6 space-y-6 flex flex-col shadow-2xl animate-panelRise">
+          <div className="w-full max-w-sm h-full glass-panel rounded-none border-l border-white/10 p-6 space-y-6 flex flex-col shadow-2xl animate-panelRise">
             <div className="flex items-center justify-between pb-4 border-b border-white/15">
               <h3 className="text-lg font-extrabold text-white flex items-center gap-2">
-                <Bell className="w-5 h-5 text-[#FD1D1D]" />
+                <Bell className="w-5 h-5 text-[#9B5DE5]" />
                 <span>Notification Panel</span>
               </h3>
               <button
                 onClick={() => setIsNotificationsOpen(false)}
-                className="w-8 h-8 rounded-full bg-[#181818] border border-white/20 flex items-center justify-center text-white hover:bg-[#262626] transition-all"
+                className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/15 transition-all"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-4 divide-y divide-white/10 pr-1">
-              <div className="pt-3 space-y-1">
-                <p className="text-xs font-bold text-white flex items-center justify-between">
-                  <span>Prof. S. R. Ramesh upvoted your note</span>
-                  <span className="text-white/40 text-[10px]">2m ago</span>
-                </p>
-                <p className="text-xs text-white/70 font-normal">
-                  Your "Operating Systems Process Synchronization" PDF gained +15 dwell points.
-                </p>
-              </div>
-
-              <div className="pt-3 space-y-1">
-                <p className="text-xs font-bold text-white flex items-center justify-between">
-                  <span>Striver commented on your doubt</span>
-                  <span className="text-white/40 text-[10px]">1h ago</span>
-                </p>
-                <p className="text-xs text-white/70 font-normal">
-                  "Check out the topological sort Kahn's algorithm approach for BFS queue cycles."
-                </p>
-              </div>
-
-              <div className="pt-3 space-y-1">
-                <p className="text-xs font-bold text-white flex items-center justify-between">
-                  <span>Campus Study Hub Invite</span>
-                  <span className="text-white/40 text-[10px]">3h ago</span>
-                </p>
-                <p className="text-xs text-white/70 font-normal">
-                  You were invited to join **Algorithm Masters Pod** by Ananya Verma.
-                </p>
+              <div className="flex flex-col items-center justify-center h-full text-white/40 pt-10">
+                <Bell className="w-8 h-8 mb-3 opacity-50" />
+                <p className="text-sm font-bold">No new notifications</p>
+                <p className="text-xs mt-1">You're all caught up!</p>
               </div>
             </div>
 
@@ -262,34 +276,37 @@ export const App: React.FC = () => {
 
       {/* Create New Post Modal (Instagram Dark Theme) */}
       {isCreatePostOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-          <div className="w-full max-w-lg glass-card rounded-[28px] p-6 space-y-5 bg-[#121212] border border-white/20 shadow-2xl animate-scaleUp">
-            <div className="flex items-center justify-between pb-3 border-b border-white/15">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-2xl animate-fadeIn">
+          <div className="w-full max-w-lg glass-panel p-6 space-y-5 animate-scaleUp">
+            <div className="flex items-center justify-between pb-3 border-b border-[rgba(255,255,255,0.08)]">
               <h3 className="text-base font-extrabold text-white flex items-center gap-2">
-                <Plus className="w-5 h-5 text-[#E1306C]" />
+                <Plus className="w-5 h-5 text-[#00CFFF]" />
                 <span>Create New Post / Share Resource</span>
               </h3>
               <button
                 onClick={() => setIsCreatePostOpen(false)}
-                className="w-8 h-8 rounded-full bg-[#181818] border border-white/20 flex items-center justify-center text-white hover:bg-[#262626]"
+                className="w-8 h-8 rounded-full bg-[#0D0D0D] border border-white/20 flex items-center justify-center text-white hover:bg-[#111111]"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="space-y-3">
-              <textarea
-                rows={4}
-                placeholder="What's happening on campus or what notes do you want to share today?..."
-                value={postContent}
-                onChange={(e) => setPostContent(e.target.value)}
-                className="w-full bg-[#181818] border border-white/20 rounded-[18px] p-4 text-sm text-white placeholder:text-white/50 outline-none focus:border-[#E1306C]"
-              />
+              {/* Post textarea with flowing gradient border on focus */}
+              <div className="kx-field">
+                <textarea
+                  rows={4}
+                  placeholder="What's on campus today? Share notes, doubts, or resources…"
+                  value={postContent}
+                  onChange={(e) => setPostContent(e.target.value)}
+                  className="w-full bg-transparent p-4 text-sm text-white placeholder:text-white/30 outline-none resize-none"
+                />
+              </div>
 
               <div className="flex flex-wrap items-center gap-2 pt-1">
-                <label className="cursor-pointer px-3.5 py-2 rounded-full bg-[#181818] border border-white/20 text-xs text-white font-bold flex items-center gap-1.5 hover:bg-[#262626] transition-all shadow-sm">
-                  <ImageIcon className="w-4 h-4 text-[#E1306C]" />
-                  <span>Attach Photo</span>
+                <label className="kx-pill-flow cursor-pointer px-3.5 py-2 text-xs text-white font-bold flex items-center gap-1.5">
+                  <ImageIcon className="w-4 h-4 text-[#00CFFF]" />
+                  <span>Photo</span>
                   <input
                     type="file"
                     accept="image/*"
@@ -298,7 +315,7 @@ export const App: React.FC = () => {
                   />
                 </label>
 
-                <label className="cursor-pointer px-3.5 py-2 rounded-full bg-[#181818] border border-white/20 text-xs text-white font-bold flex items-center gap-1.5 hover:bg-[#262626] transition-all shadow-sm">
+                <label className="cursor-pointer px-3.5 py-2 rounded-full bg-white/5 border border-white/10 text-xs text-white font-bold flex items-center gap-1.5 hover:bg-white/15 transition-all shadow-sm">
                   <Video className="w-4 h-4 text-[#34C759]" />
                   <span>Attach Video</span>
                   <input
@@ -309,8 +326,8 @@ export const App: React.FC = () => {
                   />
                 </label>
 
-                <label className="cursor-pointer px-3.5 py-2 rounded-full bg-[#181818] border border-white/20 text-xs text-white font-bold flex items-center gap-1.5 hover:bg-[#262626] transition-all shadow-sm">
-                  <FileText className="w-4 h-4 text-[#833AB4]" />
+                <label className="cursor-pointer px-3.5 py-2 rounded-full bg-[#0D0D0D] border border-white/20 text-xs text-white font-bold flex items-center gap-1.5 hover:bg-[#111111] transition-all shadow-sm">
+                  <FileText className="w-4 h-4 text-[#4169E1]" />
                   <span>Attach PDF Note</span>
                   <input
                     type="file"
@@ -323,7 +340,7 @@ export const App: React.FC = () => {
 
               {/* Live Attachment Preview HUD */}
               {attachedFile && (
-                <div className="p-3 rounded-[18px] bg-[#181818] border border-white/20 flex items-center justify-between gap-3 animate-panelRise shadow-sm">
+                <div className="p-3 rounded-[18px] bg-white/5 border border-white/10 flex items-center justify-between gap-3 animate-panelRise shadow-sm">
                   <div className="flex items-center gap-3 min-w-0">
                     {attachedMediaType === 'image' && attachedMediaUrl && (
                       <img src={attachedMediaUrl} alt="" className="w-14 h-14 rounded-xl object-cover border border-white/20 shrink-0" />
@@ -332,8 +349,8 @@ export const App: React.FC = () => {
                       <video src={attachedMediaUrl} className="w-16 h-14 rounded-xl object-cover border border-white/20 shrink-0" />
                     )}
                     {attachedMediaType === 'pdf' && (
-                      <div className="w-12 h-12 rounded-xl bg-[#833AB4]/20 border border-[#833AB4]/40 flex items-center justify-center shrink-0">
-                        <FileText className="w-6 h-6 text-[#833AB4]" />
+                      <div className="w-12 h-12 rounded-xl bg-[#4169E1]/20 border border-[#4169E1]/40 flex items-center justify-center shrink-0">
+                        <FileText className="w-6 h-6 text-[#4169E1]" />
                       </div>
                     )}
                     <div className="min-w-0">
@@ -351,7 +368,7 @@ export const App: React.FC = () => {
                     }}
                     className="p-1.5 rounded-full hover:bg-white/10 text-white/70 hover:text-white transition-all shrink-0"
                   >
-                    <Trash2 className="w-4 h-4 text-[#FD1D1D]" />
+                    <Trash2 className="w-4 h-4 text-[#9B5DE5]" />
                   </button>
                 </div>
               )}
@@ -370,45 +387,85 @@ export const App: React.FC = () => {
                 Cancel
               </button>
               <button
-                onClick={() => {
+                disabled={isPosting}
+                onClick={async () => {
                   if (!postContent.trim() && !attachedFile) {
                     alert('Please write a caption or attach a Photo/Video/PDF before posting!');
                     return;
                   }
-                  const newPost: HeapItem = {
-                    id: `post_${Date.now().toString().slice(-4)}`,
-                    title: postContent || (attachedFile ? `[Shared ${attachedMediaType?.toUpperCase()}] ${attachedFile.name}` : 'Shared Post'),
-                    authorName: currentUser?.name || 'Aarav Sharma (You)',
-                    authorCollege: currentUser?.college || 'IIT Bombay • CSE',
-                    upvotes: 1,
-                    commentsCount: 0,
-                    category: 'DSA',
-                    createdAt: 'Just now',
-                    type: attachedMediaType === 'pdf' ? 'note' : (attachedMediaType === 'video' ? 'post' : 'note'),
-                    mediaUrl: attachedMediaType === 'image' || attachedMediaType === 'video' ? attachedMediaUrl || undefined : undefined,
-                    mediaType: attachedMediaType || undefined,
-                  };
-                  globalTrendingHeap.insert(newPost);
-                  globalPlatformTrie.indexItem({
-                    id: newPost.id,
-                    title: newPost.title,
-                    subtitle: `By ${newPost.authorName} (${newPost.category})`,
-                    type: newPost.type,
-                    tags: [newPost.category, 'Student Post'],
-                  });
-                  window.dispatchEvent(new CustomEvent('edunetwork:refresh'));
-                  alert(`${attachedMediaType ? attachedMediaType.toUpperCase() + ' and caption' : 'Post'} published to Instagram Dark Campus Feed! ($O(1)$ insert)`);
-                  setPostContent('');
-                  setAttachedFile(null);
-                  setAttachedMediaUrl(null);
-                  setAttachedMediaType(null);
-                  setIsCreatePostOpen(false);
-                  setActiveTab('home');
+                  if (!currentUser?.uid) {
+                    alert('You must be signed in to post.');
+                    return;
+                  }
+
+                  // Safety Layer: Anti-Spam Rate Limiter (Max 3 posts per minute)
+                  const rateLimit = checkRateLimit(`create_post:${currentUser.uid}`, 3, 60000);
+                  if (!rateLimit.allowed) {
+                    const remainingSeconds = Math.ceil((rateLimit.resetTimeMs - Date.now()) / 1000);
+                    alert(`Rate Limit Triggered: Please wait ${remainingSeconds} seconds before creating another post.`);
+                    return;
+                  }
+
+                  // Safety Layer: Content Moderation & Profanity Filtering
+                  const contentCheck = validateContentSafety(postContent);
+                  if (!contentCheck.isSafe) {
+                    alert(`Safety Alert: Your post contains flagged keyword: "${contentCheck.flaggedWord}". Please keep content academic and campus-friendly.`);
+                    return;
+                  }
+
+                  setIsPosting(true);
+                  setUploadProgress(0);
+                  try {
+                    let mediaUrl: string | undefined;
+                    let storagePath: string | undefined;
+
+                    // Upload file to Firebase Storage if attached
+                    if (attachedFile && attachedMediaType) {
+                      const result = await uploadFile(
+                        attachedFile,
+                        currentUser.uid,
+                        (pct) => setUploadProgress(pct)
+                      );
+                      mediaUrl = result.downloadUrl;
+                      storagePath = result.storagePath;
+                    }
+
+                    // Write post to Firestore
+                    await createPost({
+                      title: postContent.trim() || `[${attachedMediaType?.toUpperCase()}] ${attachedFile?.name}`,
+                      authorId: currentUser.uid,
+                      authorName: currentUser.name || 'Student',
+                      authorCollege: currentUser.college || 'Campus',
+                      authorAvatarUrl: currentUser.avatarUrl || '',
+                      upvotes: 0,
+                      commentsCount: 0,
+                      category: 'General',
+                      type: attachedMediaType === 'video' ? 'post' : 'note',
+                      mediaUrl,
+                      mediaType: attachedMediaType || undefined,
+                      storagePath,
+                    });
+
+                    setPostContent('');
+                    setAttachedFile(null);
+                    setAttachedMediaUrl(null);
+                    setAttachedMediaType(null);
+                    setIsCreatePostOpen(false);
+                    setActiveTab('home');
+                  } catch (err: any) {
+                    alert(`Failed to post: ${err.message}`);
+                  } finally {
+                    setIsPosting(false);
+                    setUploadProgress(0);
+                  }
                 }}
-                className="btn-primary text-xs py-2 px-6 font-bold flex items-center gap-1.5"
+                className="btn-primary text-xs py-2 px-6 font-bold flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-wait"
               >
-                <Send className="w-3.5 h-3.5" />
-                <span>Share Post</span>
+                {isPosting ? (
+                  <><Loader className="w-3.5 h-3.5 animate-spin" /><span>{uploadProgress > 0 ? `Uploading ${uploadProgress}%` : 'Posting...'}</span></>
+                ) : (
+                  <><Send className="w-3.5 h-3.5" /><span>Share Post</span></>
+                )}
               </button>
             </div>
           </div>
@@ -422,6 +479,9 @@ export const App: React.FC = () => {
         currentUser={currentUser}
         onLoginSuccess={(user) => {
           setCurrentUser(user);
+          // Create per-account OOP instance with fresh DSA engines
+          const account = accountManager.createAccount(user);
+          setCurrentAccount(account);
           setIsAuthOpen(false);
         }}
         onDeleteAccount={handleDeleteAccount}

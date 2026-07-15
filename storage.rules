@@ -1,0 +1,17 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /posts/{userId}/{filename} {
+      // Only authenticated owner can upload
+      allow write: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size < 50 * 1024 * 1024  // 50 MB max size protection
+        && (request.resource.contentType.matches('image/.*')
+            || request.resource.contentType == 'application/pdf'
+            || request.resource.contentType.matches('video/.*'));
+      
+      // Any authenticated student/user can download files
+      allow read: if request.auth != null;
+    }
+  }
+}

@@ -61,8 +61,19 @@ export class MaxHeap<T extends { id: string; upvotes: number }> {
   }
 
   public getTopK(k: number): T[] {
-    // Return copy sorted by upvotes descending
     return [...this.heap].sort((a, b) => b.upvotes - a.upvotes).slice(0, k);
+  }
+
+  /** Returns all items sorted descending by upvotes. O(n log n) */
+  public getSortedArray(): T[] {
+    return [...this.heap].sort((a, b) => b.upvotes - a.upvotes);
+  }
+
+  /** Clears all heap items — O(1) */
+  public clear(): void {
+    this.heap = [];
+    this.indexMap.clear();
+    this.lastLogs = [];
   }
 
   /**

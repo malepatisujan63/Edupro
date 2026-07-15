@@ -1,14 +1,15 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   MessageSquare,
   Send,
   Mic,
-  Square,
-  Phone,
   Video,
   Radio,
   Play,
+  Phone,
+  Square,
 } from 'lucide-react';
+import { subscribeToCommunities, type FirestoreCommunity } from '../lib/firestoreService';
 
 interface ChatMessage {
   id: string;
@@ -20,31 +21,18 @@ interface ChatMessage {
   imageUrl?: string;
   timestamp: string;
   channel: string;
-  latencyMs: number;
 }
 
 export const RealtimeMessaging: React.FC = () => {
-  const [activeChannel, setActiveChannel] = useState<'Kabir Mehta' | 'Riya Patel' | 'Algo Champions Pod'>('Kabir Mehta');
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 'msg_1',
-      senderId: 'usr_3',
-      senderName: 'Kabir Mehta',
-      content: 'Hey Aarav! Did you check the new AVL Tree rotation proof in the notes library?',
-      timestamp: '10:14 AM',
-      channel: 'Kabir Mehta',
-      latencyMs: 14,
-    },
-    {
-      id: 'msg_2',
-      senderId: 'usr_1',
-      senderName: 'Aarav Sharma (You)',
-      content: 'Yes! The O(1) pointer swap diagram makes so much sense compared to height traversal.',
-      timestamp: '10:16 AM',
-      channel: 'Kabir Mehta',
-      latencyMs: 11,
-    },
-  ]);
+  const [communities, setCommunities] = useState<FirestoreCommunity[]>([]);
+  const channels: string[] = ['Global Network', ...communities.map(c => c.title)];
+  const [activeChannel, setActiveChannel] = useState<string>('Global Network');
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+
+  useEffect(() => {
+    const unsub = subscribeToCommunities((comms) => setCommunities(comms));
+    return () => unsub();
+  }, []);
 
   const [inputMsg, setInputMsg] = useState('');
   const [isRecordingAudio, setIsRecordingAudio] = useState(false);
@@ -109,12 +97,11 @@ export const RealtimeMessaging: React.FC = () => {
     const newMsg: ChatMessage = {
       id: `msg_${Date.now()}`,
       senderId: 'usr_1',
-      senderName: 'Aarav Sharma (You)',
+      senderName: 'You',
       audioBlobUrl: audioUrl,
       audioDurationSeconds: durationSec,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       channel: activeChannel,
-      latencyMs: Math.floor(8 + Math.random() * 8),
     };
     setMessages((prev) => [...prev, newMsg]);
   };
@@ -124,25 +111,23 @@ export const RealtimeMessaging: React.FC = () => {
     const newMsg: ChatMessage = {
       id: `msg_${Date.now()}`,
       senderId: 'usr_1',
-      senderName: 'Aarav Sharma (You)',
+      senderName: 'You',
       content: inputMsg,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       channel: activeChannel,
-      latencyMs: Math.floor(8 + Math.random() * 8),
     };
     setMessages((prev) => [...prev, newMsg]);
     setInputMsg('');
 
-    // Simulate instant Redis PubSub reply
+    // Simulate a reply
     setTimeout(() => {
       const reply: ChatMessage = {
         id: `msg_${Date.now() + 1}`,
         senderId: 'usr_peer',
         senderName: activeChannel,
-        content: `Got your message! Redis PubSub transmitted the payload via WebSocket channel #chat:${activeChannel.toLowerCase().replace(/\s+/g, '_')} with 12ms latency.`,
+        content: `Thanks for sharing in ${activeChannel}!`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         channel: activeChannel,
-        latencyMs: 12,
       };
       setMessages((prev) => [...prev, reply]);
     }, 1500);
@@ -153,47 +138,46 @@ export const RealtimeMessaging: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-6 pb-32 grid grid-cols-1 lg:grid-cols-4 gap-6">
       
-      {/* Left Sidebar: Active Channels & WebSocket Architecture HUD */}
+      {/* Left Sidebar: Active Channels */}
       <div className="lg:col-span-1 space-y-6">
         
-        {/* Channel Selector */}
         {/* Channel Selector Widget */}
-        <div className="p-5 rounded-[26px] bg-[#121212] border border-white/20 space-y-4 shadow-xl">
-          <div className="flex items-center justify-between border-b border-white/15 pb-3">
+        <div className="kx-card p-5 space-y-4">
+          <div className="flex items-center justify-between border-b border-white/10 pb-3">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <MessageSquare className="w-4 h-4 text-[#E1306C]" />
+              <MessageSquare className="w-4 h-4 text-[#00CFFF]" />
               <span>Active Sessions</span>
             </h3>
-            <span className="text-[10px] bg-[#34C759]/15 text-[#34C759] px-2.5 py-0.5 rounded-full border border-[#34C759]/40 flex items-center gap-1.5 font-semibold">
+            <span className="text-[10px] bg-[#34C759]/15 text-[#34C759] px-2.5 py-0.5 rounded-full border border-[#34C759]/30 flex items-center gap-1.5 font-semibold">
               <span className="w-1.5 h-1.5 rounded-full bg-[#34C759] animate-ping" />
-              WebSocket
+              Live
             </span>
           </div>
 
           <div className="space-y-2.5">
-            {(['Kabir Mehta', 'Riya Patel', 'Algo Champions Pod'] as const).map((ch) => (
+            {channels.map((ch) => (
               <button
                 key={ch}
                 onClick={() => setActiveChannel(ch)}
                 className={`w-full p-3.5 rounded-[20px] text-left transition-all flex items-center gap-3.5 border ${
                   activeChannel === ch
-                    ? 'bg-[#262626] border-white/40 shadow-lg text-white scale-[1.02]'
-                    : 'bg-[#181818] border-white/10 text-white/70 hover:text-white hover:bg-[#202020]'
+                    ? 'bg-[#111111] border-white/40 shadow-lg text-white scale-[1.02]'
+                    : 'bg-[#0D0D0D] border-white/10 text-white/70 hover:text-white hover:bg-[#111111]'
                 }`}
               >
                 <div className="relative shrink-0">
-                  <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-[#E1306C]/40 to-[#FD1D1D]/60 border border-white/20 flex items-center justify-center font-bold text-white shadow-md">
+                  <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-[#00CFFF]/40 to-[#9B5DE5]/60 border border-white/20 flex items-center justify-center font-bold text-white shadow-md">
                     {ch[0]}
                   </div>
-                  <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[#34C759] border-2 border-[#121212]" />
+                  <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[#34C759] border-2 border-[#05050A]" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between">
                     <h4 className="text-sm font-bold truncate text-white">{ch}</h4>
-                    {activeChannel === ch && <span className="w-2 h-2 rounded-full bg-[#E1306C]" />}
+                    {activeChannel === ch && <span className="w-2 h-2 rounded-full bg-[#00CFFF]" />}
                   </div>
                   <p className="text-[11px] text-white/50 truncate font-normal">
-                    {ch.includes('Pod') ? 'Study Group Channel' : 'Direct Peer Channel'}
+                    {ch === 'Global Network' ? 'General Channel' : 'Community Channel'}
                   </p>
                 </div>
               </button>
@@ -202,9 +186,9 @@ export const RealtimeMessaging: React.FC = () => {
         </div>
 
         {/* Redis PubSub & Audio Architecture Card */}
-        <div className="p-5 rounded-[26px] bg-[#121212] border border-white/20 space-y-3 text-xs text-white shadow-xl">
+        <div className="p-5 rounded-[26px] bg-[#000000] border border-white/20 space-y-3 text-xs text-white shadow-xl">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
-            <Radio className="w-4 h-4 text-[#E1306C]" />
+            <Radio className="w-4 h-4 text-[#00CFFF]" />
             <span>Redis PubSub + Audio Voice Engine</span>
           </h3>
           <p className="leading-relaxed text-white/70 font-normal">
@@ -213,7 +197,7 @@ export const RealtimeMessaging: React.FC = () => {
           <p className="leading-relaxed text-white/70 font-normal">
             • <b>Direct Audio Voice Notes:</b> Uses browser `HTML5 MediaRecorder API` to record microphone input directly into WebM blobs without server transcoding bottlenecks!
           </p>
-          <div className="pt-2 border-t border-white/15 flex items-center justify-between text-[11px] text-[#E1306C] font-semibold">
+          <div className="pt-2 border-t border-white/15 flex items-center justify-between text-[11px] text-[#00CFFF] font-semibold">
             <span>Status: SUBSCRIBED</span>
             <span>Latency: ~12ms</span>
           </div>
@@ -222,26 +206,24 @@ export const RealtimeMessaging: React.FC = () => {
       </div>
 
       {/* Main Chat Session Area (3 Cols) */}
-      <div className="lg:col-span-3 rounded-[28px] bg-[#121212] border border-white/20 flex flex-col h-[700px] overflow-hidden shadow-2xl">
+      <div className="lg:col-span-3 rounded-[28px] bg-[#000000] border border-white/20 flex flex-col h-[700px] overflow-hidden shadow-2xl">
         
         {/* Chat Header */}
-        <div className="p-4 sm:p-5 bg-[#181818] border-b border-white/15 flex items-center justify-between">
+        <div className="p-4 sm:p-5 bg-[#0D0D0D] border-b border-white/15 flex items-center justify-between">
           <div className="flex items-center gap-3.5">
             <div className="relative shrink-0">
-              <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-[#E1306C]/40 to-[#FD1D1D]/60 border border-white/20 flex items-center justify-center font-bold text-white text-base shadow-md">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[#00CFFF] to-[#9B5DE5] flex items-center justify-center text-white font-black text-lg shadow-md border-2 border-white/20">
                 {activeChannel[0]}
               </div>
-              <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[#34C759] border-2 border-[#181818]" />
+              <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-[#34C759] border-2 border-[#05050A] shadow-sm" />
             </div>
+            
             <div>
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <h3 className="text-lg font-black text-white flex items-center gap-2">
                 {activeChannel}
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#34C759]/15 text-[#34C759] border border-[#34C759]/30 font-semibold">
-                  ● Live PubSub Session
-                </span>
               </h3>
               <p className="text-xs text-white/60 font-normal">
-                End-to-end WebSocket communication • Redis Channel: <code>#chat:{activeChannel.toLowerCase().replace(/\s+/g, '_')}</code>
+                Community Chat
               </p>
             </div>
           </div>
@@ -257,7 +239,7 @@ export const RealtimeMessaging: React.FC = () => {
         </div>
 
         {/* Chat Messages Log (iMessage Grouping & Spring-In Bubbles) */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-[#121212]">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-[#000000]">
           {filteredMessages.map((msg) => {
             const isMe = msg.senderId === 'usr_1';
             return (
@@ -265,12 +247,9 @@ export const RealtimeMessaging: React.FC = () => {
                 <div className="flex items-center gap-2 mb-1 px-2">
                   <span className="text-xs font-semibold text-white/80">{msg.senderName}</span>
                   <span className="text-[10px] text-white/50 font-mono">{msg.timestamp}</span>
-                  <span className="text-[10px] bg-[#181818] text-[#34C759] px-2 py-0.5 rounded-full font-mono border border-white/20">
-                    ⚡ {msg.latencyMs}ms
-                  </span>
                 </div>
 
-                <div className={isMe ? 'bg-[#E1306C] text-white p-3.5 rounded-2xl rounded-br-sm shadow-md max-w-md' : 'bg-[#181818] text-white p-3.5 rounded-2xl rounded-bl-sm border border-white/15 shadow-md max-w-md'}>
+                <div className={isMe ? 'bg-[#00CFFF] text-white p-3.5 rounded-2xl rounded-br-sm shadow-md max-w-md' : 'bg-[#0D0D0D] text-white p-3.5 rounded-2xl rounded-bl-sm border border-white/15 shadow-md max-w-md'}>
                   {/* Text message */}
                   {msg.content && <p className="text-sm leading-relaxed font-normal">{msg.content}</p>}
 
@@ -286,9 +265,9 @@ export const RealtimeMessaging: React.FC = () => {
                               else audioEl.pause();
                             }
                           }}
-                          className="w-10 h-10 rounded-full bg-white text-[#121212] flex items-center justify-center shrink-0 shadow-md hover:scale-105 transition-all"
+                          className="w-10 h-10 rounded-full bg-white text-[#05050A] flex items-center justify-center shrink-0 shadow-md hover:scale-105 transition-all"
                         >
-                          <Play className="w-5 h-5 fill-[#121212] ml-0.5 text-[#121212]" />
+                          <Play className="w-5 h-5 fill-[#05050A] ml-0.5 text-[#05050A]" />
                         </button>
 
                         <div className="flex-1 space-y-1">
@@ -302,7 +281,7 @@ export const RealtimeMessaging: React.FC = () => {
                             {[4, 12, 18, 24, 16, 28, 22, 14, 26, 30, 20, 15, 24, 18, 10, 22, 14, 8].map((h, i) => (
                               <div
                                 key={i}
-                                className={`flex-1 rounded-full transition-all ${isMe ? 'bg-white/85' : 'bg-[#E1306C]/80'}`}
+                                className={`flex-1 rounded-full transition-all ${isMe ? 'bg-white/85' : 'bg-[#00CFFF]/80'}`}
                                 style={{ height: `${h}px` }}
                               />
                             ))}
@@ -341,8 +320,8 @@ export const RealtimeMessaging: React.FC = () => {
           </div>
         )}
 
-        {/* Input Dock (Glass Pill composer, docked Coral circle button) */}
-        <div className="p-4 bg-[#181818] border-t border-white/15 flex items-center gap-3">
+        {/* Input Dock */}
+        <div className="p-4 bg-[#000000] border-t border-[rgba(65,105,225,0.15)] flex items-center gap-3">
           <button
             onClick={isRecordingAudio ? stopRecordingVoiceNote : startRecordingVoiceNote}
             title="Record Audio Voice Note (MediaRecorder API)"
@@ -353,18 +332,18 @@ export const RealtimeMessaging: React.FC = () => {
             <Mic className="w-5 h-5" />
           </button>
 
-          <div className="flex-1 relative flex items-center">
+          <div className="flex-1 kx-field flex items-center overflow-hidden">
             <input
               type="text"
-              placeholder={`Send instant message to ${activeChannel}...`}
+              placeholder={activeChannel ? `Message ${activeChannel}…` : 'Select a channel…'}
               value={inputMsg}
               onChange={(e) => setInputMsg(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-              className="w-full bg-[#262626] border border-white/20 rounded-full pl-5 pr-12 py-3 text-sm text-white focus:border-[#E1306C] focus:bg-[#333333] outline-none placeholder:text-white/50 shadow-inner transition-all"
+              className="flex-1 bg-transparent pl-5 pr-3 py-3 text-sm text-white outline-none placeholder:text-white/30"
             />
             <button
               onClick={handleSendMessage}
-              className="absolute right-1.5 w-9 h-9 rounded-full bg-gradient-to-tr from-[#E1306C] to-[#FD1D1D] hover:opacity-95 text-white flex items-center justify-center shadow-md transition-transform active:scale-90"
+              className="shrink-0 w-9 h-9 mr-1 rounded-full bg-gradient-to-br from-[#00CFFF] via-[#4169E1] to-[#9B5DE5] hover:opacity-90 text-white flex items-center justify-center shadow-md transition-transform active:scale-90"
             >
               <Send className="w-4 h-4 ml-0.5" />
             </button>

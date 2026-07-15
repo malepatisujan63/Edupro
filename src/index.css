@@ -2,340 +2,649 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ════════════════════════════════════════════════════════════════════════════
+   KOINEXA DESIGN SYSTEM — Pure Black Canvas + Gradient Brand Identity
+   Logo Gradient: Cyan #00CFFF → Royal Blue #4169E1 → Purple #9B5DE5
+   ════════════════════════════════════════════════════════════════════════════ */
+
 @layer base {
   :root {
-    /* iOS 18 Liquid Glass & Instagram Sunset Dark Theme Tokens */
-    --canvas-bg-1: #000000;
-    --canvas-bg-2: #0A0A0A;
-    --canvas-bg-3: #121212;
-    --glass-fill: rgba(18, 18, 18, 0.75);
-    --glass-border: rgba(255, 255, 255, 0.18);
-    --coral-blaze: #E1306C;
-    --coral-blaze-end: #FD1D1D;
-    --ocean-mist: #5AC8FA;
-    --success-green: #34C759;
-    --badge-red: #FF3B30;
-    --ink: #FFFFFF;
-    --muted: rgba(255, 255, 255, 0.60);
+    /* ── Koinexa Logo Palette ── */
+    --kx-cyan:      #00CFFF;
+    --kx-blue:      #4169E1;
+    --kx-purple:    #9B5DE5;
+    --kx-violet:    #7B2FBE;
+    --kx-gradient:  linear-gradient(135deg, #00CFFF 0%, #4169E1 50%, #9B5DE5 100%);
+    --kx-gradient-r: linear-gradient(225deg, #00CFFF 0%, #4169E1 50%, #9B5DE5 100%);
+
+    /* ── Surface Layers (Pure Black) ── */
+    --surface-0:    #000000;   /* canvas / body */
+    --surface-1:    #0A0A0A;   /* cards */
+    --surface-2:    #111111;   /* elevated / hover */
+    --surface-3:    #1A1A1A;   /* inputs / deep panels */
+
+    /* ── Border ── */
+    --border-subtle:   rgba(255,255,255,0.06);
+    --border-mid:      rgba(255,255,255,0.10);
+    --border-strong:   rgba(255,255,255,0.18);
+    --border-kx:       rgba(0,207,255,0.25);      /* cyan-tinted border */
+    --border-kx-purple:rgba(155,93,229,0.25);     /* purple-tinted border */
+
+    /* ── Status ── */
+    --success:      #22C55E;
+    --danger:       #EF4444;
+    --warning:      #F59E0B;
+
+    /* ── Typography ── */
+    --ink:          #FFFFFF;
+    --muted:        rgba(255,255,255,0.55);
+    --faint:        rgba(255,255,255,0.30);
   }
 
+  /* ── BODY: Pure Black Canvas ── */
   body {
-    background: #000000 !important;
-    background-attachment: fixed;
+    background: #000000;
     color: #FFFFFF;
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", sans-serif;
-    font-weight: 480;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif;
+    font-weight: 400;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
     min-height: 100vh;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-weight: 590;
+    font-weight: 700;
     color: #FFFFFF;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
   }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(65, 105, 225, 0.5);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--kx-cyan);
+  }
+
+  /* ── Text selection ── */
+  ::selection { background: rgba(65,105,225,0.4); color: #fff; }
 }
 
-/* iOS 18 Liquid Glass Panels & Surfaces (Instagram Dark Theme - Pure Glossy No Border) */
+/* ════════════════════════════════════════════════════════════════════════════
+   COMPONENTS
+   ════════════════════════════════════════════════════════════════════════════ */
 @layer components {
-  /* Main Cards, Profiles, Post Widgets (28px radius, NO outer border, glossy specular inset) */
-  .glass-card, .glass-panel {
-    background: rgba(18, 18, 18, 0.92);
-    backdrop-filter: blur(28px) saturate(200%);
-    -webkit-backdrop-filter: blur(28px) saturate(200%);
-    border: none !important;
-    border-radius: 28px;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.9), inset 0 1px 1px rgba(255, 255, 255, 0.16) !important;
-    color: #FFFFFF;
-    transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
-  }
 
-  .glass-card:hover {
-    background: rgba(26, 26, 26, 0.96);
-    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.95), inset 0 1px 1px rgba(255, 255, 255, 0.22) !important;
+  /* ── KOINEXA GRADIENT BORDER CARD ─────────────────────────────────────────
+     Pure black fill, 1px gradient border (Cyan→Blue→Purple), subtle glow   */
+  .kx-card {
+    position: relative;
+    background: #000000;
+    border-radius: 20px;
+    color: #FFFFFF;
+    transition: transform 280ms cubic-bezier(0.16,1,0.3,1),
+                box-shadow 280ms cubic-bezier(0.16,1,0.3,1);
+    z-index: 0;
+  }
+  .kx-card::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 21px;
+    background: linear-gradient(135deg, #00CFFF 0%, #4169E1 50%, #9B5DE5 100%);
+    z-index: -1;
+    opacity: 0.5;
+    transition: opacity 280ms ease;
+  }
+  .kx-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    background: #000000;
+    z-index: -1;
+  }
+  .kx-card:hover::before { opacity: 1; }
+  .kx-card:hover {
     transform: translateY(-2px);
+    box-shadow: 0 0 40px rgba(0,207,255,0.12), 0 0 80px rgba(155,93,229,0.08);
   }
 
-  /* Compact Chips & Small Widgets (18px radius, NO outer border) */
-  .glass-chip {
-    background: rgba(28, 28, 30, 0.88);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: none !important;
-    border-radius: 18px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.14) !important;
+  /* ── GLASS CARD (glassmorphism with Koinexa gradient border) ── */
+  .glass-card, .glass-panel {
+    position: relative;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(32px) saturate(160%);
+    -webkit-backdrop-filter: blur(32px) saturate(160%);
+    border-radius: 24px;
     color: #FFFFFF;
+    transition: transform 280ms cubic-bezier(0.16,1,0.3,1),
+                box-shadow 280ms cubic-bezier(0.16,1,0.3,1);
+    z-index: 0;
+    /* Gradient border via box-shadow + outline trick */
+    border: 1px solid transparent;
+    background-clip: padding-box;
+    box-shadow:
+      0 0 0 1px rgba(65,105,225,0.2),
+      0 24px 48px rgba(0,0,0,0.8),
+      inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .glass-card:hover, .glass-panel:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 0 0 1px rgba(0,207,255,0.35),
+      0 32px 64px rgba(0,0,0,0.9),
+      0 0 30px rgba(65,105,225,0.10),
+      inset 0 1px 0 rgba(255,255,255,0.10);
   }
 
-  /* Floating Dock & Pill Nav Bar (26px radius or full pill, NO outer border, crystal clear glossy iOS 18 transparency) */
+  /* ── GLASS PILL NAV ── */
   .glass-pill {
-    background: rgba(255, 255, 255, 0.12) !important;
-    backdrop-filter: blur(36px) saturate(240%) brightness(1.15) !important;
-    -webkit-backdrop-filter: blur(36px) saturate(240%) brightness(1.15) !important;
-    border: none !important;
+    background: rgba(0,0,0,0.90) !important;
+    backdrop-filter: blur(40px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
     border-radius: 9999px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), inset 0 1.5px 2px rgba(255, 255, 255, 0.35), inset 0 -1.5px 2px rgba(0, 0, 0, 0.6) !important;
+    box-shadow:
+      0 0 0 1px rgba(65,105,225,0.3),
+      0 16px 40px rgba(0,0,0,0.9),
+      inset 0 1px 0 rgba(255,255,255,0.08) !important;
     color: #FFFFFF;
   }
 
-  /* iOS 18 Segmented Control Groups (Grouped Neighbor Buttons inside capsule, NO outer border, glossy transparency) */
+  /* ── SEGMENTED CONTROL ── */
   .segmented-glass-group {
-    background: rgba(255, 255, 255, 0.12) !important;
-    backdrop-filter: blur(36px) saturate(240%) brightness(1.15) !important;
-    -webkit-backdrop-filter: blur(36px) saturate(240%) brightness(1.15) !important;
-    border: none !important;
+    background: rgba(0,0,0,0.90) !important;
+    backdrop-filter: blur(40px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
     border-radius: 999px;
     padding: 4px;
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.8), inset 0 1.5px 2px rgba(255, 255, 255, 0.35), inset 0 -1px 2px rgba(0, 0, 0, 0.6) !important;
+    box-shadow:
+      0 0 0 1px rgba(65,105,225,0.3),
+      0 12px 32px rgba(0,0,0,0.9),
+      inset 0 1px 0 rgba(255,255,255,0.06) !important;
   }
 
   .segmented-glass-btn {
-    padding: 6px 14px;
+    padding: 7px 16px;
     border-radius: 999px;
     font-size: 13px;
-    font-weight: 480;
-    color: rgba(255, 255, 255, 0.75);
+    font-weight: 500;
+    color: rgba(255,255,255,0.6);
     transition: all 150ms ease-out;
+    border: none;
+    background: transparent;
   }
-
-  .segmented-glass-btn:hover {
-    color: #FFFFFF;
-    background: rgba(255, 255, 255, 0.18);
-  }
-
-  .segmented-glass-btn:active {
-    transform: scale(0.96);
-  }
+  .segmented-glass-btn:hover { color: #FFFFFF; background: rgba(255,255,255,0.08); }
+  .segmented-glass-btn:active { transform: scale(0.96); }
 
   .segmented-glass-btn-active {
-    padding: 6px 14px;
+    padding: 7px 16px;
     border-radius: 999px;
     font-size: 13px;
-    font-weight: 590;
-    background: #262626;
+    font-weight: 700;
+    background: linear-gradient(135deg, #00CFFF 0%, #4169E1 50%, #9B5DE5 100%);
     color: #FFFFFF;
     border: none !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 4px 16px rgba(65,105,225,0.4), inset 0 1px 0 rgba(255,255,255,0.25) !important;
     transition: all 150ms ease-out;
   }
 
-  /* iOS 18 BUTTON SPECIFICATIONS */
-  /* Primary Button (Instagram Sunset gradient, pill shape, glossy highlight over top third) */
-  .glass-action-btn-primary, .btn-primary {
-    border-radius: 999px;
-    background: linear-gradient(135deg, #E1306C 0%, #FD1D1D 50%, #FCB045 100%);
-    color: #FFFFFF;
-    font-weight: 590;
-    font-size: 13px;
-    padding: 10px 20px;
-    box-shadow: 0 4px 14px rgba(225, 48, 108, 0.35);
+  /* ════════════════════════════════════════════════════════════════════════
+     BUTTONS
+     ════════════════════════════════════════════════════════════════════════ */
+
+  /* ── PRIMARY: Koinexa Gradient Fill ── */
+  .btn-primary, .glass-action-btn-primary {
     position: relative;
-    overflow: hidden;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: transform 120ms ease-out, filter 120ms ease-out, box-shadow 120ms ease-out;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #00CFFF 0%, #4169E1 50%, #9B5DE5 100%);
+    color: #FFFFFF;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 11px 22px;
     border: none;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    overflow: hidden;
+    transition: transform 120ms ease-out, filter 120ms ease-out, box-shadow 120ms ease-out;
+    box-shadow: 0 0 24px rgba(65,105,225,0.4), 0 4px 16px rgba(0,0,0,0.4);
   }
-
-  .glass-action-btn-primary::before, .btn-primary::before {
+  /* Glossy specular highlight on top third */
+  .btn-primary::before, .glass-action-btn-primary::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 35%;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.30) 0%, rgba(255, 255, 255, 0) 100%);
+    top: 0; left: 0; right: 0;
+    height: 40%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 100%);
     pointer-events: none;
+    border-radius: inherit;
   }
-
-  .glass-action-btn-primary:active, .btn-primary:active {
+  .btn-primary:hover, .glass-action-btn-primary:hover {
+    filter: brightness(1.12);
+    box-shadow: 0 0 32px rgba(0,207,255,0.35), 0 0 60px rgba(155,93,229,0.2), 0 6px 20px rgba(0,0,0,0.5);
+  }
+  .btn-primary:active, .glass-action-btn-primary:active {
     transform: scale(0.97);
-    filter: brightness(1.08);
-    box-shadow: 0 2px 8px rgba(225, 48, 108, 0.45);
+    filter: brightness(0.95);
   }
 
-  /* Secondary Button (Dark glass pill, white text, NO outer border) */
-  .glass-action-btn, .btn-secondary {
+  /* ── SECONDARY: Black with gradient border ── */
+  .btn-secondary, .glass-action-btn {
+    position: relative;
     border-radius: 999px;
-    background: rgba(28, 28, 30, 0.90);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: none !important;
+    background: #000000;
     color: #FFFFFF;
-    font-weight: 480;
-    font-size: 13px;
-    padding: 10px 20px;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.16) !important;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 11px 22px;
+    border: 1px solid rgba(65,105,225,0.35);
+    cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    transition: transform 120ms ease-out, background 120ms ease-out;
-    cursor: pointer;
+    transition: all 120ms ease-out;
+    box-shadow: 0 0 0 0 rgba(0,207,255,0);
   }
-
-  .glass-action-btn:hover, .btn-secondary:hover {
-    background: rgba(44, 44, 46, 0.95);
+  .btn-secondary:hover, .glass-action-btn:hover {
+    border-color: rgba(0,207,255,0.6);
+    box-shadow: 0 0 16px rgba(0,207,255,0.15);
+    background: rgba(0,207,255,0.05);
   }
-
-  .glass-action-btn:active, .btn-secondary:active {
+  .btn-secondary:active, .glass-action-btn:active {
     transform: scale(0.97);
-    background: rgba(58, 58, 60, 0.98);
   }
 
-  /* Icon Buttons (Circular 44px dark glass chip, white icon, NO outer border) */
+  /* ── ICON BUTTON ── */
   .btn-icon {
-    width: 44px;
-    height: 44px;
+    width: 44px; height: 44px;
     border-radius: 50%;
-    background: rgba(28, 28, 30, 0.90);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: none !important;
+    background: #0D0D0D;
+    border: 1px solid rgba(65,105,225,0.25);
     color: #FFFFFF;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.16) !important;
-    transition: transform 120ms ease-out, background 120ms ease-out;
+    transition: all 120ms ease-out;
     cursor: pointer;
   }
-
   .btn-icon:hover {
-    background: rgba(44, 44, 46, 0.95);
+    border-color: rgba(0,207,255,0.5);
+    background: rgba(0,207,255,0.08);
+    box-shadow: 0 0 12px rgba(0,207,255,0.2);
   }
+  .btn-icon:active { transform: scale(0.93); }
 
-  .btn-icon:active {
-    transform: scale(0.95);
-  }
-
-  /* Destructive Button */
+  /* ── DESTRUCTIVE ── */
   .btn-destructive {
     border-radius: 999px;
-    background: rgba(255, 59, 48, 0.22);
-    border: none !important;
-    color: #FF3B30;
-    font-weight: 590;
+    background: rgba(239,68,68,0.15);
+    border: 1px solid rgba(239,68,68,0.35);
+    color: #EF4444;
+    font-weight: 700;
     font-size: 13px;
     padding: 10px 20px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    box-shadow: 0 4px 14px rgba(255, 59, 48, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
-    transition: transform 120ms ease-out, background 120ms ease-out;
     cursor: pointer;
+    transition: all 120ms ease-out;
   }
+  .btn-destructive:hover { background: rgba(239,68,68,0.25); }
+  .btn-destructive:active { transform: scale(0.97); }
 
-  .btn-destructive:active {
-    transform: scale(0.97);
-    background: rgba(255, 59, 48, 0.32);
-  }
-
-  /* Chat Bubbles (20px radius, max-width 75%, generous padding, NO outer border) */
+  /* ── CHAT BUBBLES ── */
   .chat-bubble-sent {
     border-radius: 20px 20px 4px 20px;
-    background: linear-gradient(135deg, #E1306C 0%, #FD1D1D 100%);
+    background: linear-gradient(135deg, #00CFFF 0%, #4169E1 50%, #9B5DE5 100%);
     color: #FFFFFF;
     border: none !important;
     padding: 12px 16px;
-    box-shadow: 0 4px 14px rgba(225, 48, 108, 0.25);
+    box-shadow: 0 4px 14px rgba(65,105,225,0.3);
     max-width: 75%;
   }
-
   .chat-bubble-received {
     border-radius: 20px 20px 20px 4px;
-    background: rgba(28, 28, 30, 0.90);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: none !important;
+    background: #0D0D0D;
+    border: 1px solid rgba(65,105,225,0.2) !important;
     color: #FFFFFF;
     padding: 12px 16px;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.16) !important;
     max-width: 75%;
   }
+
+  /* ── GLASS CHIP ── */
+  .glass-chip {
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(65,105,225,0.2);
+    border-radius: 12px;
+    color: #FFFFFF;
+  }
+
+  /* ── GRADIENT TEXT UTILITY ── */
+  .kx-text {
+    background: linear-gradient(135deg, #00CFFF 0%, #4169E1 50%, #9B5DE5 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+/* ════════════════════════════════════════════════════════════════════════════
+   KOINEXA FLOWING GRADIENT BORDER SYSTEM
+   The spinning conic-gradient that flows around every focused input/button
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* Animate the --kx-angle custom property for the conic-gradient spin */
+@property --kx-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
 }
 
-/* Global utility override to strip ANY white border across all components when requested */
-@layer utilities {
-  [class*="border-white"],
-  [class*="border-[#"],
-  [class*="border-slate"],
-  [class*="border-gray"],
-  [class*="border-neutral"],
-  [class*="border-zinc"] {
-    border-color: transparent !important;
-    border-width: 0px !important;
-  }
+@keyframes kxFlow {
+  from { --kx-angle: 0deg; }
+  to   { --kx-angle: 360deg; }
 }
 
-/* Animations */
-@keyframes panelRise {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* ── KX FIELD (wrapper div — activates on focus-within) ─────────────────── */
+.kx-field {
+  position: relative;
+  border: 1.5px solid rgba(65, 105, 225, 0.18);
+  border-radius: 14px;
+  background: #000000;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-@keyframes springIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.92);
-  }
-  70% {
-    transform: scale(1.02);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
+.kx-field:focus-within {
+  --kx-angle: 0deg;
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(#000000, #000000) padding-box,
+    conic-gradient(from var(--kx-angle),
+      #00CFFF  0%,
+      #4169E1  33%,
+      #9B5DE5  66%,
+      #00CFFF  100%
+    ) border-box;
+  animation: kxFlow 2.4s linear infinite;
+  box-shadow:
+    0 0 12px rgba(0, 207, 255, 0.35),
+    0 0 28px rgba(65, 105, 225, 0.25),
+    0 0 52px rgba(155, 93, 229, 0.12);
 }
 
-@keyframes floatSlow {
-  0%, 100% {
-    transform: translate(0, 0) scale(1);
-  }
-  50% {
-    transform: translate(-20px, 15px) scale(1.05);
-  }
+/* ── KX INPUT (direct on the <input> element) ────────────────────────────── */
+.kx-input-flow {
+  --kx-angle: 0deg;
+  background: #000000;
+  border: 1.5px solid rgba(65, 105, 225, 0.18);
+  border-radius: 14px;
+  color: #FFFFFF;
+  padding: 12px 16px;
+  width: 100%;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease,
+              background 0.3s ease;
+}
+.kx-input-flow::placeholder { color: rgba(255,255,255,0.30); }
+
+.kx-input-flow:focus {
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(#000000, #000000) padding-box,
+    conic-gradient(from var(--kx-angle),
+      #00CFFF  0%,
+      #4169E1  33%,
+      #9B5DE5  66%,
+      #00CFFF  100%
+    ) border-box;
+  animation: kxFlow 2.4s linear infinite;
+  box-shadow:
+    0 0 10px rgba(0, 207, 255, 0.30),
+    0 0 24px rgba(65, 105, 225, 0.20),
+    0 0 44px rgba(155, 93, 229, 0.10);
 }
 
-.animate-panelRise {
-  animation: panelRise 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-springIn {
-  animation: springIn 350ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-.animate-floatSlow {
-  animation: floatSlow 12s ease-in-out infinite;
-}
-
-/* Custom smooth scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(50, 50, 50, 0.6);
+/* ── KX PILL (pill-shaped flowing border — nav/buttons) ──────────────────── */
+.kx-pill-flow {
+  --kx-angle: 0deg;
+  border: 1.5px solid rgba(65, 105, 225, 0.2);
   border-radius: 9999px;
-  border: none;
+  background: #000000;
+  transition: all 0.3s ease;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(225, 48, 108, 0.8);
+
+.kx-pill-flow:hover,
+.kx-pill-flow:focus,
+.kx-pill-flow.active {
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(#000000, #000000) padding-box,
+    conic-gradient(from var(--kx-angle),
+      #00CFFF  0%,
+      #4169E1  33%,
+      #9B5DE5  66%,
+      #00CFFF  100%
+    ) border-box;
+  animation: kxFlow 2s linear infinite;
+  box-shadow:
+    0 0 14px rgba(0, 207, 255, 0.35),
+    0 0 32px rgba(65, 105, 225, 0.25);
+}
+
+/* ── KX NAV DOCK (bottom navigation bar container) ───────────────────────── */
+.kx-nav-dock {
+  --kx-angle: 0deg;
+  border-radius: 9999px;
+  backdrop-filter: blur(24px) saturate(180%);
+  transition: all 0.3s ease;
+  
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)) padding-box,
+    conic-gradient(from var(--kx-angle),
+      #00CFFF 0%, #4169E1 33%, #9B5DE5 66%, #00CFFF 100%
+    ) border-box;
+  animation: kxFlow 3s linear infinite;
+  box-shadow:
+    0 0 16px rgba(0, 207, 255, 0.25),
+    0 0 36px rgba(65, 105, 225, 0.15);
+}
+
+/* ── KX FIELD PILL (fully rounded search bar wrapper) ────────────────────── */
+.kx-field-pill {
+  position: relative;
+  border: 1.5px solid rgba(65, 105, 225, 0.18);
+  border-radius: 9999px;
+  background: #000000;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+}
+
+.kx-field-pill:focus-within {
+  --kx-angle: 0deg;
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(#000000, #000000) padding-box,
+    conic-gradient(from var(--kx-angle),
+      #00CFFF 0%, #4169E1 33%, #9B5DE5 66%, #00CFFF 100%
+    ) border-box;
+  animation: kxFlow 2.4s linear infinite;
+  box-shadow:
+    0 0 12px rgba(0, 207, 255, 0.35),
+    0 0 28px rgba(65, 105, 225, 0.25),
+    0 0 52px rgba(155, 93, 229, 0.12);
+}
+
+/* ── KX GLOW CAPSULE (the top-right nav group — single clean border) ─────── */
+.kx-capsule {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  /* Single clean gradient border — no double borders */
+  border: 1px solid transparent;
+  background:
+    linear-gradient(rgba(0,0,0,0.92), rgba(0,0,0,0.92)) padding-box,
+    linear-gradient(135deg, rgba(0,207,255,0.35), rgba(65,105,225,0.35), rgba(155,93,229,0.35)) border-box;
+  box-shadow:
+    0 8px 24px rgba(0,0,0,0.7),
+    0 0 1px rgba(65,105,225,0.3);
+}
+
+/* ── KX SEARCH CONTAINER (search bar modal header) ───────────────────────── */
+.kx-search-header {
+  --kx-angle: 0deg;
+  border-radius: 24px 24px 0 0;
+  background: #000000;
+  border-bottom: 1px solid transparent;
+  transition: all 0.3s;
+}
+
+.kx-search-header:focus-within {
+  background:
+    linear-gradient(#050505, #050505) padding-box,
+    conic-gradient(from var(--kx-angle),
+      #00CFFF 0%, #4169E1 33%, #9B5DE5 66%, #00CFFF 100%
+    ) border-box;
+  animation: kxFlow 2.4s linear infinite;
+  box-shadow:
+    0 0 16px rgba(0, 207, 255, 0.3),
+    0 0 40px rgba(65, 105, 225, 0.2),
+    inset 0 0 20px rgba(0, 207, 255, 0.04);
+}
+
+  /* ── KOINEXA GLOW UTILITIES ── */
+  .kx-glow-cyan   { box-shadow: 0 0 20px rgba(0,207,255,0.35); }
+  .kx-glow-blue   { box-shadow: 0 0 20px rgba(65,105,225,0.4); }
+  .kx-glow-purple { box-shadow: 0 0 20px rgba(155,93,229,0.35); }
+
+  /* ── GRADIENT BORDER RING (utility) ── */
+  .kx-border {
+    border: 1px solid transparent;
+    background:
+      linear-gradient(#000000, #000000) padding-box,
+      linear-gradient(135deg, #00CFFF 0%, #4169E1 50%, #9B5DE5 100%) border-box;
+  }
+  .kx-border-hover:hover {
+    border: 1px solid transparent;
+    background:
+      linear-gradient(#000000, #000000) padding-box,
+      linear-gradient(135deg, #00CFFF 0%, #4169E1 50%, #9B5DE5 100%) border-box;
+  }
+
+  /* ── AVATAR GRADIENT RING ── */
+  .kx-avatar-ring {
+    padding: 2px;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #00CFFF 0%, #4169E1 50%, #9B5DE5 100%);
+  }
+
+  /* ── FORM INPUTS ── */
+  .kx-input {
+    background: #0D0D0D;
+    border: 1px solid rgba(65,105,225,0.25);
+    border-radius: 14px;
+    color: #FFFFFF;
+    padding: 12px 16px;
+    font-size: 14px;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+    outline: none;
+    width: 100%;
+  }
+  .kx-input::placeholder { color: rgba(255,255,255,0.3); }
+  .kx-input:focus {
+    border-color: rgba(0,207,255,0.6);
+    box-shadow: 0 0 0 3px rgba(65,105,225,0.15);
+  }
+
+  /* ── BADGE / TAG ── */
+  .kx-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(65,105,225,0.12);
+    border: 1px solid rgba(65,105,225,0.3);
+    color: #00CFFF;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ANIMATIONS
+   ════════════════════════════════════════════════════════════════════════════ */
+@keyframes panelRise {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleUp {
+  0%   { opacity: 0; transform: scale(0.88); }
+  70%  { transform: scale(1.02); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+@keyframes kxPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(0,207,255,0.4); }
+  50%       { box-shadow: 0 0 24px rgba(65,105,225,0.7), 0 0 48px rgba(155,93,229,0.4); }
+}
+
+@keyframes heartBurst {
+  0%   { opacity: 0; transform: translate(-50%,-50%) scale(0.3); }
+  40%  { opacity: 1; transform: translate(-50%,-50%) scale(1.3); }
+  70%  { transform: translate(-50%,-50%) scale(0.9); }
+  100% { opacity: 0; transform: translate(-50%,-50%) scale(1.1); }
+}
+
+.animate-panelRise { animation: panelRise 320ms cubic-bezier(0.16,1,0.3,1) forwards; }
+.animate-scaleUp   { animation: scaleUp  360ms cubic-bezier(0.34,1.56,0.64,1) forwards; }
+.animate-fadeIn    { animation: fadeIn   200ms ease forwards; }
+.animate-kxPulse   { animation: kxPulse 2.5s ease-in-out infinite; }
+
+/* ── Skeleton shimmer ── */
+.skeleton {
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(65,105,225,0.08)  50%,
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+  border-radius: 12px;
+}
+
+/* ── Utility: remove borders globally from tailwind utilities 
+   (we control borders via our own classes now) ── */
+@layer utilities {
+  /* Remove any accidental left-over white/slate borders */
+  .no-border { border: none !important; }
 }
