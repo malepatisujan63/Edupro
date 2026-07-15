@@ -1,9 +1,7 @@
-// src/components/auth/AuthModal.tsx  — Real Email OTP + EduNetwork Color Identity
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ShieldCheck, AlertTriangle, CheckCircle2, Trash2, Loader, Lock, Mail, Send } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ShieldCheck, AlertTriangle, CheckCircle2, Trash2, Loader, Lock, Mail } from 'lucide-react';
 import { globalRegistrationHash, globalPlatformTrie, globalSocialGraph } from '../../dsa-engine';
 import { saveUserProfile, fetchUserProfile, fetchUserProfileByEmail } from '../../lib/firestoreService';
-import { sendOtpEmail } from '../../lib/emailService';
 
 declare global {
   interface Window {
@@ -12,7 +10,6 @@ declare global {
         id: {
           initialize: (config: any) => void;
           renderButton: (element: HTMLElement, config: any) => void;
-          prompt: () => void;
         };
       };
     };
@@ -28,20 +25,23 @@ interface AuthModalProps {
 }
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
-const OTP_EXPIRY_SECONDS = 120; // 2 minutes
 
 export const AuthModal: React.FC<AuthModalProps> = ({
   isOpen, onClose, currentUser, onLoginSuccess, onDeleteAccount,
 }) => {
-  type Step = 'SIGN_IN' | 'GOOGLE_OAUTH' | 'REG_PASSWORD' | 'REG_DETAILS' | 'OTP_VERIFY_REG' | 'OTP_VERIFY_LOGIN' | 'LOGGED_IN';
+  type Step = 'SIGN_IN' | 'REGISTER' | 'REG_DETAILS' | 'LOGGED_IN';
   const [step, setStep] = useState<Step>('SIGN_IN');
 
   const [googleUser, setGoogleUser] = useState<{ uid: string; name: string; email: string; picture: string } | null>(null);
-  const [loginUser,  setLoginUser]  = useState<any>(null);
+  
+  // Registration Type
+  const [authMode, setAuthMode] = useState<'google' | 'manual' | null>(null);
 
   // Input fields
   const [email,            setEmail]            = useState('');
   const [password,         setPassword]         = useState('');
+  const [registerName,     setRegisterName]     = useState('');
+  const [registerEmail,    setRegisterEmail]    = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
   const [confirmPassword,  setConfirmPassword]  = useState('');
 
@@ -56,25 +56,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [hobbies, setHobbies] = useState('');
   const [interests, setInterests] = useState('');
 
-  // OTP boxes — 6 individual digits
-  const [otpDigits, setOtpDigits]   = useState<string[]>(['','','','','','']);
-  const [correctOtp, setCorrectOtp] = useState('');
-  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
-
   const [errorMsg,           setErrorMsg]           = useState('');
   const [successMsg,         setSuccessMsg]          = useState('');
   const [isLoading,          setIsLoading]          = useState(false);
-  const [isSendingOtp,       setIsSendingOtp]       = useState(false);
   const [isGoogleLoading,    setIsGoogleLoading]    = useState(false);
 
   // CAPTCHA
   const [captchaChecked,    setCaptchaChecked]   = useState(false);
   const [captchaVerifying,  setCaptchaVerifying] = useState(false);
-
-  // OTP countdown timer
-  const [countdown,        setCountdown]       = useState(0);
-  const [canResend,        setCanResend]        = useState(false);
-  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const googleBtnRef = useRef<HTMLDivElement>(null);
 
@@ -82,28 +71,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       setStep('SIGN_IN'); setErrorMsg(''); setSuccessMsg('');
-      setOtpDigits(['','','','','','']); setCountdown(0); setCanResend(false);
-      setCaptchaChecked(false);
+      setCaptchaChecked(false); setAuthMode(null);
     }
   }, [isOpen]);
-
-  // ── Countdown timer
-  const startCountdown = useCallback(() => {
-    setCountdown(OTP_EXPIRY_SECONDS); setCanResend(false);
-    if (countdownRef.current) clearInterval(countdownRef.current);
-    countdownRef.current = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(countdownRef.current!);
-          setCanResend(true);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  }, []);
-
-  useEffect(() => () => { if (countdownRef.current) clearInterval(countdownRef.current); }, []);
 
   // ── Parse Google JWT
   const parseJwt = (token: string) => {
@@ -123,8 +93,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     try {
       const existingUser = await fetchUserProfile(uid);
       if (existingUser) {
-        setErrorMsg('This Google account is already registered. Please sign in with your email & password.');
-        setStep('SIGN_IN'); return;
+        // They are already registered! Just log them in instantly
+        onLoginSuccess(existingUser);
+        setStep('LOGGED_IN');
+        return;
       }
     } catch {}
 
@@ -133,13 +105,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       email: payload.email,
       picture: payload.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(payload.name)}&background=6C63FF&color=fff`,
     });
+    setAuthMode('google');
     setErrorMsg('');
-    setStep('REG_PASSWORD');
+    setStep('REG_DETAILS');
   };
 
   // ── Google GIS init
   useEffect(() => {
-    if (!isOpen || step !== 'GOOGLE_OAUTH') return;
+    if (!isOpen || step !== 'REGISTER') return;
     const init = () => {
       if (!window.google) return;
       window.google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleGoogleCredential, auto_select: false });
@@ -162,50 +135,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setTimeout(() => { setCaptchaVerifying(false); setCaptchaChecked(true); }, 1100);
   };
 
-  // ── OTP box input handler
-  const handleOtpDigit = (idx: number, val: string) => {
-    if (!/^\d*$/.test(val)) return;
-    
-    // Support copy-paste of full 6 digits
-    if (val.length === 6) {
-      setOtpDigits(val.split(''));
-      setTimeout(() => otpRefs.current[5]?.focus(), 10);
-      return;
-    }
-
-    const next = [...otpDigits];
-    next[idx] = val.slice(-1);
-    setOtpDigits(next);
-    if (val && idx < 5) {
-      setTimeout(() => otpRefs.current[idx + 1]?.focus(), 10);
-    }
-  };
-  const handleOtpKeyDown = (idx: number, e: React.KeyboardEvent) => {
-    if (e.key === 'Backspace' && !otpDigits[idx] && idx > 0) otpRefs.current[idx - 1]?.focus();
-  };
-  const getEnteredOtp = () => otpDigits.join('');
-
-  // ── Send OTP email helper
-  const generateAndSendOtp = async (toEmail: string, toName: string, purpose: 'registration' | 'login') => {
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    setCorrectOtp(code);
-    setIsSendingOtp(true);
-    setErrorMsg('');
-    try {
-      await sendOtpEmail(toEmail, toName, code, purpose);
-      setSuccessMsg(`OTP sent to ${toEmail} ✓`);
-      startCountdown();
-      setOtpDigits(['','','','','','']);
-      setTimeout(() => otpRefs.current[0]?.focus(), 100);
-    } catch (err: any) {
-      setErrorMsg(`Failed to send OTP: ${err?.text || err?.message || 'Unknown error'}`);
-      throw err;
-    } finally {
-      setIsSendingOtp(false);
-    }
-  };
-
-  // ── Login flow
+  // ── Login flow (Instant)
   const handleCustomLogin = async () => {
     if (!email.trim() || !password.trim()) { setErrorMsg('Enter your email and password.'); return; }
     if (!captchaChecked) { setErrorMsg('Please verify you are not a robot.'); return; }
@@ -213,44 +143,40 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     try {
       const user = await fetchUserProfileByEmail(email.trim().toLowerCase());
       if (!user || user.password !== password) { setErrorMsg('Incorrect email or password.'); return; }
-      setLoginUser(user);
-      await generateAndSendOtp(user.email, user.name, 'login');
-      setStep('OTP_VERIFY_LOGIN');
+      onLoginSuccess(user);
+      setStep('LOGGED_IN');
     } catch (err: any) {
       if (!err?.text) setErrorMsg(`Login failed: ${err?.message || 'Unknown error'}`);
     } finally { setIsLoading(false); }
   };
 
-  // ── Register — create password step, then collect details
-  const handleNextToDetails = async () => {
-    if (!registerPassword || registerPassword.length < 6) { setErrorMsg('Password must be at least 6 characters.'); return; }
+  // ── Register flow (Manual Form to Details)
+  const handleManualRegisterNext = () => {
+    if (!registerName.trim() || !registerEmail.trim() || !registerPassword) { setErrorMsg('Please fill all fields.'); return; }
+    if (registerPassword.length < 6) { setErrorMsg('Password must be at least 6 characters.'); return; }
     if (registerPassword !== confirmPassword) { setErrorMsg('Passwords do not match.'); return; }
-    if (!googleUser) return;
+    setAuthMode('manual');
+    setErrorMsg('');
     setStep('REG_DETAILS');
   };
 
-  const handleSendRegisterOtp = async () => {
+  // ── Complete Registration & Save
+  const handleCompleteRegistration = async () => {
     if (!studentType) { setErrorMsg('Please select School or College.'); return; }
-    if (!googleUser) return;
-    setIsLoading(true);
-    try {
-      await generateAndSendOtp(googleUser.email, googleUser.name, 'registration');
-      setStep('OTP_VERIFY_REG');
-    } catch {} finally { setIsLoading(false); }
-  };
-
-  // ── Verify registration OTP & save
-  const handleVerifyAndRegister = async () => {
-    const entered = getEnteredOtp();
-    if (entered !== correctOtp) { setErrorMsg('Incorrect OTP. Please try again.'); return; }
-    if (!googleUser) return;
     setIsLoading(true); setErrorMsg('');
     try {
       const isSchool = studentType === 'school';
+      
+      const uid = authMode === 'google' ? googleUser!.uid : `usr_${Date.now()}`;
+      const name = authMode === 'google' ? googleUser!.name : registerName;
+      const userEmail = authMode === 'google' ? googleUser!.email : registerEmail;
+      const pwd = authMode === 'google' ? '' : registerPassword;
+      const pic = authMode === 'google' ? googleUser!.picture : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6C63FF&color=fff`;
+
       const newUser = {
-        uid: googleUser.uid, id: `usr_${Date.now().toString().slice(-6)}`,
-        name: googleUser.name, email: googleUser.email,
-        password: registerPassword, phone: '',
+        uid, id: `usr_${Date.now().toString().slice(-6)}`,
+        name, email: userEmail,
+        password: pwd, phone: '',
         
         studentType: studentType as 'school' | 'college',
         college: isSchool ? '' : (collegeName || 'Unknown College'),
@@ -268,92 +194,31 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         pendingStudyMateRequests: [],
         createdCommunities: [],
 
-        avatarUrl: googleUser.picture,
+        avatarUrl: pic,
         role: 'student' as const, reputationPoints: 100,
-        badges: ['Verified Student', 'Google Verified'], createdAt: new Date(),
+        badges: ['Verified Student'], createdAt: new Date().toISOString(),
       };
-      globalRegistrationHash.registerUser(googleUser.email, '', newUser);
+      
+      if (authMode === 'google') newUser.badges.push('Google Verified');
+
+      globalRegistrationHash.registerUser(userEmail, '', newUser);
       await saveUserProfile(newUser);
       globalSocialGraph.addStudent(newUser);
       
       const locationInfo = isSchool ? `${newUser.schoolClass} • ${newUser.board}` : `${newUser.college} • ${newUser.department}`;
       globalPlatformTrie.indexItem({ id: newUser.id, title: newUser.name, subtitle: locationInfo, type: 'user', tags: [...newUser.badges, ...(newUser.skills||[])], avatarUrl: newUser.avatarUrl });
+      
       onLoginSuccess(newUser);
       setStep('LOGGED_IN');
     } catch (err: any) { setErrorMsg(`Registration failed: ${err?.message || 'Unknown'}`); }
     finally { setIsLoading(false); }
   };
 
-  // ── Verify login OTP
-  const handleVerifyLoginOtp = () => {
-    if (getEnteredOtp() !== correctOtp) { setErrorMsg('Incorrect OTP. Please try again.'); return; }
-    if (!loginUser) { setStep('SIGN_IN'); return; }
-    onLoginSuccess(loginUser);
-    setStep('LOGGED_IN');
-  };
-
   const stepLabel: Record<Step, string> = {
     SIGN_IN: 'Sign In to Koinexa',
-    GOOGLE_OAUTH: 'Register via Google',
-    REG_PASSWORD: 'Create Password',
+    REGISTER: 'Create an Account',
     REG_DETAILS: 'Setup Student Profile',
-    OTP_VERIFY_REG: 'Verify Email (Registration)',
-    OTP_VERIFY_LOGIN: 'Verify Identity (Login)',
     LOGGED_IN: 'Authenticated successfully',
-  };
-
-  const OtpBoxes = ({ onSubmit }: { onSubmit: () => void }) => {
-    // Automatically submit when all 6 digits are entered
-    useEffect(() => {
-      const entered = getEnteredOtp();
-      if (entered.length === 6 && !entered.includes('')) {
-        const timer = setTimeout(() => onSubmit(), 300);
-        return () => clearTimeout(timer);
-      }
-    }, [otpDigits, onSubmit]);
-
-    return (
-      <div className="space-y-4">
-        {successMsg && (
-          <div className="flex items-center gap-2 text-[11px] text-[#00CFFF] font-bold px-1">
-            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /><span>{successMsg}</span>
-          </div>
-        )}
-        <div className="flex gap-2 justify-center">
-          {otpDigits.map((d, i) => (
-            <input key={i}
-              ref={el => { otpRefs.current[i] = el; }}
-              type="text" inputMode="numeric" maxLength={1} value={d}
-              onChange={e => handleOtpDigit(i, e.target.value)}
-              onKeyDown={e => handleOtpKeyDown(i, e)}
-              onFocus={e => e.target.select()}
-              className="w-11 h-14 text-center text-xl font-black rounded-2xl border-2 bg-[#0D0D0D] text-white outline-none transition-all
-                border-[rgba(99,179,237,0.2)] focus:border-[#00CFFF] focus:shadow-[0_0_0_3px_rgba(108,99,255,0.25)]"
-            />
-          ))}
-        </div>
-        <div className="flex items-center justify-between text-xs px-1">
-          <span className="text-white/40">
-            {countdown > 0 ? `Expires in ${Math.floor(countdown/60)}:${String(countdown%60).padStart(2,'0')}` : 'OTP expired'}
-          </span>
-          {canResend && (
-            <button onClick={() => step === 'OTP_VERIFY_REG'
-              ? generateAndSendOtp(googleUser!.email, googleUser!.name, 'registration')
-              : generateAndSendOtp(loginUser?.email, loginUser?.name, 'login')}
-              disabled={isSendingOtp}
-              className="text-[#00CFFF] font-bold hover:text-[#4169E1] transition-colors">
-              {isSendingOtp ? 'Sending...' : 'Resend OTP'}
-            </button>
-          )}
-        </div>
-        <button onClick={onSubmit} disabled={getEnteredOtp().length < 6 || isLoading}
-          className="w-full py-3.5 rounded-2xl font-black text-sm text-white transition-all
-            bg-gradient-to-r from-[#00CFFF] via-[#9B5DE5] to-[#4169E1] hover:opacity-90
-            shadow-lg shadow-[#00CFFF]/20 disabled:opacity-50 flex items-center justify-center gap-2">
-          {isLoading ? <Loader className="w-4 h-4 animate-spin" /> : <span>Verify & Continue →</span>}
-        </button>
-      </div>
-    );
   };
 
   return (
@@ -377,19 +242,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" /><span>{errorMsg}</span>
             </div>
           )}
+          {successMsg && (
+            <div className="p-3 rounded-2xl bg-[#00CFFF]/10 border border-[#00CFFF]/30 text-[#00CFFF] text-xs flex items-start gap-2">
+              <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" /><span>{successMsg}</span>
+            </div>
+          )}
 
           {/* ── SIGN IN ── */}
           {step === 'SIGN_IN' && (
             <div className="space-y-4">
               <div className="space-y-3">
-                {/* Email — kx-field: flowing gradient border on focus */}
                 <div className="kx-field flex items-center gap-2 px-3.5">
                   <Mail className="w-4 h-4 text-[#00CFFF] shrink-0" />
                   <input type="email" placeholder="Student email address" value={email}
                     onChange={e => setEmail(e.target.value)}
                     className="flex-1 bg-transparent py-3.5 text-sm text-white placeholder:text-white/30 outline-none font-medium" />
                 </div>
-                {/* Password */}
                 <div className="kx-field flex items-center gap-2 px-3.5">
                   <Lock className="w-4 h-4 text-[#00CFFF] shrink-0" />
                   <input type="password" placeholder="Password" value={password}
@@ -399,7 +267,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </div>
               </div>
 
-              {/* CAPTCHA */}
               <div onClick={handleCaptchaClick}
                 className="flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-[rgba(99,179,237,0.12)] hover:border-[#00CFFF]/40 cursor-pointer select-none transition-all">
                 <div className="flex items-center gap-3">
@@ -418,67 +285,59 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
               <button onClick={handleCustomLogin} disabled={isLoading}
                 className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#00CFFF] via-[#9B5DE5] to-[#4169E1] text-white font-black text-sm hover:opacity-90 transition-all shadow-lg shadow-[#00CFFF]/20 flex items-center justify-center gap-2 disabled:opacity-50">
-                {isLoading ? <Loader className="w-4 h-4 animate-spin" /> : <><Send className="w-4 h-4" /><span>Sign In & Send OTP</span></>}
+                {isLoading ? <Loader className="w-4 h-4 animate-spin" /> : <span>Sign In →</span>}
               </button>
 
               <div className="flex items-center gap-3 text-white/20 text-xs">
                 <div className="flex-1 h-px bg-white/8" /><span>OR</span><div className="flex-1 h-px bg-white/8" />
               </div>
 
-              <button onClick={() => { setStep('GOOGLE_OAUTH'); setErrorMsg(''); }}
+              <button onClick={() => { setStep('REGISTER'); setErrorMsg(''); }}
                 className="w-full py-3.5 rounded-2xl bg-white/5 border border-[rgba(108,99,255,0.25)] text-white font-bold text-sm hover:border-[#00CFFF]/60 hover:bg-white/10 transition-all flex items-center justify-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-[#00CFFF]" />
-                <span>New here? Register with Google</span>
+                <span>New here? Create an Account</span>
               </button>
             </div>
           )}
 
-          {/* ── GOOGLE OAUTH ── */}
-          {step === 'GOOGLE_OAUTH' && (
-            <div className="space-y-5 text-center">
-              <p className="text-sm font-bold text-white">Continue with your Google account</p>
-              <p className="text-xs text-white/40">We'll verify your student email via Google, then set your password.</p>
-              <div className="flex justify-center min-h-[48px]">
-                {isGoogleLoading ? <Loader className="w-5 h-5 animate-spin text-white/50" /> : <div ref={googleBtnRef} />}
-              </div>
-              {(!window.google || GOOGLE_CLIENT_ID.includes('YOUR_GOOGLE')) && (
-                <div className="p-3 rounded-2xl bg-[#00CFFF]/10 border border-[#00CFFF]/25 text-xs text-white/60 text-center">
-                  <p className="font-bold text-white mb-1">⚙️ Google Client ID not configured</p>
-                  <code className="block text-[10px] bg-[#0D0D0D] rounded-xl p-2 text-[#4169E1] font-mono">VITE_GOOGLE_CLIENT_ID=xxxx.apps.googleusercontent.com</code>
-                </div>
-              )}
-              <button onClick={() => setStep('SIGN_IN')} className="text-xs text-white/30 hover:text-white/60 underline">← Back to Sign In</button>
-            </div>
-          )}
-
-          {/* ── SET PASSWORD (Register Step 2) ── */}
-          {step === 'REG_PASSWORD' && googleUser && (
+          {/* ── REGISTER ── */}
+          {step === 'REGISTER' && (
             <div className="space-y-4">
-              <div className="flex items-center gap-3 p-3 rounded-2xl bg-[#0D0D0D] border border-[#00CFFF]/30">
-                <img src={googleUser.picture} alt="" className="w-10 h-10 rounded-full border-2 border-[#00CFFF]/40 object-cover" />
-                <div>
-                  <p className="text-sm font-bold text-white">{googleUser.name}</p>
-                  <p className="text-xs text-[#00CFFF] font-medium flex items-center gap-1"><CheckCircle2 className="w-3 h-3" />{googleUser.email}</p>
-                </div>
-              </div>
               <div className="space-y-3">
                 <div className="kx-field flex items-center gap-2 px-3.5">
-                  <Lock className="w-4 h-4 text-[#00CFFF] shrink-0" />
-                  <input type="password" placeholder="Create password (min 6 chars)" value={registerPassword}
+                  <input type="text" placeholder="Full Name" value={registerName}
+                    onChange={e => setRegisterName(e.target.value)}
+                    className="flex-1 bg-transparent py-3.5 text-sm text-white placeholder:text-white/30 outline-none font-medium" />
+                </div>
+                <div className="kx-field flex items-center gap-2 px-3.5">
+                  <input type="email" placeholder="Email Address" value={registerEmail}
+                    onChange={e => setRegisterEmail(e.target.value)}
+                    className="flex-1 bg-transparent py-3.5 text-sm text-white placeholder:text-white/30 outline-none font-medium" />
+                </div>
+                <div className="kx-field flex items-center gap-2 px-3.5">
+                  <input type="password" placeholder="Create password" value={registerPassword}
                     onChange={e => setRegisterPassword(e.target.value)}
                     className="flex-1 bg-transparent py-3.5 text-sm text-white placeholder:text-white/30 outline-none font-medium" />
                 </div>
                 <div className="kx-field flex items-center gap-2 px-3.5">
-                  <Lock className="w-4 h-4 text-[#00CFFF] shrink-0" />
                   <input type="password" placeholder="Confirm password" value={confirmPassword}
                     onChange={e => setConfirmPassword(e.target.value)}
                     className="flex-1 bg-transparent py-3.5 text-sm text-white placeholder:text-white/30 outline-none font-medium" />
                 </div>
               </div>
-              <button onClick={handleNextToDetails}
+              <button onClick={handleManualRegisterNext}
                 className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#00CFFF] via-[#9B5DE5] to-[#4169E1] text-white font-black text-sm hover:opacity-90 transition-all shadow-lg shadow-[#00CFFF]/20 flex items-center justify-center gap-2">
                 <span>Continue to Profile Details →</span>
               </button>
+
+              <div className="flex items-center gap-3 text-white/20 text-xs">
+                <div className="flex-1 h-px bg-white/8" /><span>OR</span><div className="flex-1 h-px bg-white/8" />
+              </div>
+
+              <div className="flex justify-center min-h-[48px]">
+                {isGoogleLoading ? <Loader className="w-5 h-5 animate-spin text-white/50" /> : <div ref={googleBtnRef} />}
+              </div>
+
+              <button onClick={() => setStep('SIGN_IN')} className="w-full mt-2 text-xs text-white/30 hover:text-white/60 underline">← Back to Sign In</button>
             </div>
           )}
 
@@ -554,39 +413,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </div>
               )}
 
-              <button onClick={handleSendRegisterOtp} disabled={isLoading || isSendingOtp || !studentType}
+              <button onClick={handleCompleteRegistration} disabled={isLoading || !studentType}
                 className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#00CFFF] via-[#9B5DE5] to-[#4169E1] text-white font-black text-sm hover:opacity-90 transition-all shadow-lg shadow-[#00CFFF]/20 flex items-center justify-center gap-2 disabled:opacity-50">
-                {isLoading || isSendingOtp ? <Loader className="w-4 h-4 animate-spin" /> : <><Send className="w-4 h-4" /><span>Send Verification OTP</span></>}
+                {isLoading ? <Loader className="w-4 h-4 animate-spin" /> : <><CheckCircle2 className="w-4 h-4" /><span>Complete Registration</span></>}
               </button>
-              <p className="text-center text-xs text-white/30">OTP will be sent to <span className="text-[#4169E1]">{googleUser?.email}</span></p>
-            </div>
-          )}
-
-          {/* ── OTP VERIFY REGISTER ── */}
-          {step === 'OTP_VERIFY_REG' && (
-            <div className="space-y-4">
-              <div className="text-center">
-                <div className="w-14 h-14 rounded-2xl bg-[#00CFFF]/15 border border-[#00CFFF]/30 flex items-center justify-center mx-auto mb-3">
-                  <Mail className="w-7 h-7 text-[#00CFFF]" />
-                </div>
-                <p className="text-sm font-bold text-white">Check your email</p>
-                <p className="text-xs text-white/40 mt-1">OTP sent to <span className="text-[#4169E1]">{googleUser?.email}</span></p>
-              </div>
-              <OtpBoxes onSubmit={handleVerifyAndRegister} />
-            </div>
-          )}
-
-          {/* ── OTP VERIFY LOGIN ── */}
-          {step === 'OTP_VERIFY_LOGIN' && (
-            <div className="space-y-4">
-              <div className="text-center">
-                <div className="w-14 h-14 rounded-2xl bg-[#4169E1]/15 border border-[#4169E1]/30 flex items-center justify-center mx-auto mb-3">
-                  <Mail className="w-7 h-7 text-[#4169E1]" />
-                </div>
-                <p className="text-sm font-bold text-white">Two-Factor Verification</p>
-                <p className="text-xs text-white/40 mt-1">OTP sent to <span className="text-[#4169E1]">{loginUser?.email}</span></p>
-              </div>
-              <OtpBoxes onSubmit={handleVerifyLoginOtp} />
             </div>
           )}
 
@@ -597,8 +427,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <CheckCircle2 className="w-9 h-9 text-[#00CFFF]" />
               </div>
               <div>
-                <h3 className="text-lg font-black text-white">Welcome back, {currentUser?.name || googleUser?.name}! 🎓</h3>
-                <p className="text-xs text-white/40 mt-1">Email OTP verified — secure 2FA login complete.</p>
+                <h3 className="text-lg font-black text-white">Welcome back, {currentUser?.name || googleUser?.name || registerName}! 🎓</h3>
+                <p className="text-xs text-white/40 mt-1">Authenticated securely. You can now enter the app.</p>
               </div>
               <div className="pt-3 border-t border-white/8 flex flex-col gap-2">
                 <button onClick={onClose}
