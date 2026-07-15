@@ -141,12 +141,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     if (!captchaChecked) { setErrorMsg('Please verify you are not a robot.'); return; }
     setIsLoading(true); setErrorMsg('');
     try {
-      const user = await fetchUserProfileByEmail(email.trim().toLowerCase());
+      const fetchPromise = fetchUserProfileByEmail(email.trim().toLowerCase());
+      const timeoutPromise = new Promise<null>((_, reject) => setTimeout(() => reject(new Error('Firestore connection timed out. Please make sure you clicked "Create Database" inside your Firebase Console -> Firestore Database.')), 6000));
+      const user = await Promise.race([fetchPromise, timeoutPromise]);
+      
       if (!user || user.password !== password) { setErrorMsg('Incorrect email or password.'); return; }
       onLoginSuccess(user);
       setStep('LOGGED_IN');
     } catch (err: any) {
-      if (!err?.text) setErrorMsg(`Login failed: ${err?.message || 'Unknown error'}`);
+      setErrorMsg(`Login failed: ${err?.message || 'Unknown error'}`);
     } finally { setIsLoading(false); }
   };
 
@@ -202,7 +205,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       if (authMode === 'google') newUser.badges.push('Google Verified');
 
       globalRegistrationHash.registerUser(userEmail, '', newUser);
-      await saveUserProfile(newUser);
+      
+      try {
+        const savePromise = saveUserProfile(newUser);
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Firestore connection timed out. Please make sure you clicked "Create Database" inside your Firebase Console -> Firestore Database.')), 6000));
+        await Promise.race([savePromise, timeoutPromise]);
+      } catch (dbErr: any) {
+        // Even if Firestore fails, we store locally and log them in so they aren't blocked!
+        console.warn('Firestore save warning:', dbErr);
+        if (dbErr.message.includes('timed out') || dbErr.message.includes('NOT_FOUND')) {
+          setErrorMsg('Warning: Firestore database is not created yet in Firebase Console. Logged in locally for now!');
+        } else {
+          setErrorMsg(`Database Warning: ${dbErr.message}`);
+        }
+      }
+
       globalSocialGraph.addStudent(newUser);
       
       const locationInfo = isSchool ? `${newUser.schoolClass} • ${newUser.board}` : `${newUser.college} • ${newUser.department}`;
