@@ -23,6 +23,8 @@ export async function sendOtpEmail(
       reply_to:  toEmail,
       to_name:   toName,
       otp_code:  otpCode,
+      passcode:  otpCode,      // Added based on user template
+      time:      '15 minutes', // Added based on user template
       purpose:   purpose === 'registration' ? 'Account Registration' : 'Login Verification',
       app_name:  'EduNetwork',
     },
