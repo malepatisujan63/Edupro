@@ -18,6 +18,9 @@ export async function sendOtpEmail(
     TEMPLATE_ID,
     {
       to_email:  toEmail,
+      email:     toEmail,      // Fallback for default templates
+      user_email: toEmail,     // Fallback for default templates
+      reply_to:  toEmail,
       to_name:   toName,
       otp_code:  otpCode,
       purpose:   purpose === 'registration' ? 'Account Registration' : 'Login Verification',
