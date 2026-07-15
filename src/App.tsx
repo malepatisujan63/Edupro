@@ -9,23 +9,19 @@ import { QnAPlatform } from './pages/QnAPlatform';
 import { RealtimeMessaging } from './pages/RealtimeMessaging';
 import { StudentProfile } from './pages/StudentProfile';
 import { preloadPlatformData } from './dsa-engine';
-import { uploadFile, createPost } from './lib/firestoreService';
+import { uploadFile, createPost, backgroundUploadAndAttach, compressImage } from './lib/firestoreService';
 import { AppleTimerExtension } from './components/extensions/AppleTimerExtension';
-import { AppleAIBuddy } from './components/extensions/AppleAIBuddy';
-import { AppleCodeSandbox } from './components/extensions/AppleCodeSandbox';
 import { checkRateLimit } from './utils/rateLimiter';
 import { validateContentSafety, verifyFileMagicBytes } from './utils/safetyFilter';
 import { accountManager } from './models/AccountManager';
 import { type StudentAccount } from './models/StudentAccount';
-import { ShieldCheck, Lock, ArrowRight, CheckCircle2, Bell, Plus, X, Image as ImageIcon, FileText, Send, Video, Trash2, Loader, Bot, Code, Clock, Sparkles } from 'lucide-react';
+import { ShieldCheck, Lock, ArrowRight, CheckCircle2, Bell, Plus, X, Image as ImageIcon, FileText, Send, Video, Trash2, Loader, Clock, Sparkles } from 'lucide-react';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<NavTab>('home');
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isDSAHUDOpen, setIsDSAHUDOpen] = useState(false);
   const [isTimerOpen, setIsTimerOpen] = useState(false);
-  const [isAIBuddyOpen, setIsAIBuddyOpen] = useState(false);
-  const [isCodeSandboxOpen, setIsCodeSandboxOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
   const [postContent, setPostContent] = useState('');
@@ -34,6 +30,7 @@ export const App: React.FC = () => {
   const [attachedMediaType, setAttachedMediaType] = useState<'image' | 'video' | 'pdf' | null>(null);
   const [isPosting, setIsPosting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStatus, setUploadStatus] = useState<{ fileName: string; progress: number; status: 'uploading' | 'completed' } | null>(null);
 
   // Mandatory Login Gate: start as null so user MUST login before opening
   const [currentUser,    setCurrentUser]    = useState<any>(null);
@@ -389,26 +386,14 @@ export const App: React.FC = () => {
                     return;
                   }
 
-                  setIsPosting(true);
-                  setUploadProgress(0);
                   try {
-                    let mediaUrl: string | undefined;
-                    let storagePath: string | undefined;
+                    const localPreview = attachedMediaUrl || undefined;
+                    const fileToUpload = attachedFile;
+                    const mediaTypeToSave = attachedMediaType || undefined;
 
-                    // Upload file to Firebase Storage if attached
-                    if (attachedFile && attachedMediaType) {
-                      const result = await uploadFile(
-                        attachedFile,
-                        currentUser.uid,
-                        (pct) => setUploadProgress(pct)
-                      );
-                      mediaUrl = result.downloadUrl;
-                      storagePath = result.storagePath;
-                    }
-
-                    // Write post to Firestore
-                    await createPost({
-                      title: postContent.trim() || `[${attachedMediaType?.toUpperCase()}] ${attachedFile?.name}`,
+                    // Write post immediately to Firestore (0ms optimistic latency)
+                    const postId = await createPost({
+                      title: postContent.trim() || `[${mediaTypeToSave?.toUpperCase()}] ${fileToUpload?.name || 'Attachment'}`,
                       authorId: currentUser.uid,
                       authorName: currentUser.name || 'Student',
                       authorCollege: currentUser.college || 'Campus',
@@ -416,12 +401,31 @@ export const App: React.FC = () => {
                       upvotes: 0,
                       commentsCount: 0,
                       category: 'General',
-                      type: attachedMediaType === 'video' ? 'post' : 'note',
-                      mediaUrl,
-                      mediaType: attachedMediaType || undefined,
-                      storagePath,
+                      type: mediaTypeToSave === 'video' ? 'post' : 'note',
+                      mediaUrl: localPreview,
+                      mediaType: mediaTypeToSave,
                     });
 
+                    // Launch non-blocking background upload engine + compression if file exists
+                    if (fileToUpload && mediaTypeToSave) {
+                      setUploadStatus({ fileName: fileToUpload.name, progress: 0, status: 'uploading' });
+                      backgroundUploadAndAttach(
+                        fileToUpload,
+                        currentUser.uid,
+                        postId,
+                        'posts',
+                        (pct) => setUploadStatus({ fileName: fileToUpload.name, progress: pct, status: 'uploading' })
+                      ).then(() => {
+                        setUploadStatus({ fileName: fileToUpload.name, progress: 100, status: 'completed' });
+                        setTimeout(() => setUploadStatus(null), 3500);
+                      }).catch((err) => {
+                        console.error('Background cloud attachment error:', err);
+                        alert(`Cloud storage sync failed: ${err.message}`);
+                        setUploadStatus(null);
+                      });
+                    }
+
+                    // Reset modal immediately (0ms block time)
                     setPostContent('');
                     setAttachedFile(null);
                     setAttachedMediaUrl(null);
@@ -430,9 +434,6 @@ export const App: React.FC = () => {
                     setActiveTab('home');
                   } catch (err: any) {
                     alert(`Failed to post: ${err.message}`);
-                  } finally {
-                    setIsPosting(false);
-                    setUploadProgress(0);
                   }
                 }}
                 className="btn-primary text-xs py-2 px-6 font-bold flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-wait"
@@ -466,12 +467,6 @@ export const App: React.FC = () => {
       {/* Study Pomodoro Timer Overlay Modal */}
       <AppleTimerExtension isOpen={isTimerOpen} onClose={() => setIsTimerOpen(false)} />
 
-      {/* visionOS AI Copilot & Study Assistant Modal */}
-      <AppleAIBuddy isOpen={isAIBuddyOpen} onClose={() => setIsAIBuddyOpen(false)} onNavigateTab={setActiveTab} />
-
-      {/* visionOS Interactive Code Sandbox Modal */}
-      <AppleCodeSandbox isOpen={isCodeSandboxOpen} onClose={() => setIsCodeSandboxOpen(false)} currentUser={currentUser} />
-
       {/* Live DSA & Compression Intelligence HUD */}
       <DSAIntelligenceHUD
         isOpen={isDSAHUDOpen}
@@ -479,28 +474,35 @@ export const App: React.FC = () => {
         onOpenFullLab={() => setActiveTab('resources')}
       />
 
-      {/* ── Sleek Floating "Koinexa Study Hub & AI Copilot Dock" ── */}
-      <div className="fixed bottom-24 right-5 sm:right-7 z-40 flex flex-col items-end gap-2.5 pointer-events-auto animate-fadeIn">
-        {/* AI Copilot Button */}
-        <button
-          onClick={() => setIsAIBuddyOpen(true)}
-          className="group flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#0D0D18]/90 hover:bg-[#141424] border border-[#00CFFF]/40 hover:border-[#00CFFF] text-white text-xs font-black shadow-[0_0_25px_rgba(0,207,255,0.25)] hover:shadow-[0_0_35px_rgba(0,207,255,0.5)] transition-all scale-100 hover:scale-105 active:scale-95 backdrop-blur-2xl"
-        >
-          <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#00CFFF] to-[#9B5DE5] flex items-center justify-center text-white shadow-sm group-hover:rotate-12 transition-transform">
-            <Bot className="w-3.5 h-3.5" />
+      {/* ── Sleek Global Background Upload Progress Pill ── */}
+      {uploadStatus && (
+        <div className="fixed top-20 right-5 sm:right-8 z-50 p-3.5 rounded-2xl bg-[#0D0D18]/95 border border-[#00CFFF]/40 shadow-[0_15px_45px_rgba(0,0,0,0.85)] backdrop-blur-2xl flex items-center gap-3 animate-slideDown max-w-sm">
+          <div className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center shrink-0">
+            {uploadStatus.status === 'uploading' ? (
+              <Loader className="w-5 h-5 text-[#00CFFF] animate-spin" />
+            ) : (
+              <CheckCircle2 className="w-5 h-5 text-[#34C759]" />
+            )}
           </div>
-          <span className="bg-gradient-to-r from-white via-cyan-100 to-[#00CFFF] bg-clip-text text-transparent">AI Study Copilot</span>
-        </button>
-
-        {/* Code Sandbox Button */}
-        <button
-          onClick={() => setIsCodeSandboxOpen(true)}
-          className="group flex items-center gap-2 px-4 py-2 rounded-full bg-[#0A0A12]/85 hover:bg-[#121220] border border-white/15 hover:border-[#9B5DE5]/60 text-white/90 hover:text-white text-xs font-bold shadow-xl transition-all scale-100 hover:scale-105 active:scale-95 backdrop-blur-xl"
-        >
-          <Code className="w-4 h-4 text-[#9B5DE5] group-hover:scale-110 transition-transform" />
-          <span>Code Sandbox</span>
-        </button>
-      </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center justify-between gap-2 text-xs font-black text-white">
+              <span className="truncate">{uploadStatus.fileName}</span>
+              <span className="text-[#00CFFF] font-mono shrink-0">{uploadStatus.progress}%</span>
+            </div>
+            <div className="w-full h-1.5 bg-white/10 rounded-full mt-1.5 overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-[#00CFFF] via-[#9B5DE5] to-[#34C759] transition-all duration-300 rounded-full"
+                style={{ width: `${uploadStatus.progress}%` }}
+              />
+            </div>
+            <p className="text-[10px] text-white/50 font-bold mt-1">
+              {uploadStatus.status === 'uploading'
+                ? '⚡ Background Storage Stream ($O(1)$ client thread)...'
+                : '✓ Cloud attachment verified & synced!'}
+            </p>
+          </div>
+        </div>
+      )}
 
     </div>
   );
