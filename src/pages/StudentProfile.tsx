@@ -123,7 +123,16 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
             {profileUser.name.toLowerCase()} <span className="text-white/70 text-sm bg-white/10 px-2 py-0.5 rounded-full border border-white/20">Verified</span>
           </h1>
           <div className="flex items-center gap-4 text-white">
-            <span className="text-xl font-light cursor-pointer hover:text-[#00CFFF] transition-colors drop-shadow-md">@</span>
+            <button 
+              onClick={() => {
+                navigator.clipboard.writeText(`edunetwork.app/${profileUser.name.toLowerCase().replace(/\s/g, '')}`);
+                alert('Profile link copied to clipboard!');
+              }}
+              title="Copy Profile Link"
+              className="text-xl font-light hover:text-[#00CFFF] transition-colors drop-shadow-md active:scale-90"
+            >
+              @
+            </button>
             {isViewingSelf && (
               <button 
                 onClick={() => setIsEditing(!isEditing)}
