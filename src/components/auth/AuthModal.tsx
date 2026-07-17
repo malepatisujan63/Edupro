@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShieldCheck, AlertTriangle, CheckCircle2, Trash2, Loader, Lock, Mail } from 'lucide-react';
 import { globalRegistrationHash, globalPlatformTrie, globalSocialGraph } from '../../dsa-engine';
-import { saveUserProfile, fetchUserProfile, fetchUserProfileByEmail } from '../../lib/firestoreService';
+import { saveUserProfile, fetchUserProfileByEmail } from '../../lib/firestoreService';
 import { hashPassword, verifyPassword } from '../../utils/authHasher';
 
 declare global {
@@ -25,18 +25,11 @@ interface AuthModalProps {
   onDeleteAccount: () => void;
 }
 
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
-
 export const AuthModal: React.FC<AuthModalProps> = ({
   isOpen, onClose, currentUser, onLoginSuccess, onDeleteAccount,
 }) => {
   type Step = 'SIGN_IN' | 'REGISTER' | 'REG_DETAILS' | 'LOGGED_IN';
   const [step, setStep] = useState<Step>('SIGN_IN');
-
-  const [googleUser, setGoogleUser] = useState<{ uid: string; name: string; email: string; picture: string } | null>(null);
-  
-  // Registration Type
-  const [authMode, setAuthMode] = useState<'google' | 'manual' | null>(null);
 
   // Input fields
   const [email,            setEmail]            = useState('');
@@ -60,72 +53,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [errorMsg,           setErrorMsg]           = useState('');
   const [successMsg,         setSuccessMsg]          = useState('');
   const [isLoading,          setIsLoading]          = useState(false);
-  const [isGoogleLoading,    setIsGoogleLoading]    = useState(false);
 
   // CAPTCHA
   const [captchaChecked,    setCaptchaChecked]   = useState(false);
   const [captchaVerifying,  setCaptchaVerifying] = useState(false);
 
-  const googleBtnRef = useRef<HTMLDivElement>(null);
-
   // ── Reset on open
   useEffect(() => {
     if (isOpen) {
       setStep('SIGN_IN'); setErrorMsg(''); setSuccessMsg('');
-      setCaptchaChecked(false); setAuthMode(null);
+      setCaptchaChecked(false);
     }
   }, [isOpen]);
-
-  // ── Parse Google JWT
-  const parseJwt = (token: string) => {
-    try {
-      const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-      return JSON.parse(decodeURIComponent(atob(b64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
-    } catch { return null; }
-  };
-
-  // ── Google Credential Callback
-  const handleGoogleCredential = async (response: { credential: string }) => {
-    setIsGoogleLoading(false);
-    const payload = parseJwt(response.credential);
-    if (!payload) { setErrorMsg('Google sign-in failed. Please try again.'); return; }
-    const uid = payload.sub || payload.email;
-
-    try {
-      const existingUser = await fetchUserProfile(uid);
-      if (existingUser) {
-        // They are already registered! Just log them in instantly
-        onLoginSuccess(existingUser);
-        setStep('LOGGED_IN');
-        return;
-      }
-    } catch {}
-
-    setGoogleUser({
-      uid, name: payload.name || payload.email.split('@')[0],
-      email: payload.email,
-      picture: payload.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(payload.name)}&background=6C63FF&color=fff`,
-    });
-    setAuthMode('google');
-    setErrorMsg('');
-    setStep('REG_DETAILS');
-  };
-
-  // ── Google GIS init
-  useEffect(() => {
-    if (!isOpen || step !== 'REGISTER') return;
-    const init = () => {
-      if (!window.google) return;
-      window.google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleGoogleCredential, auto_select: false });
-      if (googleBtnRef.current) {
-        window.google.accounts.id.renderButton(googleBtnRef.current, { theme: 'filled_black', size: 'large', shape: 'pill', width: 360, text: 'signup_with' });
-      }
-    };
-    window.google ? init() : (() => {
-      const t = setInterval(() => { if (window.google) { clearInterval(t); init(); } }, 200);
-      return () => clearInterval(t);
-    })();
-  }, [isOpen, step]);
 
   if (!isOpen) return null;
 
@@ -180,7 +119,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         setIsLoading(false);
         return;
       }
-      setAuthMode('manual');
       setErrorMsg('');
       setStep('REG_DETAILS');
     } catch (err: any) {
@@ -197,12 +135,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     try {
       const isSchool = studentType === 'school';
       
-      const uid = authMode === 'google' ? googleUser!.uid : `usr_${Date.now()}`;
-      const name = authMode === 'google' ? googleUser!.name : registerName;
-      const userEmail = authMode === 'google' ? googleUser!.email.toLowerCase() : registerEmail.trim().toLowerCase();
-      // Hash the password if manual registration (don't store as plain text)
-      const pwd = authMode === 'google' ? '' : await hashPassword(registerPassword);
-      const pic = authMode === 'google' ? googleUser!.picture : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6C63FF&color=fff`;
+      const uid = `usr_${Date.now()}`;
+      const name = registerName.trim();
+      const userEmail = registerEmail.trim().toLowerCase();
+      // Hash the password (don't store as plain text)
+      const pwd = await hashPassword(registerPassword);
+      const pic = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6C63FF&color=fff`;
 
       const newUser = {
         uid, id: `usr_${Date.now().toString().slice(-6)}`,
@@ -210,7 +148,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         password: pwd, phone: '',
         
         studentType: studentType as 'school' | 'college',
-        college: isSchool ? '' : (collegeName || 'Unknown College'),
+        college: isSchool ? '' : (collegeName || 'Koinexa Campus'),
         department: isSchool ? '' : (department || 'General'),
         semester: isSchool ? 0 : semester,
         
@@ -229,8 +167,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         role: 'student' as const, reputationPoints: 100,
         badges: ['Verified Student'], createdAt: new Date().toISOString(),
       };
-      
-      if (authMode === 'google') newUser.badges.push('Google Verified');
 
       globalRegistrationHash.registerUser(userEmail, '', newUser);
       
@@ -374,15 +310,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <span>Continue to Profile Details →</span>
               </button>
 
-              <div className="flex items-center gap-3 text-white/20 text-xs">
-                <div className="flex-1 h-px bg-white/8" /><span>OR</span><div className="flex-1 h-px bg-white/8" />
-              </div>
-
-              <div className="flex justify-center min-h-[48px]">
-                {isGoogleLoading ? <Loader className="w-5 h-5 animate-spin text-white/50" /> : <div ref={googleBtnRef} />}
-              </div>
-
-              <button onClick={() => setStep('SIGN_IN')} className="w-full mt-2 text-xs text-white/30 hover:text-white/60 underline">← Back to Sign In</button>
+              <button onClick={() => setStep('SIGN_IN')} className="w-full mt-4 text-xs text-white/40 hover:text-[#00CFFF] font-bold transition-all underline text-center block">← Already have an account? Sign In</button>
             </div>
           )}
 
@@ -472,7 +400,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <CheckCircle2 className="w-9 h-9 text-[#00CFFF]" />
               </div>
               <div>
-                <h3 className="text-lg font-black text-white">Welcome back, {currentUser?.name || googleUser?.name || registerName}! 🎓</h3>
+                <h3 className="text-lg font-black text-white">Welcome back, {currentUser?.name || registerName || 'Student'}! 🎓</h3>
                 <p className="text-xs text-white/40 mt-1">Authenticated securely. You can now enter the app.</p>
               </div>
               <div className="pt-3 border-t border-white/8 flex flex-col gap-2">
