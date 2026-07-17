@@ -98,6 +98,20 @@ export interface FirestoreComment {
   createdAt: any;
 }
 
+export interface FirestoreStory {
+  id?: string;
+  authorId: string;
+  authorName: string;
+  authorCollege: string;
+  authorAvatar: string;
+  title: string;
+  content: string;
+  views: number;
+  tag: string;
+  color: string;
+  createdAt: any;
+}
+
 // ─────────────────────────────────────────────
 // USER PROFILE
 // ─────────────────────────────────────────────
@@ -472,5 +486,29 @@ export function subscribeToComments(callback: (comments: FirestoreComment[]) => 
       ...(d.data() as Omit<FirestoreComment, 'id'>),
     }));
     callback(comments);
+  });
+}
+
+// ─────────────────────────────────────────────
+// CAMPUS STORIES & HIGHLIGHTS — Firestore
+// ─────────────────────────────────────────────
+
+export async function createStory(story: Omit<FirestoreStory, 'id' | 'createdAt'>): Promise<string> {
+  const docRef = doc(collection(db, 'stories'));
+  await setDoc(docRef, {
+    ...story,
+    createdAt: serverTimestamp(),
+  });
+  return docRef.id;
+}
+
+export function subscribeToStories(callback: (stories: FirestoreStory[]) => void): () => void {
+  const q = query(collection(db, 'stories'), orderBy('createdAt', 'desc'), limit(30));
+  return onSnapshot(q, (snap) => {
+    const stories: FirestoreStory[] = snap.docs.map((d) => ({
+      id: d.id,
+      ...(d.data() as Omit<FirestoreStory, 'id'>),
+    }));
+    callback(stories);
   });
 }
