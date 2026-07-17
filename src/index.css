@@ -749,17 +749,23 @@ body.light-theme .segmented-glass-group {
 }
 
 /* =============================================================================
-   FLOWING GLOW — reduced intensity for white backgrounds
+   FLOWING GLOW — STRONG & VIVID on white backgrounds
    ============================================================================= */
 body.light-theme .kx-pill-flow:hover,
 body.light-theme .kx-pill-flow:focus,
 body.light-theme .kx-pill-flow.active {
   background:
-    linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.95)) padding-box,
+    linear-gradient(#FFFFFF, #FFFFFF) padding-box,
     linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box !important;
   background-size: 200% 100% !important;
-  box-shadow: 0 0 8px rgba(0,207,255,0.2), 0 0 18px rgba(65,105,225,0.12) !important;
+  border-width: 2px !important;
+  box-shadow:
+    0 0 12px rgba(0,207,255,0.60),
+    0 0 28px rgba(65,105,225,0.45),
+    0 0 50px rgba(155,93,229,0.25),
+    inset 0 0 12px rgba(0,207,255,0.06) !important;
 }
+
 body.light-theme .kx-input-flow:focus,
 body.light-theme .kx-field:focus-within,
 body.light-theme .kx-field-pill:focus-within {
@@ -767,7 +773,25 @@ body.light-theme .kx-field-pill:focus-within {
     linear-gradient(#FFFFFF, #FFFFFF) padding-box,
     linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box !important;
   background-size: 200% 100% !important;
-  box-shadow: 0 0 8px rgba(0,207,255,0.2), 0 0 18px rgba(65,105,225,0.12) !important;
+  border-width: 2px !important;
+  box-shadow:
+    0 0 12px rgba(0,207,255,0.55),
+    0 0 28px rgba(65,105,225,0.40),
+    0 0 50px rgba(155,93,229,0.20),
+    inset 0 0 10px rgba(0,207,255,0.05) !important;
+}
+
+/* Nav dock glow — strong on white */
+body.light-theme .kx-nav-dock {
+  background:
+    linear-gradient(rgba(255,255,255,0.88), rgba(255,255,255,0.88)) padding-box,
+    linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box !important;
+  border-width: 2px !important;
+  box-shadow:
+    0 0 18px rgba(0,207,255,0.50),
+    0 0 40px rgba(65,105,225,0.35),
+    0 0 70px rgba(155,93,229,0.20),
+    0 8px 32px rgba(0,0,0,0.08) !important;
 }
 
 /* =============================================================================
