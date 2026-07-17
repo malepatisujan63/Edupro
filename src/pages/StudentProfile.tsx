@@ -9,6 +9,7 @@ interface StudentProfileProps {
   viewProfileId?: string | null;
   onLogout: () => void;
   onDeleteAccount: () => void;
+  onStartMessage?: (userId: string, userName: string) => void;
 }
 
 export const StudentProfile: React.FC<StudentProfileProps> = ({
@@ -16,6 +17,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
   viewProfileId,
   onLogout,
   onDeleteAccount,
+  onStartMessage,
 }) => {
   const isViewingSelf = !viewProfileId || viewProfileId === (currentUser.uid || currentUser.id);
   const targetId = isViewingSelf ? (currentUser.uid || currentUser.id) : viewProfileId!;
@@ -165,7 +167,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
                <button onClick={handleFollow} className={`flex-1 py-2 rounded-lg font-bold ${isFollowing ? 'bg-[#1A1A1A] text-white' : 'bg-[#4169E1] text-white'}`}>
                  {isFollowing ? 'Following' : 'Follow'}
                </button>
-               <button className="flex-1 py-2 rounded-lg font-bold bg-[#1A1A1A] text-white">Message</button>
+               <button onClick={() => onStartMessage?.(profileUser.uid, profileUser.name)} className="flex-1 py-2 rounded-lg font-bold bg-[#1A1A1A] text-white hover:bg-[#2A2A2A] transition-all">Message</button>
              </div>
           )}
         </div>

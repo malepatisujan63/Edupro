@@ -33,9 +33,9 @@ export const App: React.FC = () => {
   const isPosting = false;
   const [uploadStatus, setUploadStatus] = useState<{ fileName: string; progress: number; status: 'uploading' | 'completed' } | null>(null);
 
-  // Mandatory Login Gate: start as null so user MUST login before opening
   const [currentUser,    setCurrentUser]    = useState<any>(null);
   const [currentAccount, setCurrentAccount] = useState<StudentAccount | null>(null);
+  const [activeDm,       setActiveDm]       = useState<{id: string, name: string} | null>(null);
   const [isInitialized,  setIsInitialized]  = useState(false);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'video' | 'pdf') => {
@@ -205,7 +205,7 @@ export const App: React.FC = () => {
             {activeTab === 'resources' && <ResourceLibrary currentUser={currentUser} account={currentAccount} />}
             {activeTab === 'communities' && <SubjectCommunities currentUser={currentUser} account={currentAccount} />}
             {activeTab === 'qna' && <QnAPlatform currentUser={currentUser} account={currentAccount} />}
-            {activeTab === 'messaging' && <RealtimeMessaging />}
+            {activeTab === 'messaging' && <RealtimeMessaging activeDm={activeDm} />}
             {activeTab === 'profile' && (
               <StudentProfile
                 currentUser={currentUser}
@@ -213,6 +213,10 @@ export const App: React.FC = () => {
                 viewProfileId={viewProfileId}
                 onLogout={handleLogout}
                 onDeleteAccount={handleDeleteAccount}
+                onStartMessage={(id, name) => {
+                  setActiveDm({ id, name });
+                  setActiveTab('messaging');
+                }}
               />
             )}
           </main>

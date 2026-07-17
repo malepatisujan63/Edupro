@@ -23,11 +23,22 @@ interface ChatMessage {
   channel: string;
 }
 
-export const RealtimeMessaging: React.FC = () => {
+interface RealtimeMessagingProps {
+  activeDm?: { id: string, name: string } | null;
+}
+
+export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({ activeDm }) => {
   const [communities, setCommunities] = useState<FirestoreCommunity[]>([]);
-  const channels: string[] = ['Global Network', ...communities.map(c => c.title)];
+  const baseChannels: string[] = ['Global Network', ...communities.map(c => c.title)];
+  const channels = activeDm ? [...baseChannels, activeDm.name] : baseChannels;
   const [activeChannel, setActiveChannel] = useState<string>('Global Network');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+
+  useEffect(() => {
+    if (activeDm) {
+      setActiveChannel(activeDm.name);
+    }
+  }, [activeDm]);
 
   useEffect(() => {
     const unsub = subscribeToCommunities((comms) => setCommunities(comms));
