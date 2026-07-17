@@ -94,6 +94,18 @@ export interface FirestoreStory {
   createdAt: any;
 }
 
+export interface FirestoreMessage {
+  id?: string;
+  channel: string;
+  senderId: string;
+  senderName: string;
+  content?: string;
+  audioBlobUrl?: string;
+  audioDurationSeconds?: number;
+  imageUrl?: string;
+  createdAt: any;
+}
+
 export interface UploadResult {
   downloadUrl: string;
   storagePath: string;
@@ -237,6 +249,20 @@ function rowToStory(row: any): FirestoreStory {
     views: row.views || 0,
     tag: row.tag || 'General',
     color: row.color || '#6C63FF',
+    createdAt: row.created_at,
+  };
+}
+
+function rowToMessage(row: any): FirestoreMessage {
+  return {
+    id: row.id,
+    channel: row.channel,
+    senderId: row.sender_id,
+    senderName: row.sender_name,
+    content: row.content,
+    audioBlobUrl: row.audio_blob_url,
+    audioDurationSeconds: row.audio_duration_seconds,
+    imageUrl: row.image_url,
     createdAt: row.created_at,
   };
 }
@@ -689,3 +715,61 @@ export function subscribeToStories(callback: (stories: FirestoreStory[]) => void
 
   return () => { supabase.removeChannel(channel); };
 }
+
+// ─────────────────────────────────────────────
+// MESSAGES (Realtime Peer-to-Peer)
+// ─────────────────────────────────────────────
+
+export async function sendMessage(msg: Omit<FirestoreMessage, 'id' | 'createdAt'>): Promise<string> {
+  const { data, error } = await supabase
+    .from('messages')
+    .insert({
+      channel: msg.channel,
+      sender_id: msg.senderId,
+      sender_name: msg.senderName,
+      content: msg.content || null,
+      audio_blob_url: msg.audioBlobUrl || null,
+      audio_duration_seconds: msg.audioDurationSeconds || null,
+      image_url: msg.imageUrl || null,
+    })
+    .select('id')
+    .single();
+  if (error) throw new Error(`[Supabase sendMessage] ${error.message}`);
+  return data.id;
+}
+
+export function subscribeToMessages(channelName: string, callback: (messages: FirestoreMessage[]) => void): () => void {
+  const fetchAndEmit = async () => {
+    const { data, error } = await supabase
+      .from('messages')
+      .select('*')
+      .eq('channel', channelName)
+      .order('created_at', { ascending: true })
+      .limit(200);
+    if (error) {
+      console.error('[Supabase subscribeToMessages]', error.message);
+      return;
+    }
+    callback((data || []).map(rowToMessage));
+  };
+
+  fetchAndEmit();
+
+  const sub = supabase
+    .channel(`messages-${channelName}`)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `channel=eq.${channelName}` }, () => fetchAndEmit())
+    .subscribe();
+
+  return () => { supabase.removeChannel(sub); };
+}
+
+export async function deleteMessage(messageId: string, userId: string): Promise<void> {
+  // Ensure the user actually owns the message before deleting it
+  const { error } = await supabase
+    .from('messages')
+    .delete()
+    .eq('id', messageId)
+    .eq('sender_id', userId);
+  if (error) throw new Error(`[Supabase deleteMessage] ${error.message}`);
+}
+

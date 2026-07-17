@@ -8,31 +8,28 @@ import {
   Play,
   Phone,
   Square,
+  Trash2,
 } from 'lucide-react';
-import { subscribeToCommunities, type FirestoreCommunity } from '../lib/supabaseService';
-
-interface ChatMessage {
-  id: string;
-  senderId: string;
-  senderName: string;
-  content?: string;
-  audioBlobUrl?: string;
-  audioDurationSeconds?: number;
-  imageUrl?: string;
-  timestamp: string;
-  channel: string;
-}
+import {
+  subscribeToCommunities,
+  type FirestoreCommunity,
+  type FirestoreMessage,
+  sendMessage,
+  subscribeToMessages,
+  deleteMessage
+} from '../lib/supabaseService';
 
 interface RealtimeMessagingProps {
   activeDm?: { id: string, name: string } | null;
+  currentUser: any;
 }
 
-export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({ activeDm }) => {
+export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({ activeDm, currentUser }) => {
   const [communities, setCommunities] = useState<FirestoreCommunity[]>([]);
   const baseChannels: string[] = ['Global Network', ...communities.map(c => c.title)];
   const channels = activeDm ? [...baseChannels, activeDm.name] : baseChannels;
   const [activeChannel, setActiveChannel] = useState<string>('Global Network');
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<FirestoreMessage[]>([]);
 
   useEffect(() => {
     if (activeDm) {
@@ -44,6 +41,13 @@ export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({ activeDm }
     const unsub = subscribeToCommunities((comms) => setCommunities(comms));
     return () => unsub();
   }, []);
+
+  useEffect(() => {
+    const unsub = subscribeToMessages(activeChannel, (newMessages) => {
+      setMessages(newMessages);
+    });
+    return () => unsub();
+  }, [activeChannel]);
 
   const [inputMsg, setInputMsg] = useState('');
   const [isRecordingAudio, setIsRecordingAudio] = useState(false);
@@ -104,47 +108,46 @@ export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({ activeDm }
     }
   };
 
-  const sendVoiceNoteMessage = (audioUrl: string, durationSec: number) => {
-    const newMsg: ChatMessage = {
-      id: `msg_${Date.now()}`,
-      senderId: 'usr_1',
-      senderName: 'You',
-      audioBlobUrl: audioUrl,
-      audioDurationSeconds: durationSec,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      channel: activeChannel,
-    };
-    setMessages((prev) => [...prev, newMsg]);
-  };
-
-  const handleSendMessage = () => {
-    if (!inputMsg.trim()) return;
-    const newMsg: ChatMessage = {
-      id: `msg_${Date.now()}`,
-      senderId: 'usr_1',
-      senderName: 'You',
-      content: inputMsg,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      channel: activeChannel,
-    };
-    setMessages((prev) => [...prev, newMsg]);
-    setInputMsg('');
-
-    // Simulate a reply
-    setTimeout(() => {
-      const reply: ChatMessage = {
-        id: `msg_${Date.now() + 1}`,
-        senderId: 'usr_peer',
-        senderName: activeChannel,
-        content: `Thanks for sharing in ${activeChannel}!`,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+  const sendVoiceNoteMessage = async (audioUrl: string, durationSec: number) => {
+    try {
+      await sendMessage({
         channel: activeChannel,
-      };
-      setMessages((prev) => [...prev, reply]);
-    }, 1500);
+        senderId: currentUser.uid,
+        senderName: currentUser.name,
+        audioBlobUrl: audioUrl,
+        audioDurationSeconds: durationSec,
+      });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const filteredMessages = messages.filter((m) => m.channel === activeChannel);
+  const handleSendMessage = async () => {
+    if (!inputMsg.trim()) return;
+    const content = inputMsg;
+    setInputMsg('');
+    try {
+      await sendMessage({
+        channel: activeChannel,
+        senderId: currentUser.uid,
+        senderName: currentUser.name,
+        content,
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteMessage = async (messageId: string) => {
+    if (!messageId) return;
+    try {
+      await deleteMessage(messageId, currentUser.uid);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const filteredMessages = messages; // Already filtered by activeChannel via DB subscription
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6 pb-32 grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -252,15 +255,31 @@ export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({ activeDm }
         {/* Chat Messages Log (iMessage Grouping & Spring-In Bubbles) */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-[#000000]">
           {filteredMessages.map((msg) => {
-            const isMe = msg.senderId === 'usr_1';
+            const isMe = msg.senderId === currentUser?.uid;
+            // Format timestamp
+            let timeString = '';
+            if (msg.createdAt) {
+              const d = new Date(msg.createdAt);
+              timeString = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
             return (
-              <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} animate-springIn`}>
+              <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} animate-springIn group`}>
                 <div className="flex items-center gap-2 mb-1 px-2">
                   <span className="text-xs font-semibold text-white/80">{msg.senderName}</span>
-                  <span className="text-[10px] text-white/50 font-mono">{msg.timestamp}</span>
+                  <span className="text-[10px] text-white/50 font-mono">{timeString}</span>
                 </div>
 
-                <div className={isMe ? 'bg-[#00CFFF] text-white p-3.5 rounded-2xl rounded-br-sm shadow-md max-w-md' : 'bg-[#0D0D0D] text-white p-3.5 rounded-2xl rounded-bl-sm border border-white/15 shadow-md max-w-md'}>
+                <div className="flex items-center gap-2">
+                  {isMe && (
+                    <button 
+                      onClick={() => msg.id && handleDeleteMessage(msg.id)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-white/10 rounded-full"
+                      title="Delete message"
+                    >
+                      <Trash2 className="w-4 h-4 text-red-400" />
+                    </button>
+                  )}
+                  <div className={isMe ? 'bg-[#00CFFF] text-white p-3.5 rounded-2xl rounded-br-sm shadow-md max-w-md' : 'bg-[#0D0D0D] text-white p-3.5 rounded-2xl rounded-bl-sm border border-white/15 shadow-md max-w-md'}>
                   {/* Text message */}
                   {msg.content && <p className="text-sm leading-relaxed font-normal">{msg.content}</p>}
 
@@ -308,6 +327,7 @@ export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({ activeDm }
                   {msg.imageUrl && (
                     <img src={msg.imageUrl} alt="chat attachment" className="rounded-[18px] mt-2 max-h-60 object-cover border border-white/20 shadow-sm" />
                   )}
+                </div>
                 </div>
               </div>
             );

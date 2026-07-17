@@ -206,7 +206,7 @@ export const App: React.FC = () => {
             {activeTab === 'resources' && <ResourceLibrary currentUser={currentUser} account={currentAccount} />}
             {activeTab === 'communities' && <SubjectCommunities currentUser={currentUser} account={currentAccount} />}
             {activeTab === 'qna' && <QnAPlatform currentUser={currentUser} account={currentAccount} />}
-            {activeTab === 'messaging' && <RealtimeMessaging activeDm={activeDm} />}
+            {activeTab === 'messaging' && <RealtimeMessaging activeDm={activeDm} currentUser={currentUser} />}
             {activeTab === 'profile' && (
               <StudentProfile
                 currentUser={currentUser}
