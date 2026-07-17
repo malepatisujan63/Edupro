@@ -53,16 +53,13 @@ export const IOSFloatingNav: React.FC<IOSFloatingNavProps> = ({
 
   return (
     <>
-      {/* Top App Brand Floating Badge (Official EduNetwork Logo + GOATED Edition Pill) */}
-      <div className="fixed top-3 left-4 sm:left-6 z-40 pointer-events-auto flex items-center gap-3">
+      {/* Top App Brand Floating Badge (Koinexa Banner Picture) */}
+      <div className="fixed top-3 left-4 sm:left-6 z-40 pointer-events-auto flex items-center">
         <img
-          src="/logo.png"
-          alt="EduNetwork"
-          className="h-14 sm:h-16 w-auto object-contain transition-transform hover:scale-105 drop-shadow-[0_4px_16px_rgba(0,0,0,0.85)]"
+          src="/koinexa-banner.png"
+          alt="Koinexa"
+          className="h-10 sm:h-12 md:h-14 w-auto object-contain transition-transform hover:scale-105 drop-shadow-[0_4px_16px_rgba(0,0,0,0.85)]"
         />
-        <span className="hidden md:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-gradient-to-r from-[#00CFFF]/25 via-[#9B5DE5]/25 to-[#4169E1]/25 border border-[#00CFFF]/50 text-[#00CFFF] shadow-lg shadow-[#00CFFF]/20 backdrop-blur-md">
-          <span className="animate-bounce">👑</span> Koinexa GOATED OS
-        </span>
       </div>
 
       {/* iOS 18 Floating Liquid Glass Pill Navigation Dock (No Scroll Bar, Minimal Icons Only, High Transparency) */}
