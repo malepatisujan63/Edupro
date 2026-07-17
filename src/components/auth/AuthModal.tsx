@@ -75,7 +75,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setTimeout(() => { setCaptchaVerifying(false); setCaptchaChecked(true); }, 1100);
   };
 
-  // ── Login flow (Instant Database Lookup + Hashed Password Verification)
+  // ── Login flow (Instant Database Lookup + Password Verification)
   const handleCustomLogin = async () => {
     if (!email.trim() || !password.trim()) { setErrorMsg('Enter your email and password.'); return; }
     if (!captchaChecked) { setErrorMsg('Please verify you are not a robot.'); return; }
@@ -90,7 +90,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         return;
       }
 
-      // Compare entered plaintext with stored hashed password
+      // Compare entered plaintext with stored password
       const isPasswordValid = await verifyPassword(password, user.password);
       if (!isPasswordValid) {
         setErrorMsg('Invalid email or password.');
@@ -128,7 +128,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  // ── Complete Registration & Save (Store User with Hashed Password)
+  // ── Complete Registration & Save (Store User with Password)
   const handleCompleteRegistration = async () => {
     if (!studentType) { setErrorMsg('Please select School or College.'); return; }
     setIsLoading(true); setErrorMsg('');
@@ -138,7 +138,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       const uid = `usr_${Date.now()}`;
       const name = registerName.trim();
       const userEmail = registerEmail.trim().toLowerCase();
-      // Hash the password (don't store as plain text)
+      // Store password
       const pwd = await hashPassword(registerPassword);
       const pic = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6C63FF&color=fff`;
 

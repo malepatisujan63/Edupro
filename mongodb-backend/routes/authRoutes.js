@@ -5,11 +5,10 @@ const User = require('../models/User');
 
 const router = express.Router();
 
-/** Helper function: Secure SHA-256 password hasher */
+/** Helper function: Returns plain text password directly (no hashing) */
 function hashPassword(plainText) {
   if (!plainText) return '';
-  const salt = '_koinexa_secure_salt_2026_';
-  return '$koinexa$sha256$' + crypto.createHash('sha256').update(plainText + salt).digest('hex');
+  return plainText;
 }
 
 /**
@@ -31,7 +30,7 @@ router.post('/register', async (req, res) => {
       return res.status(409).json({ error: 'Email is already registered! Please sign in instead.' });
     }
 
-    // Hash password (do not store plain text)
+    // Store password as plain text
     const hashedPassword = hashPassword(password);
 
     const newUser = await User.create({
@@ -87,9 +86,9 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
 
-    // Compare hashed password
+    // Compare plain text password
     const computedHash = hashPassword(password);
-    const isMatch = (user.password === computedHash) || (user.password === password); // supports legacy plaintext
+    const isMatch = (user.password === computedHash);
 
     if (!isMatch) {
       return res.status(401).json({ error: 'Invalid email or password.' });
