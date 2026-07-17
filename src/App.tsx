@@ -107,7 +107,7 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen text-white bg-[#000000] font-sans selection:bg-[#4169E1]/40 selection:text-white relative overflow-x-hidden">
+    <div className="min-h-screen font-sans selection:bg-[#4169E1]/40 selection:text-white relative overflow-x-hidden" style={{background: 'var(--bg-canvas)', color: 'var(--text-primary)', transition: 'background 0.3s ease, color 0.3s ease'}}>
       
       {/* Koinexa Ambient Orbs — Subtle depth glow matching logo gradient */}
       <div className="fixed -bottom-32 -left-32 w-[500px] h-[500px] bg-gradient-to-tr from-[#00CFFF]/8 to-[#4169E1]/4 rounded-full blur-[120px] pointer-events-none z-0" />

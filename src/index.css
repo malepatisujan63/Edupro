@@ -653,32 +653,129 @@
   .no-border { border: none !important; }
 }
 
-/* ════════════════════════════════════════════════════════════════════════════
-   LIGHT THEME OVERRIDES (GLOBAL INVERSION)
-   ════════════════════════════════════════════════════════════════════════════ */
-/* NOTE: Most light-theme changes now happen via CSS variable overrides in :root.
-   The variables --bg-canvas, --text-primary, etc. are overridden in body.light-theme
-   above. Only Tailwind hardcoded utility classes need individual overrides below. */
+/* =============================================================================
+   LIGHT THEME OVERRIDES
+   ============================================================================= */
 
+/* Tailwind background overrides */
 body.light-theme .bg-\[\#000000\], body.light-theme .bg-black { background-color: var(--bg-canvas) !important; }
-body.light-theme .bg-\[\#111111\], body.light-theme .bg-\[\#0A0A0A\], body.light-theme .bg-\[\#1A1A1A\], body.light-theme .bg-\[\#05050A\], body.light-theme .bg-\[\#0D0D0D\] { background-color: var(--bg-card) !important; }
-body.light-theme .text-white { color: var(--text-primary) !important; }
-body.light-theme .text-white\/90 { color: var(--text-secondary) !important; }
-body.light-theme .text-white\/80 { color: var(--text-secondary) !important; }
-body.light-theme .text-white\/70 { color: var(--text-secondary) !important; }
-body.light-theme .text-white\/60 { color: var(--text-muted) !important; }
-body.light-theme .text-white\/50 { color: var(--text-muted) !important; }
-body.light-theme .text-white\/40 { color: var(--text-faint) !important; }
-body.light-theme .text-white\/30 { color: var(--text-faint) !important; }
-body.light-theme .border-white\/5 { border-color: var(--border-subtle) !important; }
-body.light-theme .border-white\/10 { border-color: var(--border-mid) !important; }
+body.light-theme .bg-\[\#111111\], body.light-theme .bg-\[\#0A0A0A\],
+body.light-theme .bg-\[\#1A1A1A\], body.light-theme .bg-\[\#05050A\],
+body.light-theme .bg-\[\#0D0D0D\], body.light-theme .bg-\[\#111\],
+body.light-theme .bg-\[\#222\], body.light-theme .bg-\[\#2A2A2A\] {
+  background-color: var(--bg-card) !important;
+}
+
+/* Tailwind text overrides */
+body.light-theme .text-white           { color: var(--text-primary)   !important; }
+body.light-theme .text-white\/90       { color: var(--text-secondary) !important; }
+body.light-theme .text-white\/80       { color: var(--text-secondary) !important; }
+body.light-theme .text-white\/70       { color: var(--text-secondary) !important; }
+body.light-theme .text-white\/60       { color: var(--text-muted)     !important; }
+body.light-theme .text-white\/50       { color: var(--text-muted)     !important; }
+body.light-theme .text-white\/40       { color: var(--text-faint)     !important; }
+body.light-theme .text-white\/30       { color: var(--text-faint)     !important; }
+
+/* Tailwind border overrides */
+body.light-theme .border-white\/5  { border-color: var(--border-subtle) !important; }
+body.light-theme .border-white\/10 { border-color: var(--border-mid)    !important; }
 body.light-theme .border-white\/20 { border-color: var(--border-strong) !important; }
 body.light-theme .border-white\/30 { border-color: var(--border-strong) !important; }
+body.light-theme .border-white\/40 { border-color: var(--border-strong) !important; }
 
-/* Koinexa logo */
+/* Hover states */
+body.light-theme .hover\:bg-\[\#111111\]:hover,
+body.light-theme .hover\:bg-\[\#0D0D0D\]:hover,
+body.light-theme .hover\:bg-\[\#2A2A2A\]:hover { background-color: var(--bg-elevated) !important; }
+
+/* Placeholders */
+body.light-theme input::placeholder,
+body.light-theme textarea::placeholder { color: var(--input-placeholder) !important; }
+
+/* =============================================================================
+   MODAL BACKDROPS — dark black overlay becomes soft translucent in light mode
+   ============================================================================= */
+body.light-theme .bg-black\/80,
+body.light-theme .bg-black\/70,
+body.light-theme .bg-black\/60 {
+  background-color: rgba(15, 23, 42, 0.3) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+}
+
+/* =============================================================================
+   NAVIGATION DOCK — glossy white glass in light mode with flowing border
+   ============================================================================= */
+body.light-theme .kx-nav-dock {
+  background:
+    linear-gradient(rgba(255,255,255,0.88), rgba(255,255,255,0.88)) padding-box,
+    linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box !important;
+  box-shadow:
+    0 0 12px rgba(0,207,255,0.18),
+    0 8px 32px rgba(0,0,0,0.08),
+    inset 0 1px 0 rgba(255,255,255,1) !important;
+}
+body.light-theme .kx-nav-dock button { color: rgba(15,23,42,0.6) !important; }
+body.light-theme .kx-nav-dock button:hover { color: #0F172A !important; background: rgba(65,105,225,0.08) !important; }
+
+/* =============================================================================
+   TOP-RIGHT CAPSULE — white glass in light mode
+   ============================================================================= */
+body.light-theme .kx-capsule {
+  background:
+    linear-gradient(rgba(255,255,255,0.92), rgba(255,255,255,0.92)) padding-box,
+    linear-gradient(135deg, rgba(0,207,255,0.4), rgba(65,105,225,0.4), rgba(155,93,229,0.4)) border-box !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
+}
+
+/* =============================================================================
+   GLASS CARDS — white-based glass instead of black glass
+   ============================================================================= */
+body.light-theme .glass-card, body.light-theme .glass-panel {
+  background: rgba(255,255,255,0.78) !important;
+  box-shadow:
+    0 0 0 1px rgba(65,105,225,0.12),
+    0 8px 32px rgba(0,0,0,0.06),
+    inset 0 1px 0 rgba(255,255,255,1) !important;
+}
+body.light-theme .glass-chip {
+  background: rgba(255,255,255,0.85) !important;
+  border-color: rgba(65,105,225,0.12) !important;
+}
+body.light-theme .segmented-glass-group {
+  background: rgba(255,255,255,0.88) !important;
+  box-shadow:
+    0 0 0 1px rgba(65,105,225,0.12),
+    0 4px 16px rgba(0,0,0,0.06) !important;
+}
+
+/* =============================================================================
+   FLOWING GLOW — reduced intensity for white backgrounds
+   ============================================================================= */
+body.light-theme .kx-pill-flow:hover,
+body.light-theme .kx-pill-flow:focus,
+body.light-theme .kx-pill-flow.active {
+  background:
+    linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.95)) padding-box,
+    linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box !important;
+  background-size: 200% 100% !important;
+  box-shadow: 0 0 8px rgba(0,207,255,0.2), 0 0 18px rgba(65,105,225,0.12) !important;
+}
+body.light-theme .kx-input-flow:focus,
+body.light-theme .kx-field:focus-within,
+body.light-theme .kx-field-pill:focus-within {
+  background:
+    linear-gradient(#FFFFFF, #FFFFFF) padding-box,
+    linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box !important;
+  background-size: 200% 100% !important;
+  box-shadow: 0 0 8px rgba(0,207,255,0.2), 0 0 18px rgba(65,105,225,0.12) !important;
+}
+
+/* =============================================================================
+   KOINEXA LOGO — darken it so it shows on white backgrounds
+   ============================================================================= */
 body.light-theme img[alt="Koinexa"] {
-  background-color: #FFFFFF !important;
-  border-radius: 12px;
-  padding: 4px;
-  filter: invert(1);
+  filter: brightness(0) !important;
+  background: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
 }

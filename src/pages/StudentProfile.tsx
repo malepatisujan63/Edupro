@@ -115,7 +115,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
   const followersCount = profileUser.studyMates?.length || 0;
 
   return (
-    <div className="max-w-[1000px] mx-auto min-h-screen bg-[#000000] pb-32 text-white font-sans">
+    <div className="max-w-[1000px] mx-auto min-h-screen pb-32 font-sans" style={{background: 'var(--bg-canvas)', color: 'var(--text-primary)', transition: 'background 0.3s ease, color 0.3s ease'}}>
       
       {/* ── COVER BANNER WITH FLOWING GLOW ── */}
       <div className="relative w-full h-48 sm:h-64 rounded-b-[40px] overflow-hidden bg-[#0A0A0A] border-b border-white/10 shadow-[0_10px_50px_rgba(65,105,225,0.15)] group">
