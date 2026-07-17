@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ShieldCheck, AlertTriangle, CheckCircle2, Trash2, Loader, Lock, Mail } from 'lucide-react';
 import { globalRegistrationHash, globalPlatformTrie, globalSocialGraph } from '../../dsa-engine';
 import { saveUserProfile, fetchUserProfile, fetchUserProfileByEmail } from '../../lib/firestoreService';
+import { hashPassword, verifyPassword } from '../../utils/authHasher';
 
 declare global {
   interface Window {
@@ -135,7 +136,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setTimeout(() => { setCaptchaVerifying(false); setCaptchaChecked(true); }, 1100);
   };
 
-  // ── Login flow (Instant)
+  // ── Login flow (Instant Database Lookup + Hashed Password Verification)
   const handleCustomLogin = async () => {
     if (!email.trim() || !password.trim()) { setErrorMsg('Enter your email and password.'); return; }
     if (!captchaChecked) { setErrorMsg('Please verify you are not a robot.'); return; }
@@ -145,7 +146,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       const timeoutPromise = new Promise<null>((_, reject) => setTimeout(() => reject(new Error('Firestore connection timed out. Please make sure you clicked "Create Database" inside your Firebase Console -> Firestore Database.')), 6000));
       const user = await Promise.race([fetchPromise, timeoutPromise]);
       
-      if (!user || user.password !== password) { setErrorMsg('Incorrect email or password.'); return; }
+      if (!user) {
+        setErrorMsg('Invalid email or password.');
+        return;
+      }
+
+      // Compare entered plaintext with stored hashed password
+      const isPasswordValid = await verifyPassword(password, user.password);
+      if (!isPasswordValid) {
+        setErrorMsg('Invalid email or password.');
+        return;
+      }
+
       onLoginSuccess(user);
       setStep('LOGGED_IN');
     } catch (err: any) {
@@ -153,17 +165,32 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     } finally { setIsLoading(false); }
   };
 
-  // ── Register flow (Manual Form to Details)
-  const handleManualRegisterNext = () => {
+  // ── Register flow (Manual Form & Duplicate Email Check)
+  const handleManualRegisterNext = async () => {
     if (!registerName.trim() || !registerEmail.trim() || !registerPassword) { setErrorMsg('Please fill all fields.'); return; }
     if (registerPassword.length < 6) { setErrorMsg('Password must be at least 6 characters.'); return; }
     if (registerPassword !== confirmPassword) { setErrorMsg('Passwords do not match.'); return; }
-    setAuthMode('manual');
-    setErrorMsg('');
-    setStep('REG_DETAILS');
+    
+    setIsLoading(true); setErrorMsg('');
+    try {
+      // Backend checks if the email already exists
+      const existingUser = await fetchUserProfileByEmail(registerEmail.trim().toLowerCase());
+      if (existingUser) {
+        setErrorMsg('Email is already registered! Please sign in instead.');
+        setIsLoading(false);
+        return;
+      }
+      setAuthMode('manual');
+      setErrorMsg('');
+      setStep('REG_DETAILS');
+    } catch (err: any) {
+      setErrorMsg(`Error checking email: ${err.message}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // ── Complete Registration & Save
+  // ── Complete Registration & Save (Store User with Hashed Password)
   const handleCompleteRegistration = async () => {
     if (!studentType) { setErrorMsg('Please select School or College.'); return; }
     setIsLoading(true); setErrorMsg('');
@@ -172,8 +199,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       
       const uid = authMode === 'google' ? googleUser!.uid : `usr_${Date.now()}`;
       const name = authMode === 'google' ? googleUser!.name : registerName;
-      const userEmail = authMode === 'google' ? googleUser!.email : registerEmail;
-      const pwd = authMode === 'google' ? '' : registerPassword;
+      const userEmail = authMode === 'google' ? googleUser!.email.toLowerCase() : registerEmail.trim().toLowerCase();
+      // Hash the password if manual registration (don't store as plain text)
+      const pwd = authMode === 'google' ? '' : await hashPassword(registerPassword);
       const pic = authMode === 'google' ? googleUser!.picture : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6C63FF&color=fff`;
 
       const newUser = {
