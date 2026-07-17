@@ -272,42 +272,13 @@ export const QnAPlatform: React.FC<{ currentUser?: any }> = ({ currentUser }) =>
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-4 space-y-6 pb-36">
+    <div className="max-w-2xl mx-auto px-4 py-4 space-y-8 pb-36">
       
-      {/* ── GOATED AI Solution Spotlight & Verified Mentor Hub Banner ── */}
-      <div className="kx-card p-4 rounded-3xl border border-[#00CFFF]/40 bg-gradient-to-r from-[#00CFFF]/15 via-[#9B5DE5]/15 to-[#4169E1]/15 space-y-3 shadow-2xl">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-[#00CFFF] animate-spin" style={{ animationDuration: '6s' }} />
-            <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-white">
-              Koinexa AI Solution & Verified Campus Mentor Spotlight
-            </h3>
-          </div>
-          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-gradient-to-r from-[#00CFFF] to-[#9B5DE5] text-white shadow-md uppercase">
-            ⚡ 100% Response Rate
-          </span>
-        </div>
-
-        <p className="text-xs text-white/80 leading-relaxed">
-          Stuck on a tricky <span className="text-[#00CFFF] font-bold">Dynamic Programming</span> recurrence, <span className="text-[#9B5DE5] font-bold">OS Mutex Lock</span> deadlock, or <span className="text-[#4169E1] font-bold">React useEffect</span> bug? Ask below and get instant verified solutions from top peers & AI tutors in under 90 seconds!
-        </p>
-
-        <div className="flex flex-wrap items-center gap-2 pt-1">
-          <span className="text-[10px] text-white/50 font-bold">Top Solvers Online:</span>
-          {['Aditya V. (IIT-B)', 'Prof. Rajesh K.', 'Koinexa AI Tutor V4', 'Srilakshmi M.'].map((mentor, i) => (
-            <span key={i} className="px-2.5 py-1 rounded-xl bg-slate-900 border border-white/10 text-[10px] font-black text-emerald-300 flex items-center gap-1 shadow-inner">
-              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-              {mentor}
-            </span>
-          ))}
-        </div>
-      </div>
-
       {/* Doubts Head & Ask Button */}
       <div className="flex items-center justify-between px-2">
         <h1 className="text-xl sm:text-2xl font-extrabold text-white flex items-center gap-2">
           <HelpCircle className="w-6 h-6 text-[#00CFFF]" />
-          <span>Koinexa Doubt Q&A</span>
+          <span>Doubts</span>
         </h1>
 
         <button

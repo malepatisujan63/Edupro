@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { Heart, MessageCircle, Share2, Bookmark, BookmarkCheck, FileText, Code, Zap, Flame, ExternalLink, Play, UserPlus } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Bookmark, BookmarkCheck, FileText, Code, Zap, Flame, ExternalLink, Play, UserPlus, Image as ImageIcon, Video, Send, Loader, Trash2 } from 'lucide-react';
 import {
   subscribeToPosts, likePost, unlikePost,
-  fetchLikedPostIds, sendStudyMateRequest, subscribeToComments, addComment, subscribeToStories, createStory, type FirestorePost, type FirestoreComment, type FirestoreStory,
+  fetchLikedPostIds, sendStudyMateRequest, subscribeToComments, addComment, subscribeToStories, createStory, createPost, backgroundUploadAndAttach, type FirestorePost, type FirestoreComment, type FirestoreStory,
 } from '../lib/firestoreService';
 import { checkRateLimit } from '../utils/rateLimiter';
 import { type StudentAccount } from '../models/StudentAccount';
@@ -182,6 +182,33 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ currentUser, account }) => {
   const [storyEmojis,      setStoryEmojis]      = useState<{ id: number; emoji: string; x: number }[]>([]);
   const [isPulseOpen,      setIsPulseOpen]      = useState(false);
   const [storiesList,      setStoriesList]      = useState<FirestoreStory[]>([]);
+
+  // ── Inline Social Media Photo / Video Post Creation State
+  const [postContent, setPostContent] = useState('');
+  const [attachedFile, setAttachedFile] = useState<File | null>(null);
+  const [attachedMediaUrl, setAttachedMediaUrl] = useState<string | null>(null);
+  const [attachedMediaType, setAttachedMediaType] = useState<'image' | 'video' | 'pdf' | null>(null);
+  const [isPosting, setIsPosting] = useState(false);
+
+  const handleInlineFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'video' | 'pdf') => {
+    const files = e.target.files;
+    if (files && files[0]) {
+      const file = files[0];
+      setAttachedFile(file);
+      setAttachedMediaType(type);
+      if (type === 'image' || type === 'video') {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (event.target?.result) {
+            setAttachedMediaUrl(event.target.result as string);
+          }
+        };
+        reader.readAsDataURL(file);
+      } else {
+        setAttachedMediaUrl(file.name);
+      }
+    }
+  };
 
   const loaderRef = useRef<HTMLDivElement>(null);
 
@@ -448,6 +475,165 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ currentUser, account }) => {
               <p className="text-sm font-black text-emerald-400 mt-1">Rohan K. & Ananya S.</p>
               <p className="text-[11px] text-white/60 mt-0.5">+420 Rep generated • 28 study notes upvoted by peers</p>
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── Direct Instagram / Social Media Photo & Video Upload Box ── */}
+      <div className="kx-card p-4 sm:p-5 rounded-3xl border border-white/15 bg-gradient-to-b from-[#0D0D14] to-[#0A0A0F] shadow-2xl space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-white/10">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#00CFFF] to-[#9B5DE5] flex items-center justify-center text-white text-xs font-black shadow-md">
+              {currentUser?.name ? currentUser.name[0]?.toUpperCase() : 'S'}
+            </div>
+            <div>
+              <h3 className="text-sm font-black text-white flex items-center gap-1.5">
+                <span>Create Post / Share Photo & Video</span>
+              </h3>
+              <p className="text-[10px] text-white/50">Instant Broadcast · Everyone on Campus Can See</p>
+            </div>
+          </div>
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#00CFFF]/20 text-[#00CFFF] border border-[#00CFFF]/30">
+            Social Media Feed
+          </span>
+        </div>
+
+        <div className="kx-field">
+          <textarea
+            rows={3}
+            placeholder="What's happening on campus today? Share a photo, video, study sheet, or moment with everyone..."
+            value={postContent}
+            onChange={(e) => setPostContent(e.target.value)}
+            className="w-full bg-transparent p-3 text-sm text-white placeholder:text-white/35 outline-none resize-none font-medium"
+          />
+        </div>
+
+        {/* Media Attach Pill Buttons */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="cursor-pointer px-3.5 py-2 rounded-full bg-[#00CFFF]/15 border border-[#00CFFF]/35 hover:bg-[#00CFFF]/25 text-xs text-[#00CFFF] font-black flex items-center gap-1.5 transition-all shadow-sm active:scale-95">
+              <ImageIcon className="w-4 h-4" />
+              <span>Photo</span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleInlineFileChange(e, 'image')}
+                className="hidden"
+              />
+            </label>
+
+            <label className="cursor-pointer px-3.5 py-2 rounded-full bg-[#34C759]/15 border border-[#34C759]/35 hover:bg-[#34C759]/25 text-xs text-[#34C759] font-black flex items-center gap-1.5 transition-all shadow-sm active:scale-95">
+              <Video className="w-4 h-4" />
+              <span>Video</span>
+              <input
+                type="file"
+                accept="video/*"
+                onChange={(e) => handleInlineFileChange(e, 'video')}
+                className="hidden"
+              />
+            </label>
+
+            <label className="cursor-pointer px-3 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-white/15 text-xs text-white/80 font-bold flex items-center gap-1.5 transition-all shadow-sm active:scale-95">
+              <FileText className="w-4 h-4 text-[#4169E1]" />
+              <span>PDF Note</span>
+              <input
+                type="file"
+                accept=".pdf,application/pdf"
+                onChange={(e) => handleInlineFileChange(e, 'pdf')}
+                className="hidden"
+              />
+            </label>
+          </div>
+
+          <button
+            disabled={isPosting || (!postContent.trim() && !attachedFile)}
+            onClick={async () => {
+              if (!postContent.trim() && !attachedFile) {
+                alert('Please write a caption or attach a Photo/Video before posting!');
+                return;
+              }
+              if (!currentUser?.uid) {
+                alert('You must sign in to share a post.');
+                return;
+              }
+              setIsPosting(true);
+              try {
+                const localPreview = attachedMediaUrl || undefined;
+                const fileToUpload = attachedFile;
+                const mediaTypeToSave = attachedMediaType || undefined;
+
+                const postId = await createPost({
+                  title: postContent.trim() || `[${mediaTypeToSave?.toUpperCase() || 'POST'}] ${fileToUpload?.name || 'Shared Moment'}`,
+                  authorId: currentUser.uid,
+                  authorName: currentUser.name || 'Student',
+                  authorCollege: currentUser.college || 'Koinexa Campus',
+                  authorAvatarUrl: currentUser.avatarUrl || '',
+                  upvotes: 0,
+                  commentsCount: 0,
+                  category: 'General',
+                  type: mediaTypeToSave === 'video' ? 'post' : 'note',
+                  mediaUrl: localPreview,
+                  mediaType: mediaTypeToSave,
+                });
+
+                if (fileToUpload && mediaTypeToSave) {
+                  backgroundUploadAndAttach(fileToUpload, currentUser.uid, postId, 'posts')
+                    .catch(err => console.warn('Cloud sync skipped, using instant Data URL:', err.message));
+                }
+
+                setPostContent('');
+                setAttachedFile(null);
+                setAttachedMediaUrl(null);
+                setAttachedMediaType(null);
+              } catch (err: any) {
+                alert(`Could not share post: ${err.message}`);
+              } finally {
+                setIsPosting(false);
+              }
+            }}
+            className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#00CFFF] via-[#9B5DE5] to-[#4169E1] hover:opacity-95 text-white font-black text-xs flex items-center gap-2 shadow-lg shadow-[#00CFFF]/25 transition-all shrink-0 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {isPosting ? (
+              <><Loader className="w-3.5 h-3.5 animate-spin" /><span>Broadcasting...</span></>
+            ) : (
+              <><Send className="w-3.5 h-3.5" /><span>Share to Feed</span></>
+            )}
+          </button>
+        </div>
+
+        {/* Live Preview HUD if media is selected */}
+        {attachedFile && (
+          <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between gap-3 animate-panelRise shadow-inner">
+            <div className="flex items-center gap-3 min-w-0">
+              {attachedMediaType === 'image' && attachedMediaUrl && (
+                <img src={attachedMediaUrl} alt="" className="w-16 h-16 rounded-xl object-cover border border-[#00CFFF]/40 shrink-0 shadow-md" />
+              )}
+              {attachedMediaType === 'video' && attachedMediaUrl && (
+                <video src={attachedMediaUrl} className="w-20 h-16 rounded-xl object-cover border border-[#34C759]/40 shrink-0 shadow-md" />
+              )}
+              {attachedMediaType === 'pdf' && (
+                <div className="w-12 h-12 rounded-xl bg-[#4169E1]/20 border border-[#4169E1]/40 flex items-center justify-center shrink-0">
+                  <FileText className="w-6 h-6 text-[#4169E1]" />
+                </div>
+              )}
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-white truncate">{attachedFile.name}</p>
+                <p className="text-[10px] text-emerald-400 font-mono font-bold">
+                  ⚡ Ready to share · Every user will see instantly
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                setAttachedFile(null);
+                setAttachedMediaUrl(null);
+                setAttachedMediaType(null);
+              }}
+              className="p-2 rounded-full hover:bg-white/10 text-white/70 hover:text-white transition-all shrink-0"
+              title="Remove Attachment"
+            >
+              <Trash2 className="w-4 h-4 text-[#FA709A]" />
+            </button>
           </div>
         )}
       </div>

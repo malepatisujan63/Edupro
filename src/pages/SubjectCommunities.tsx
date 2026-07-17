@@ -1,48 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Heart, MessageCircle, Share2, Bookmark, Users, Plus, X, Headphones, Radio, Mic, Volume2, Sparkles } from 'lucide-react';
+import { Search, Heart, MessageCircle, Share2, Bookmark, Users, Plus, X, Sparkles } from 'lucide-react';
 import { createCommunity, subscribeToCommunities, type FirestoreCommunity } from '../lib/firestoreService';
-
-interface LiveStudyRoom {
-  id: string;
-  title: string;
-  tag: string;
-  activePeers: number;
-  speakers: string[];
-  color: string;
-}
-
-const LIVE_STUDY_ROOMS: LiveStudyRoom[] = [
-  {
-    id: 'room-1',
-    title: '💻 DSA & LeetCode Grind Lounge',
-    tag: 'Competitive Coding',
-    activePeers: 24,
-    speakers: ['Sujan M.', 'Ananya S.', 'Rohan K.'],
-    color: 'from-[#00CFFF] to-[#4169E1]',
-  },
-  {
-    id: 'room-2',
-    title: '⚡ OS & DBMS Exam Revision Room',
-    tag: 'Core IT Placements',
-    activePeers: 38,
-    speakers: ['Prof. Sharma', 'Aryan M.', 'Priya N.'],
-    color: 'from-[#9B5DE5] to-[#F15BB5]',
-  },
-  {
-    id: 'room-3',
-    title: '🚀 AI & EdTech 36h Hackathon War Room',
-    tag: 'Project Building',
-    activePeers: 19,
-    speakers: ['Sneha P.', 'Vikram T.'],
-    color: 'from-[#FEE140] to-[#FA709A]',
-  },
-];
 
 export const SubjectCommunities: React.FC<{ currentUser?: any }> = ({ currentUser }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [communities, setCommunities] = useState<FirestoreCommunity[]>([]);
   const [isCreating, setIsCreating] = useState(false);
-  const [activeRoom, setActiveRoom] = useState<LiveStudyRoom | null>(null);
   
   // New Community Form State
   const [newTitle, setNewTitle] = useState('');
@@ -89,100 +52,14 @@ export const SubjectCommunities: React.FC<{ currentUser?: any }> = ({ currentUse
   );
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-4 space-y-6 pb-36">
+    <div className="max-w-2xl mx-auto px-4 py-4 space-y-6 pb-36">
       
-      {/* ── GOATED 24/7 Live Study Rooms & Audio Lounges Dock ── */}
-      <div className="kx-card p-4 rounded-3xl border border-[#00CFFF]/30 bg-gradient-to-r from-[#00CFFF]/10 via-[#9B5DE5]/10 to-transparent space-y-3 shadow-2xl">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_12px_#34d399] animate-pulse" />
-            <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-white flex items-center gap-1.5">
-              <Headphones className="w-4 h-4 text-[#00CFFF]" />
-              <span>Koinexa 24/7 Live Study Rooms & Voice Hubs</span>
-            </h3>
-          </div>
-          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-            81 Active Peers Online
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {LIVE_STUDY_ROOMS.map((room) => (
-            <button
-              key={room.id}
-              onClick={() => setActiveRoom(room)}
-              className="text-left p-3.5 rounded-2xl bg-slate-950/80 hover:bg-slate-900 border border-white/10 hover:border-[#00CFFF]/50 transition-all group space-y-2 relative overflow-hidden focus:outline-none"
-            >
-              <div className={`absolute top-0 right-0 w-16 h-16 bg-gradient-to-tr ${room.color} opacity-10 rounded-full blur-xl pointer-events-none group-hover:opacity-25 transition-opacity`} />
-              
-              <div className="flex items-center justify-between text-[10px] font-bold">
-                <span className="text-[#00CFFF] uppercase tracking-wide">{room.tag}</span>
-                <span className="flex items-center gap-1 text-emerald-400 font-mono">
-                  <Radio className="w-3 h-3 animate-pulse" />
-                  {room.activePeers}
-                </span>
-              </div>
-
-              <h4 className="text-xs font-black text-white group-hover:text-[#00CFFF] transition-colors line-clamp-1">{room.title}</h4>
-              
-              <div className="flex items-center gap-1.5 text-[10px] text-white/50 pt-1 border-t border-white/5">
-                <Volume2 className="w-3 h-3 text-[#9B5DE5] shrink-0" />
-                <span className="truncate">Speakers: {room.speakers.join(', ')}</span>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Active Live Study Room Overlay Modal ── */}
-      {activeRoom && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-xl p-4 animate-fadeIn" onClick={() => setActiveRoom(null)}>
-          <div className="kx-card max-w-md w-full p-6 rounded-3xl border border-[#00CFFF]/40 shadow-2xl space-y-5 relative bg-gradient-to-b from-slate-900 to-slate-950" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
-              <div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 uppercase tracking-wide flex items-center gap-1 inline-flex mb-1">
-                  <Radio className="w-3 h-3 animate-pulse" /> LIVE AUDIO ROOM
-                </span>
-                <h3 className="text-base font-black text-white">{activeRoom.title}</h3>
-              </div>
-              <button onClick={() => setActiveRoom(null)} className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold">✕</button>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-slate-950 border border-white/10 space-y-3">
-              <div className="flex items-center justify-between text-xs text-white/70">
-                <span>Active Speakers & Mentors:</span>
-                <span className="text-[#00CFFF] font-bold">{activeRoom.speakers.length} speaking</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {activeRoom.speakers.map((s, idx) => (
-                  <div key={idx} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-[#00CFFF]/30 text-xs font-bold text-white">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-[#00CFFF] to-[#9B5DE5] flex items-center justify-center text-[10px] text-white font-black">
-                      {s[0]}
-                    </div>
-                    <span>{s}</span>
-                    <Mic className="w-3 h-3 text-emerald-400 animate-pulse" />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <button onClick={() => alert(`Joined ${activeRoom.title} Audio Lounge! You are connected via clear WebRTC channels.`)} className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-[#00CFFF] via-[#9B5DE5] to-[#4169E1] text-white font-black text-xs hover:opacity-90 transition-all shadow-lg shadow-[#00CFFF]/30 flex items-center justify-center gap-2">
-                <Headphones className="w-4 h-4" />
-                <span>Join Voice War Room Now</span>
-              </button>
-              <button onClick={() => setActiveRoom(null)} className="px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs">Leave</button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Subject Communities Head & Search Bar */}
       <div className="space-y-4">
         <div className="flex items-center justify-between px-2">
           <h1 className="text-xl sm:text-2xl font-extrabold text-white flex items-center gap-2">
             <Users className="w-6 h-6 text-[#00CFFF]" />
-            <span>Koinexa Subject Communities</span>
+            <span>Subject Communities</span>
           </h1>
           <button 
             onClick={() => setIsCreating(true)}
