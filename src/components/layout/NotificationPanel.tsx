@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Bell, X, Check, Trash2, UserPlus } from 'lucide-react';
-import { fetchUserProfile, acceptStudyMateRequest, type FirestoreUser } from '../../lib/supabaseService';
+import { fetchUserProfile, acceptStudyMateRequest } from '../../lib/supabaseService';
 
 interface NotificationPanelProps {
   currentUser: any;

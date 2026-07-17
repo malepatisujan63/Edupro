@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Grid, LogOut, Trash2, X, Settings } from 'lucide-react';
-import { fetchUserProfile, fetchPostsByUser, sendStudyMateRequest, acceptStudyMateRequest, saveUserProfile, type FirestoreUser, type FirestorePost } from '../lib/supabaseService';
-import { globalSocialGraph } from '../dsa-engine';
+import { fetchUserProfile, fetchPostsByUser, sendStudyMateRequest, saveUserProfile, type FirestoreUser, type FirestorePost } from '../lib/supabaseService';
 
 interface StudentProfileProps {
   currentUser: any;
