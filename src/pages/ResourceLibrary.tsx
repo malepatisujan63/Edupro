@@ -234,6 +234,44 @@ export const ResourceLibrary: React.FC<ResourceLibraryProps> = ({ currentUser })
         </button>
       </div>
 
+      {/* ── GOATED Interactive Placement Study Roadmap & Milestone Tracker ── */}
+      <div className="kx-card p-4 sm:p-5 border border-[#00CFFF]/30 bg-gradient-to-r from-[#00CFFF]/10 via-[#9B5DE5]/10 to-[#4169E1]/10 rounded-2xl shadow-xl">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <span className="px-2 py-0.5 rounded-md bg-[#00CFFF]/20 text-[#00CFFF] text-[10px] font-black uppercase tracking-wider">Placement Tracker</span>
+            <h3 className="text-xs sm:text-sm font-black text-white">Koinexa Core IT Study Roadmap</h3>
+          </div>
+          <span className="text-xs font-bold text-[#00CFFF]">450+ Verified Sheets</span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 text-left">
+          {[
+            { step: '01', title: 'DSA & Graphs', desc: 'Trees, DP, Greedy', query: 'DSA', color: 'border-[#00CFFF]/40 bg-[#00CFFF]/10 hover:border-[#00CFFF]' },
+            { step: '02', title: 'OS & Memory', desc: 'Paging, Threads', query: 'Operating Systems', color: 'border-[#9B5DE5]/40 bg-[#9B5DE5]/10 hover:border-[#9B5DE5]' },
+            { step: '03', title: 'DBMS & SQL', desc: 'ACID, B+ Trees', query: 'DBMS', color: 'border-emerald-400/40 bg-emerald-500/10 hover:border-emerald-400' },
+            { step: '04', title: 'Web Systems', desc: 'REST, Scalability', query: 'Web Development', color: 'border-[#FEE140]/40 bg-[#FEE140]/10 hover:border-[#FEE140]' },
+          ].map((m) => (
+            <button
+              key={m.step}
+              onClick={() => {
+                setSearchQuery(m.query);
+                handleInteraction(m.query, 5);
+              }}
+              className={`p-3 rounded-xl border ${m.color} transition-all active:scale-95 flex flex-col justify-between group text-left`}
+            >
+              <div className="flex items-center justify-between w-full mb-1">
+                <span className="text-[10px] font-black text-white/40 group-hover:text-white/80">STEP {m.step}</span>
+                <span className="text-xs">⚡</span>
+              </div>
+              <div>
+                <h4 className="text-xs font-black text-white group-hover:text-[#00CFFF] transition-colors">{m.title}</h4>
+                <p className="text-[10px] text-white/60 truncate mt-0.5">{m.desc}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
       <ResourceUploadModal
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}
