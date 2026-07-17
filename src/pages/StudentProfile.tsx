@@ -26,8 +26,9 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
   
-  // Edit Profile Form State
-  const [isEditing, setIsEditing] = useState(false); // Default to NOT showing edit panel
+  // Settings & Edit Profile State
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [editForm, setEditForm] = useState({
     name: '',
     bio: '',
@@ -49,6 +50,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
           setIsFollowing(amIFollowing);
         }
         setIsEditing(false); // Can't edit someone else
+        setIsSettingsOpen(false);
       } else {
         const u = await fetchUserProfile(targetId);
         const userToUse = u || currentUser;
@@ -135,7 +137,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
             </button>
             {isViewingSelf && (
               <button 
-                onClick={() => setIsEditing(!isEditing)}
+                onClick={() => setIsSettingsOpen(true)}
                 className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center hover:bg-white/20 hover:scale-110 transition-all shadow-lg"
               >
                 <Settings className="w-5 h-5" />
@@ -266,10 +268,28 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
             <button onClick={handleSaveChanges} className="w-full mt-10 py-4 bg-gradient-to-r from-[#4169E1] to-[#9B5DE5] hover:opacity-90 rounded-2xl text-white font-black tracking-wide text-sm transition-all shadow-[0_0_30px_rgba(91,33,182,0.4)] hover:shadow-[0_0_40px_rgba(91,33,182,0.6)]">
               SAVE CHANGES
             </button>
-            
-            <div className="mt-6 pt-6 border-t border-white/10 flex justify-between">
-               <button onClick={onLogout} className="text-xs font-bold text-white/50 hover:text-white flex items-center gap-1.5 transition-colors"><LogOut className="w-4 h-4"/> Sign Out</button>
-               <button onClick={() => { if(confirm('Delete account permanently?')) onDeleteAccount(); }} className="text-xs font-bold text-[#FF3B30]/70 hover:text-[#FF3B30] flex items-center gap-1.5 transition-colors"><Trash2 className="w-4 h-4"/> Delete Account</button>
+          </div>
+        </div>
+        )}
+
+        {/* Settings Modal */}
+        {isViewingSelf && isSettingsOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xl animate-fadeIn">
+            <div className="w-full max-w-sm bg-[#05050A]/90 rounded-[32px] p-8 shadow-[0_0_80px_rgba(65,105,225,0.2)] relative border border-white/10">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-white/20 rounded-b-full" />
+            <div className="flex justify-between items-center mb-8">
+              <div>
+                <h2 className="text-2xl font-black tracking-tight text-white">Settings</h2>
+                <p className="text-xs text-white/50 mt-1">Manage your Koinexa account</p>
+              </div>
+              <button onClick={() => setIsSettingsOpen(false)} className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+               <button onClick={onLogout} className="w-full py-4 rounded-2xl font-bold bg-[#111] border border-white/10 text-white hover:bg-white/10 flex items-center justify-center gap-2 transition-all shadow-inner"><LogOut className="w-5 h-5"/> Sign Out</button>
+               <button onClick={() => { if(confirm('Are you absolutely sure you want to permanently delete your account? This action cannot be undone.')) onDeleteAccount(); }} className="w-full py-4 rounded-2xl font-bold bg-[#FF3B30]/10 border border-[#FF3B30]/30 text-[#FF3B30] hover:bg-[#FF3B30]/20 flex items-center justify-center gap-2 transition-all shadow-inner"><Trash2 className="w-5 h-5"/> Delete Account</button>
             </div>
           </div>
         </div>
