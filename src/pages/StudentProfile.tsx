@@ -249,27 +249,27 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-xs text-[#4169E1] font-bold uppercase tracking-wider px-1">Full Name</label>
-                <input type="text" value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} className="w-full bg-[#111] border border-white/10 rounded-2xl px-5 py-3.5 text-sm font-medium text-white outline-none focus:border-[#4169E1] focus:ring-1 focus:ring-[#4169E1]/50 transition-all shadow-inner" />
+                <input type="text" value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} className="kx-input-flow" />
               </div>
               <div className="space-y-2">
                 <label className="text-xs text-[#4169E1] font-bold uppercase tracking-wider px-1">Bio</label>
-                <input type="text" value={editForm.bio} onChange={e => setEditForm({...editForm, bio: e.target.value})} className="w-full bg-[#111] border border-white/10 rounded-2xl px-5 py-3.5 text-sm font-medium text-white outline-none focus:border-[#4169E1] focus:ring-1 focus:ring-[#4169E1]/50 transition-all shadow-inner" />
+                <input type="text" value={editForm.bio} onChange={e => setEditForm({...editForm, bio: e.target.value})} className="kx-input-flow" />
               </div>
               <div className="space-y-2">
                 <label className="text-xs text-[#9B5DE5] font-bold uppercase tracking-wider px-1">College</label>
-                <input type="text" value={editForm.college} onChange={e => setEditForm({...editForm, college: e.target.value})} className="w-full bg-[#111] border border-white/10 rounded-2xl px-5 py-3.5 text-sm font-medium text-white outline-none focus:border-[#9B5DE5] focus:ring-1 focus:ring-[#9B5DE5]/50 transition-all shadow-inner" />
+                <input type="text" value={editForm.college} onChange={e => setEditForm({...editForm, college: e.target.value})} className="kx-input-flow" />
               </div>
               <div className="space-y-2">
                 <label className="text-xs text-[#9B5DE5] font-bold uppercase tracking-wider px-1">Hobbies</label>
-                <input type="text" value={editForm.hobbies} onChange={e => setEditForm({...editForm, hobbies: e.target.value})} className="w-full bg-[#111] border border-white/10 rounded-2xl px-5 py-3.5 text-sm font-medium text-white outline-none focus:border-[#9B5DE5] focus:ring-1 focus:ring-[#9B5DE5]/50 transition-all shadow-inner" />
+                <input type="text" value={editForm.hobbies} onChange={e => setEditForm({...editForm, hobbies: e.target.value})} className="kx-input-flow" />
               </div>
               <div className="space-y-2 md:col-span-2">
                 <label className="text-xs text-[#00CFFF] font-bold uppercase tracking-wider px-1">Interests</label>
-                <input type="text" value={editForm.interests} onChange={e => setEditForm({...editForm, interests: e.target.value})} className="w-full bg-[#111] border border-white/10 rounded-2xl px-5 py-3.5 text-sm font-medium text-white outline-none focus:border-[#00CFFF] focus:ring-1 focus:ring-[#00CFFF]/50 transition-all shadow-inner" />
+                <input type="text" value={editForm.interests} onChange={e => setEditForm({...editForm, interests: e.target.value})} className="kx-input-flow" />
               </div>
             </div>
 
-            <button onClick={handleSaveChanges} className="w-full mt-10 py-4 bg-gradient-to-r from-[#4169E1] to-[#9B5DE5] hover:opacity-90 rounded-2xl text-white font-black tracking-wide text-sm transition-all shadow-[0_0_30px_rgba(91,33,182,0.4)] hover:shadow-[0_0_40px_rgba(91,33,182,0.6)]">
+            <button onClick={handleSaveChanges} className="kx-pill-flow w-full mt-10 py-4 text-white font-black tracking-wide text-sm active">
               SAVE CHANGES
             </button>
           </div>
