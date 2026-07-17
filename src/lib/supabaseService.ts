@@ -436,6 +436,19 @@ export function subscribeToPosts(callback: (posts: FirestorePost[]) => void): ()
   return () => { supabase.removeChannel(channel); };
 }
 
+export async function fetchPostsByUser(userId: string): Promise<FirestorePost[]> {
+  const { data, error } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('author_id', userId)
+    .order('post_timestamp', { ascending: false });
+  if (error) {
+    console.error('[Supabase fetchPostsByUser]', error.message);
+    return [];
+  }
+  return (data || []).map(rowToPost);
+}
+
 // ─────────────────────────────────────────────
 // LIKES — Supabase atomic updates
 // ─────────────────────────────────────────────
@@ -532,6 +545,32 @@ export async function sendStudyMateRequest(fromUserId: string, toUserId: string)
     await supabase.from('users').update({
       pending_study_mate_requests: [...pending, fromUserId],
     }).eq('uid', toUserId);
+  }
+}
+
+export async function acceptStudyMateRequest(fromUserId: string, toUserId: string): Promise<void> {
+  // toUserId is the person who received the request (currentUser)
+  // fromUserId is the person who sent it
+  const toUser = await fetchUserProfile(toUserId);
+  const fromUser = await fetchUserProfile(fromUserId);
+  if (!toUser || !fromUser) return;
+
+  // Add each other to study_mates
+  const toMates = toUser.studyMates || [];
+  const fromMates = fromUser.studyMates || [];
+  
+  if (!toMates.includes(fromUserId)) {
+    const newPending = (toUser.pendingStudyMateRequests || []).filter(id => id !== fromUserId);
+    await supabase.from('users').update({
+      study_mates: [...toMates, fromUserId],
+      pending_study_mate_requests: newPending,
+    }).eq('uid', toUserId);
+  }
+
+  if (!fromMates.includes(toUserId)) {
+    await supabase.from('users').update({
+      study_mates: [...fromMates, toUserId],
+    }).eq('uid', fromUserId);
   }
 }
 

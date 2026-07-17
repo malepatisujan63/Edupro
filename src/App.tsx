@@ -19,6 +19,7 @@ import { ShieldCheck, Lock, ArrowRight, CheckCircle2, Bell, Plus, X, Image as Im
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<NavTab>('home');
+  const [viewProfileId, setViewProfileId] = useState<string | null>(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isDSAHUDOpen, setIsDSAHUDOpen] = useState(false);
   const [isTimerOpen, setIsTimerOpen] = useState(false);
@@ -187,7 +188,10 @@ export const App: React.FC = () => {
           {/* iOS / visionOS Floating Transparent Pill Dock */}
           <IOSFloatingNav
             activeTab={activeTab}
-            onSelectTab={(tab) => setActiveTab(tab)}
+            onSelectTab={(tab, profileId = null) => {
+              setActiveTab(tab);
+              if (tab === 'profile') setViewProfileId(profileId);
+            }}
             onOpenAuth={() => setIsAuthOpen(true)}
             onOpenDSAHUD={() => setIsDSAHUDOpen(true)}
             onOpenTimer={() => setIsTimerOpen(true)}
@@ -205,6 +209,7 @@ export const App: React.FC = () => {
               <StudentProfile
                 currentUser={currentUser}
                 account={currentAccount}
+                viewProfileId={viewProfileId}
                 onLogout={handleLogout}
                 onDeleteAccount={handleDeleteAccount}
               />

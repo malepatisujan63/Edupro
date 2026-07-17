@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
-import { Check, X, Shield, Trash2, LogOut, BookOpen, Star, Zap, UserPlus, Users } from 'lucide-react';
-import { globalSocialGraph, type StudentNode } from '../dsa-engine';
+import React, { useState, useEffect } from 'react';
+import { LogOut, Trash2, Grid, Bookmark, PlaySquare, ChevronDown, UserPlus, MessageCircle, Settings, CheckCircle } from 'lucide-react';
+import { fetchUserProfile, fetchPostsByUser, sendStudyMateRequest, acceptStudyMateRequest, type FirestoreUser, type FirestorePost } from '../lib/supabaseService';
+import { globalSocialGraph } from '../dsa-engine';
 
 interface StudentProfileProps {
   currentUser: any;
   account?: any;
+  viewProfileId?: string | null;
   onLogout: () => void;
   onDeleteAccount: () => void;
 }
@@ -12,264 +14,285 @@ interface StudentProfileProps {
 export const StudentProfile: React.FC<StudentProfileProps> = ({
   currentUser,
   account,
+  viewProfileId,
   onLogout,
   onDeleteAccount,
 }) => {
-  const userNode = currentUser || {};
-  const isSchool = userNode.studentType === 'school';
+  const isViewingSelf = !viewProfileId || viewProfileId === (currentUser.uid || currentUser.id);
+  const targetId = isViewingSelf ? (currentUser.uid || currentUser.id) : viewProfileId!;
 
-  const [studyMateRequests, setStudyMateRequests] = useState<any[]>(() => {
-    return globalSocialGraph.getFriendRequests(userNode.id || userNode.uid) || [];
-  });
+  const [profileUser, setProfileUser] = useState<FirestoreUser | any>(isViewingSelf ? currentUser : null);
+  const [posts, setPosts] = useState<FirestorePost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [gridTab, setGridTab] = useState<'posts' | 'reels' | 'saved'>('posts');
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [pendingRequests, setPendingRequests] = useState<string[]>([]);
+  
+  // Settings Modal State
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  const [studyMates, setStudyMates] = useState<StudentNode[]>(() => globalSocialGraph.getFriends(userNode.id));
+  useEffect(() => {
+    async function loadData() {
+      setLoading(true);
+      if (!isViewingSelf) {
+        const u = await fetchUserProfile(targetId);
+        setProfileUser(u);
+        // Check if we are following
+        if (u && currentUser) {
+          const amIFollowing = (u.studyMates || []).includes(currentUser.uid) || (currentUser.studyMates || []).includes(u.uid);
+          setIsFollowing(amIFollowing);
+        }
+      } else {
+        setProfileUser(currentUser);
+        // Load pending requests for self
+        const freshSelf = await fetchUserProfile(targetId);
+        if (freshSelf && freshSelf.pendingStudyMateRequests) {
+          setPendingRequests(freshSelf.pendingStudyMateRequests);
+        }
+      }
+      
+      const p = await fetchPostsByUser(targetId);
+      setPosts(p);
+      setLoading(false);
+    }
+    loadData();
+  }, [targetId, isViewingSelf, currentUser]);
 
-  const handleAcceptRequest = (senderId: string) => {
-    globalSocialGraph.acceptFriendRequest(userNode.id, senderId);
-    setStudyMateRequests((prev: any[]) => prev.filter((r) => r.id !== senderId));
-    setStudyMates(globalSocialGraph.getFriends(userNode.id));
-    alert(`Study Mate request accepted! You can now message each other.`);
+  const handleFollow = async () => {
+    if (!profileUser || !currentUser) return;
+    await sendStudyMateRequest(currentUser.uid, profileUser.uid);
+    alert('Friend request sent!');
   };
 
-  const handleDeclineRequest = (senderId: string) => {
-    setStudyMateRequests((prev: any[]) => prev.filter((r) => r.id !== senderId));
+  const handleAcceptRequest = async (senderId: string) => {
+    await acceptStudyMateRequest(senderId, currentUser.uid);
+    setPendingRequests(prev => prev.filter(id => id !== senderId));
+    alert('Friend request accepted!');
   };
 
-  const renderTags = (items?: string[], icon?: React.ReactNode, title?: string) => {
-    if (!items || items.length === 0) return null;
-    return (
-      <div className="space-y-2">
-        <h4 className="text-xs font-bold text-white/50 uppercase flex items-center gap-1.5">{icon} {title}</h4>
-        <div className="flex flex-wrap gap-2">
-          {items.map((item, i) => (
-            <span key={i} className="px-3 py-1 rounded-full bg-[#111111] border border-white/10 text-white text-[11px] font-bold">
-              {item}
-            </span>
-          ))}
-        </div>
-      </div>
-    );
-  };
+  if (loading) {
+    return <div className="flex justify-center items-center h-[50vh]"><span className="text-white/50 animate-pulse">Loading Profile...</span></div>;
+  }
+
+  if (!profileUser) {
+    return <div className="text-center text-white/50 mt-10">Profile not found.</div>;
+  }
+
+  const followersCount = profileUser.studyMates?.length || 0;
+  // Following count is assumed to be similar in an undirected graph, but for UI sake:
+  const followingCount = followersCount; 
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6 space-y-6 pb-32">
-      
-      {/* Profile Header Banner */}
-      <div className="kx-card p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#00CFFF]/10 rounded-full blur-3xl pointer-events-none" />
-        
-        <div className="relative shrink-0">
-          <img
-            src={userNode.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
-            alt="Avatar"
-            className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl object-cover border border-white/20 shadow-2xl"
-          />
-          <span className="absolute -bottom-2 -right-2 bg-gradient-to-r from-[#00CFFF] to-[#9B5DE5] text-white font-black text-[10px] px-2 py-0.5 rounded-lg shadow-lg uppercase">
-            {userNode.studentType || 'STUDENT'}
-          </span>
+    <div className="max-w-2xl mx-auto min-h-screen bg-[#000000] pb-24 text-white">
+      {/* Top Navigation Bar */}
+      <div className="flex items-center justify-between p-4 sticky top-0 bg-[#000000]/80 backdrop-blur-md z-20">
+        <div className="flex items-center gap-2">
+          <Lock className="w-4 h-4 text-white/50 hidden" />
+          <h1 className="text-xl font-bold tracking-tight">{profileUser.name.toLowerCase().replace(/\s/g, '_')}</h1>
+          <ChevronDown className="w-4 h-4 text-white/70" />
         </div>
-
-        <div className="text-center sm:text-left space-y-2 flex-1 relative z-10">
-          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white">{userNode.name}</h1>
-            <span className="px-3 py-1 rounded-full bg-[#34C759]/20 text-[#34C759] border border-[#34C759]/30 text-[10px] font-bold flex items-center gap-1">
-              <Shield className="w-3 h-3" />
-              Verified User
-            </span>
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <span className="text-xl font-light">@</span>
+            {pendingRequests.length > 0 && isViewingSelf && (
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-black"></span>
+            )}
           </div>
-
-          <p className="text-sm text-[#00CFFF] font-bold">
-            {isSchool 
-              ? `${userNode.schoolClass || 'School'} • ${userNode.board || 'Board'}`
-              : `${userNode.college || 'College'} • ${userNode.department || 'Department'} • Sem ${userNode.semester || '1'}`
-            }
-          </p>
-
-          <div className="flex flex-wrap justify-center sm:justify-start gap-2 pt-1">
-            {(userNode.badges || ['Verified Student']).map((badge: string, i: number) => (
-              <span key={i} className="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-white/80 text-[10px] font-bold">
-                {badge}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div className="text-center sm:text-right shrink-0 bg-[#000000] p-4 rounded-2xl border border-white/10 shadow-inner">
-          <p className="text-[10px] text-white/50 uppercase font-bold mb-1">Reputation</p>
-          <p className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#00CFFF] to-[#9B5DE5]">
-            {userNode.reputationPoints || 100}
-          </p>
+          {isViewingSelf && (
+            <button onClick={() => setIsSettingsOpen(true)}>
+              <Settings className="w-6 h-6" />
+            </button>
+          )}
         </div>
       </div>
 
-      {/* About & Interests */}
-      {(userNode.skills?.length > 0 || userNode.interests?.length > 0 || userNode.hobbies?.length > 0) && (
-        <div className="kx-card p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-          {renderTags(userNode.skills, <Zap className="w-3.5 h-3.5 text-[#00CFFF]" />, 'Skills')}
-          {renderTags(userNode.interests, <Star className="w-3.5 h-3.5 text-[#4169E1]" />, 'Interests')}
-          {renderTags(userNode.hobbies, <BookOpen className="w-3.5 h-3.5 text-[#9B5DE5]" />, 'Hobbies')}
+      {/* Settings Modal (for own profile) */}
+      {isSettingsOpen && isViewingSelf && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center">
+          <div className="w-full sm:max-w-sm bg-[#1A1A1A] rounded-t-3xl sm:rounded-3xl p-6 animate-slideUp sm:animate-scaleUp">
+            <h3 className="text-lg font-bold mb-4 text-white">Account Settings</h3>
+            
+            {pendingRequests.length > 0 && (
+              <div className="mb-6 space-y-3">
+                <h4 className="text-sm font-semibold text-[#00CFFF]">Friend Requests</h4>
+                {pendingRequests.map(reqId => (
+                  <div key={reqId} className="flex items-center justify-between bg-black/40 p-3 rounded-xl border border-white/10">
+                    <span className="text-sm text-white/80 truncate max-w-[150px]">User {reqId.slice(-4)}</span>
+                    <button onClick={() => handleAcceptRequest(reqId)} className="text-xs bg-[#00CFFF] text-black px-3 py-1 rounded-lg font-bold hover:bg-[#00CFFF]/80">
+                      Accept
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="space-y-3 pt-4 border-t border-white/10">
+              <button onClick={() => { setIsSettingsOpen(false); onLogout(); }} className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold flex items-center justify-center gap-2 transition">
+                <LogOut className="w-4 h-4" /> Sign Out
+              </button>
+              <button onClick={() => {
+                if (confirm('Permanently delete your account?')) {
+                  setIsSettingsOpen(false);
+                  onDeleteAccount();
+                }
+              }} className="w-full py-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 font-bold flex items-center justify-center gap-2 transition">
+                <Trash2 className="w-4 h-4" /> Delete Account
+              </button>
+              <button onClick={() => setIsSettingsOpen(false)} className="w-full py-2 text-sm text-white/50 hover:text-white mt-2">
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Study Mate Requests */}
-      <div className="kx-card p-6 space-y-4">
-        <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-white/10 pb-3">
-          <UserPlus className="w-5 h-5 text-[#00CFFF]" />
-          <span>Pending Study Mate Requests ({studyMateRequests.length})</span>
-        </h2>
-
-        {studyMateRequests.length === 0 ? (
-          <p className="text-xs text-white/40 italic text-center py-2">No pending requests right now.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {studyMateRequests.map((req: any) => (
-              <div key={req.id} className="p-4 rounded-2xl bg-[#000000] border border-white/10 flex items-center justify-between gap-3 shadow-inner">
-                <div className="flex items-center gap-3 min-w-0">
-                  <img src={req.avatarUrl} alt="" className="w-10 h-10 rounded-full object-cover border border-white/20" />
-                  <div className="truncate">
-                    <h4 className="text-sm font-bold text-white truncate">{req.name}</h4>
-                    <p className="text-[10px] text-[#00CFFF] font-bold truncate">{req.college || req.schoolClass}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-1">
-                  <button onClick={() => handleAcceptRequest(req.id)} className="w-8 h-8 rounded-full bg-[#34C759]/20 hover:bg-[#34C759]/40 text-[#34C759] flex items-center justify-center transition-all border border-[#34C759]/30">
-                    <Check className="w-4 h-4 stroke-[3]" />
-                  </button>
-                  <button onClick={() => handleDeclineRequest(req.id)} className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition-all border border-white/10">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Active Study Mates */}
-      <div className="kx-card p-6 space-y-4">
-        <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-white/10 pb-3">
-          <Users className="w-5 h-5 text-[#4169E1]" />
-          <span>My Study Mates ({studyMates.length})</span>
-        </h2>
-
-        {studyMates.length === 0 ? (
-          <p className="text-xs text-white/40 italic text-center py-2">Connect with others to build your network.</p>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {studyMates.map((f) => (
-              <div key={f.id} className="p-3 rounded-2xl bg-[#000000] border border-white/10 flex flex-col items-center gap-2 text-center shadow-inner">
-                <img src={f.avatarUrl} alt="" className="w-12 h-12 rounded-full object-cover border border-white/20" />
-                <div className="min-w-0 w-full">
-                  <h4 className="text-xs font-bold text-white truncate">{f.name}</h4>
-                  <p className="text-[9px] text-[#4169E1] font-bold truncate">{f.college || 'Student'}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* ── ⚡ MongoDB Storage Record & Personal DSA Max-Heap Engine Diagnostics ── */}
-      <div className="kx-card p-6 space-y-5 border border-[#00CFFF]/40 bg-gradient-to-br from-[#00CFFF]/10 via-transparent to-[#9B5DE5]/10 shadow-2xl">
-        <div className="flex items-center justify-between border-b border-white/10 pb-3.5">
-          <div className="flex items-center gap-3">
-            <span className="w-3 h-3 rounded-full bg-[#00CFFF] shadow-[0_0_12px_#00CFFF] animate-pulse" />
-            <h2 className="text-base font-black text-white flex items-center gap-2">
-              <span>Personal Database Record & DSA Engine Status</span>
-            </h2>
-          </div>
-          <span className="px-3 py-1 rounded-full bg-[#22C55E]/20 text-[#22C55E] border border-[#22C55E]/30 text-xs font-mono font-bold">
-            MongoDB Connected
-          </span>
+      {/* Profile Header (Avatar & Stats) */}
+      <div className="px-4 pt-2 flex items-center justify-between">
+        <div className="relative">
+          <img 
+            src={profileUser.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'} 
+            alt="Avatar" 
+            className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border border-white/10 p-0.5"
+          />
+          {isViewingSelf && (
+            <div className="absolute bottom-0 right-0 bg-[#00CFFF] text-black rounded-full p-1 border-2 border-black cursor-pointer">
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4"></path></svg>
+            </div>
+          )}
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* MongoDB Person Details Storage Document Card */}
-          <div className="p-4 rounded-2xl bg-black/60 border border-white/10 space-y-2.5 font-mono">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-black uppercase tracking-wider text-[#00CFFF]">
-                MongoDB Document (_id & Metadata)
-              </span>
-              <span className="text-[10px] text-white/40">db.users.findOne()</span>
-            </div>
-            <div className="p-3 rounded-xl bg-[#08080C] border border-white/5 text-xs text-emerald-400 space-y-1 overflow-x-auto">
-              <p><span className="text-white/50">{`{`}</span></p>
-              <p className="pl-3"><span className="text-[#00CFFF]">"_id":</span> <span className="text-amber-300">"{userNode._id || userNode.id || userNode.uid || '6899fbe38d7f46a8b92c53d1'}"</span>,</p>
-              <p className="pl-3"><span className="text-[#00CFFF]">"username":</span> <span className="text-amber-300">"{userNode.name || userNode.username || 'Student'}"</span>,</p>
-              <p className="pl-3"><span className="text-[#00CFFF]">"email":</span> <span className="text-amber-300">"{userNode.email || 'student@gmail.com'}"</span>,</p>
-              <p className="pl-3"><span className="text-[#00CFFF]">"studentType":</span> <span className="text-amber-300">"{userNode.studentType || 'college'}"</span>,</p>
-              <p className="pl-3"><span className="text-[#00CFFF]">"college":</span> <span className="text-amber-300">"{userNode.college || userNode.schoolClass || 'Koinexa Campus'}"</span>,</p>
-              <p className="pl-3"><span className="text-[#00CFFF]">"password":</span> <span className="text-white/40">"&lt;hashed_password_bcrypt&gt;"</span></p>
-              <p><span className="text-white/50">{`}`}</span></p>
-            </div>
-            <p className="text-[10px] text-white/60 font-sans">
-              🔒 Stored securely in MongoDB with auto-generated 24-char ObjectID and BCrypt hashing.
-            </p>
-          </div>
-
-          {/* Personal DSA Max-Heap & Dwell Tracking Card */}
-          <div className="p-4 rounded-2xl bg-black/60 border border-white/10 space-y-3 flex flex-col justify-between">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-black uppercase tracking-wider text-[#9B5DE5]">
-                  Your Personal Max-Heap & Dwell Affinity ($O(1)$)
-                </span>
-                <span className="text-[10px] text-white/40 font-mono">Heap Active</span>
-              </div>
-              <p className="text-xs text-white/80 leading-relaxed">
-                Your interaction patterns (video dwell times, upvotes, note downloads) train an isolated <strong className="text-[#00CFFF]">Max-Heap priority queue</strong> so your Campus Feed is sorted uniquely for you:
-              </p>
-            </div>
-
-            <div className="space-y-2 pt-1 border-t border-white/10">
-              <span className="text-[10px] font-bold text-white/50 block">Live Category Dwell Scores (Trained via clicks/watch time):</span>
-              <div className="flex flex-wrap gap-1.5">
-                {account && Object.entries(account.getDwellScores()).length > 0 ? (
-                  Object.entries(account.getDwellScores()).map(([cat, score]) => (
-                    <span key={cat} className="px-2.5 py-1 rounded-lg bg-[#9B5DE5]/20 border border-[#9B5DE5]/40 text-white font-mono text-[11px] font-bold">
-                      {cat}: <span className="text-[#00CFFF]">+{Number(score)} pts</span>
-                    </span>
-                  ))
-                ) : (
-                  <span className="text-xs text-white/50 italic">No dwell points accumulated yet. Watch videos or like notes to train!</span>
-                )}
-              </div>
-            </div>
-
-            <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between text-[11px]">
-              <span className="font-bold text-white/70">Personal Bookmarks ($O(1)$ Array):</span>
-              <strong className="text-[#00CFFF] font-mono">{account?.getBookmarks().length || 0} Saved Posts</strong>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Account Settings */}
-      <div className="kx-card p-6 space-y-4 border-[#9B5DE5]/30">
-        <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-white/10 pb-3">
-          <Shield className="w-5 h-5 text-[#9B5DE5]" />
-          <span>Account Security</span>
-        </h2>
         
-        <div className="flex flex-wrap items-center gap-4">
-          <button onClick={onLogout} className="px-5 py-2.5 rounded-xl bg-[#000000] hover:bg-[#111111] border border-white/10 text-white font-bold text-xs flex items-center gap-2 transition-all">
-            <LogOut className="w-4 h-4" />
-            <span>Sign Out</span>
-          </button>
-
-          <button
-            onClick={() => {
-              if (confirm('Permanently delete your account? This removes all your profile data.')) {
-                onDeleteAccount();
-              }
-            }}
-            className="px-5 py-2.5 rounded-xl bg-[#000000] border border-red-500/30 text-red-400 hover:bg-red-500/10 font-bold text-xs flex items-center gap-2 transition-all"
-          >
-            <Trash2 className="w-4 h-4" />
-            <span>Delete Account</span>
-          </button>
+        <div className="flex-1 flex justify-center gap-6 sm:gap-10 text-center">
+          <div className="flex flex-col items-center">
+            <span className="text-lg sm:text-xl font-bold">{posts.length}</span>
+            <span className="text-[11px] sm:text-xs text-white/80">posts</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <span className="text-lg sm:text-xl font-bold">{followersCount}</span>
+            <span className="text-[11px] sm:text-xs text-white/80">followers</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <span className="text-lg sm:text-xl font-bold">{followingCount}</span>
+            <span className="text-[11px] sm:text-xs text-white/80">following</span>
+          </div>
         </div>
+      </div>
+
+      {/* Bio Section */}
+      <div className="px-4 mt-3 space-y-1">
+        <h2 className="font-bold text-sm">{profileUser.name}</h2>
+        <p className="text-xs text-white/90">
+          {profileUser.college ? `${profileUser.college} • ${profileUser.department}` : (profileUser.schoolClass ? `${profileUser.schoolClass} • ${profileUser.board}` : 'Student at Koinexa')}
+        </p>
+        {(profileUser.skills?.length > 0 || profileUser.interests?.length > 0) && (
+          <p className="text-xs text-white/70">
+            Passionate about {profileUser.skills?.slice(0,2).join(', ')} {(profileUser.interests?.length > 0) ? `and ${profileUser.interests[0]}` : ''}. Let's push limits!
+          </p>
+        )}
+        <p className="text-xs text-[#E0F7FA] font-medium pt-0.5 flex items-center gap-1 cursor-pointer">
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+          edunetwork.app/{profileUser.name.toLowerCase().replace(/\s/g, '')}
+        </p>
+      </div>
+
+      {/* Mutual Connections (Optional dummy data for Instagram vibe) */}
+      {!isViewingSelf && (
+        <div className="px-4 mt-3 flex items-center gap-2">
+          <div className="flex -space-x-1.5">
+            <img src="https://ui-avatars.com/api/?name=A&background=random" className="w-5 h-5 rounded-full border border-black" />
+            <img src="https://ui-avatars.com/api/?name=B&background=random" className="w-5 h-5 rounded-full border border-black" />
+            <img src="https://ui-avatars.com/api/?name=C&background=random" className="w-5 h-5 rounded-full border border-black" />
+          </div>
+          <span className="text-[11px] text-white/70 font-medium">Followed by sujan, anita and 42 others</span>
+        </div>
+      )}
+
+      {/* Action Buttons Row */}
+      <div className="px-4 mt-4 flex items-center gap-2">
+        {isViewingSelf ? (
+          <>
+            <button className="flex-1 bg-[#1A1A1A] hover:bg-[#262626] text-white font-semibold text-[13px] py-1.5 rounded-lg transition">Edit profile</button>
+            <button className="flex-1 bg-[#1A1A1A] hover:bg-[#262626] text-white font-semibold text-[13px] py-1.5 rounded-lg transition">Share profile</button>
+            <button className="bg-[#1A1A1A] hover:bg-[#262626] text-white p-1.5 rounded-lg transition">
+              <UserPlus className="w-4 h-4" />
+            </button>
+          </>
+        ) : (
+          <>
+            <button 
+              onClick={handleFollow}
+              className={`flex-1 font-semibold text-[13px] py-1.5 rounded-lg transition flex items-center justify-center gap-1 ${isFollowing ? 'bg-[#1A1A1A] text-white' : 'bg-[#00CFFF] text-black hover:bg-[#00CFFF]/90'}`}
+            >
+              {isFollowing ? <>Following <ChevronDown className="w-3 h-3" /></> : 'Follow'}
+            </button>
+            <button className="flex-1 bg-[#1A1A1A] hover:bg-[#262626] text-white font-semibold text-[13px] py-1.5 rounded-lg transition">Message</button>
+            <button className="bg-[#1A1A1A] hover:bg-[#262626] text-white p-1.5 rounded-lg transition">
+              <UserPlus className="w-4 h-4" />
+            </button>
+          </>
+        )}
+      </div>
+
+      {/* Tabs */}
+      <div className="mt-6 border-t border-white/10 flex items-center justify-around">
+        <button 
+          onClick={() => setGridTab('posts')} 
+          className={`flex-1 flex justify-center py-3 border-b-2 transition ${gridTab === 'posts' ? 'border-white text-white' : 'border-transparent text-white/50 hover:text-white/80'}`}
+        >
+          <Grid className="w-5 h-5" />
+        </button>
+        <button 
+          onClick={() => setGridTab('reels')} 
+          className={`flex-1 flex justify-center py-3 border-b-2 transition ${gridTab === 'reels' ? 'border-white text-white' : 'border-transparent text-white/50 hover:text-white/80'}`}
+        >
+          <PlaySquare className="w-5 h-5" />
+        </button>
+        <button 
+          onClick={() => setGridTab('saved')} 
+          className={`flex-1 flex justify-center py-3 border-b-2 transition ${gridTab === 'saved' ? 'border-white text-white' : 'border-transparent text-white/50 hover:text-white/80'}`}
+        >
+          <Bookmark className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Grid Content */}
+      <div className="grid grid-cols-3 gap-0.5 sm:gap-1">
+        {gridTab === 'posts' && posts.length > 0 ? (
+          posts.map((post, idx) => (
+            <div key={post.id || idx} className="aspect-square bg-[#1A1A1A] relative group cursor-pointer overflow-hidden">
+              {post.mediaUrl ? (
+                post.mediaType === 'video' ? (
+                  <video src={post.mediaUrl} className="w-full h-full object-cover" />
+                ) : (
+                  <img src={post.mediaUrl} className="w-full h-full object-cover" alt="Post content" />
+                )
+              ) : (
+                <div className="w-full h-full p-2 flex flex-col justify-center items-center text-center bg-gradient-to-br from-[#111] to-[#222]">
+                  <p className="text-[9px] sm:text-xs font-semibold text-white/90 line-clamp-3 leading-snug">{post.title}</p>
+                </div>
+              )}
+              {post.mediaType === 'video' && <PlaySquare className="absolute top-1 right-1 w-4 h-4 text-white drop-shadow-md" />}
+              {post.type === 'note' && <Bookmark className="absolute top-1 right-1 w-4 h-4 text-white drop-shadow-md" />}
+              
+              {/* Overlay on hover */}
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center gap-3 text-white text-sm font-bold">
+                <span className="flex items-center gap-1"><svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg> {post.upvotes}</span>
+                <span className="flex items-center gap-1"><MessageCircle className="w-4 h-4 fill-current" /> {post.commentsCount}</span>
+              </div>
+            </div>
+          ))
+        ) : gridTab === 'posts' ? (
+          <div className="col-span-3 text-center py-10 text-white/50 flex flex-col items-center">
+            <div className="w-16 h-16 rounded-full border-2 border-white/20 flex items-center justify-center mb-3">
+              <Grid className="w-8 h-8 text-white/20" />
+            </div>
+            <p className="font-bold text-lg text-white">No Posts Yet</p>
+            <p className="text-xs mt-1">Capture the moment or share your study notes.</p>
+          </div>
+        ) : (
+          <div className="col-span-3 text-center py-12 text-white/50 text-sm font-semibold">
+            {gridTab === 'reels' ? 'No Reels Yet' : 'No Saved Posts'}
+          </div>
+        )}
       </div>
 
     </div>

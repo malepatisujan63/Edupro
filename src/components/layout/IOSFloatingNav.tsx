@@ -14,7 +14,7 @@ export type NavTab = 'home' | 'communities' | 'qna' | 'messaging' | 'resources' 
 
 interface IOSFloatingNavProps {
   activeTab: NavTab;
-  onSelectTab: (tab: NavTab) => void;
+  onSelectTab: (tab: NavTab, profileId?: string | null) => void;
   onOpenAuth?: () => void;
   onOpenDSAHUD?: () => void;
   onOpenTimer?: () => void;
@@ -184,7 +184,7 @@ export const IOSFloatingNav: React.FC<IOSFloatingNavProps> = ({
                   key={item.id}
                   onClick={() => {
                     setIsSearchOpen(false);
-                    if (item.type === 'user') onSelectTab('profile');
+                    if (item.type === 'user') onSelectTab('profile', item.id);
                     else if (item.type === 'question') onSelectTab('qna');
                     else if (item.type === 'group') onSelectTab('communities');
                     else onSelectTab('resources');
