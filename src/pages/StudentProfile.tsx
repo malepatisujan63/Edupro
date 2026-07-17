@@ -73,8 +73,8 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
 
   const handleFollow = async () => {
     if (!profileUser || !currentUser) return;
+    setIsFollowing(true); // Optimistic UI update
     await sendStudyMateRequest(currentUser.uid, profileUser.uid);
-    alert('Friend request sent!');
   };
 
   const handleSaveChanges = async () => {
@@ -203,14 +203,14 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
         </div>
 
         {/* Right: Glassmorphism Stats Bar */}
-        <div className="w-full md:w-auto flex items-center gap-6 p-5 rounded-[24px] bg-gradient-to-br from-white/5 to-transparent border border-white/10 shadow-2xl backdrop-blur-xl">
+        <div className="w-full md:w-auto flex items-center gap-6 p-5 rounded-[24px] bg-gradient-to-br from-white/5 to-transparent border border-white/10 shadow-2xl backdrop-blur-xl animate-[pulse_4s_ease-in-out_infinite] hover:scale-105 transition-transform duration-300">
           <div className="flex flex-col items-center px-4">
-            <span className="text-2xl font-black tracking-tight">{posts.length}</span>
+            <span className="text-2xl font-black tracking-tight drop-shadow-md">{posts.length}</span>
             <span className="text-[11px] font-bold uppercase tracking-widest text-white/50 mt-1">Posts</span>
           </div>
           <div className="w-[1px] h-10 bg-white/10" />
           <div className="flex flex-col items-center px-4">
-            <span className="text-2xl font-black tracking-tight">{followersCount}</span>
+            <span className="text-2xl font-black tracking-tight drop-shadow-md">{followersCount}</span>
             <span className="text-[11px] font-bold uppercase tracking-widest text-white/50 mt-1">Study Mates</span>
           </div>
         </div>
