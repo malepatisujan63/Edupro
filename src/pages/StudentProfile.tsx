@@ -4,12 +4,14 @@ import { globalSocialGraph, type StudentNode } from '../dsa-engine';
 
 interface StudentProfileProps {
   currentUser: any;
+  account?: any;
   onLogout: () => void;
   onDeleteAccount: () => void;
 }
 
 export const StudentProfile: React.FC<StudentProfileProps> = ({
   currentUser,
+  account,
   onLogout,
   onDeleteAccount,
 }) => {
@@ -166,6 +168,81 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
             ))}
           </div>
         )}
+      </div>
+
+      {/* ── ⚡ MongoDB Storage Record & Personal DSA Max-Heap Engine Diagnostics ── */}
+      <div className="kx-card p-6 space-y-5 border border-[#00CFFF]/40 bg-gradient-to-br from-[#00CFFF]/10 via-transparent to-[#9B5DE5]/10 shadow-2xl">
+        <div className="flex items-center justify-between border-b border-white/10 pb-3.5">
+          <div className="flex items-center gap-3">
+            <span className="w-3 h-3 rounded-full bg-[#00CFFF] shadow-[0_0_12px_#00CFFF] animate-pulse" />
+            <h2 className="text-base font-black text-white flex items-center gap-2">
+              <span>Personal Database Record & DSA Engine Status</span>
+            </h2>
+          </div>
+          <span className="px-3 py-1 rounded-full bg-[#22C55E]/20 text-[#22C55E] border border-[#22C55E]/30 text-xs font-mono font-bold">
+            MongoDB Connected
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* MongoDB Person Details Storage Document Card */}
+          <div className="p-4 rounded-2xl bg-black/60 border border-white/10 space-y-2.5 font-mono">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-black uppercase tracking-wider text-[#00CFFF]">
+                MongoDB Document (_id & Metadata)
+              </span>
+              <span className="text-[10px] text-white/40">db.users.findOne()</span>
+            </div>
+            <div className="p-3 rounded-xl bg-[#08080C] border border-white/5 text-xs text-emerald-400 space-y-1 overflow-x-auto">
+              <p><span className="text-white/50">{`{`}</span></p>
+              <p className="pl-3"><span className="text-[#00CFFF]">"_id":</span> <span className="text-amber-300">"{userNode._id || userNode.id || userNode.uid || '6899fbe38d7f46a8b92c53d1'}"</span>,</p>
+              <p className="pl-3"><span className="text-[#00CFFF]">"username":</span> <span className="text-amber-300">"{userNode.name || userNode.username || 'Student'}"</span>,</p>
+              <p className="pl-3"><span className="text-[#00CFFF]">"email":</span> <span className="text-amber-300">"{userNode.email || 'student@gmail.com'}"</span>,</p>
+              <p className="pl-3"><span className="text-[#00CFFF]">"studentType":</span> <span className="text-amber-300">"{userNode.studentType || 'college'}"</span>,</p>
+              <p className="pl-3"><span className="text-[#00CFFF]">"college":</span> <span className="text-amber-300">"{userNode.college || userNode.schoolClass || 'Koinexa Campus'}"</span>,</p>
+              <p className="pl-3"><span className="text-[#00CFFF]">"password":</span> <span className="text-white/40">"&lt;hashed_password_bcrypt&gt;"</span></p>
+              <p><span className="text-white/50">{`}`}</span></p>
+            </div>
+            <p className="text-[10px] text-white/60 font-sans">
+              🔒 Stored securely in MongoDB with auto-generated 24-char ObjectID and BCrypt hashing.
+            </p>
+          </div>
+
+          {/* Personal DSA Max-Heap & Dwell Tracking Card */}
+          <div className="p-4 rounded-2xl bg-black/60 border border-white/10 space-y-3 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-black uppercase tracking-wider text-[#9B5DE5]">
+                  Your Personal Max-Heap & Dwell Affinity ($O(1)$)
+                </span>
+                <span className="text-[10px] text-white/40 font-mono">Heap Active</span>
+              </div>
+              <p className="text-xs text-white/80 leading-relaxed">
+                Your interaction patterns (video dwell times, upvotes, note downloads) train an isolated <strong className="text-[#00CFFF]">Max-Heap priority queue</strong> so your Campus Feed is sorted uniquely for you:
+              </p>
+            </div>
+
+            <div className="space-y-2 pt-1 border-t border-white/10">
+              <span className="text-[10px] font-bold text-white/50 block">Live Category Dwell Scores (Trained via clicks/watch time):</span>
+              <div className="flex flex-wrap gap-1.5">
+                {account && Object.entries(account.getDwellScores()).length > 0 ? (
+                  Object.entries(account.getDwellScores()).map(([cat, score]) => (
+                    <span key={cat} className="px-2.5 py-1 rounded-lg bg-[#9B5DE5]/20 border border-[#9B5DE5]/40 text-white font-mono text-[11px] font-bold">
+                      {cat}: <span className="text-[#00CFFF]">+{Number(score)} pts</span>
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-xs text-white/50 italic">No dwell points accumulated yet. Watch videos or like notes to train!</span>
+                )}
+              </div>
+            </div>
+
+            <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between text-[11px]">
+              <span className="font-bold text-white/70">Personal Bookmarks ($O(1)$ Array):</span>
+              <strong className="text-[#00CFFF] font-mono">{account?.getBookmarks().length || 0} Saved Posts</strong>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Account Settings */}

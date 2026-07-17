@@ -197,13 +197,14 @@ export const App: React.FC = () => {
           {/* Main Content View Switcher */}
           <main className="transition-all duration-300 relative z-10 pt-16">
             {activeTab === 'home' && <HomeFeed currentUser={currentUser} account={currentAccount} />}
-            {activeTab === 'resources' && <ResourceLibrary />}
-            {activeTab === 'communities' && <SubjectCommunities currentUser={currentUser} />}
-            {activeTab === 'qna' && <QnAPlatform currentUser={currentUser} />}
+            {activeTab === 'resources' && <ResourceLibrary currentUser={currentUser} account={currentAccount} />}
+            {activeTab === 'communities' && <SubjectCommunities currentUser={currentUser} account={currentAccount} />}
+            {activeTab === 'qna' && <QnAPlatform currentUser={currentUser} account={currentAccount} />}
             {activeTab === 'messaging' && <RealtimeMessaging />}
             {activeTab === 'profile' && (
               <StudentProfile
                 currentUser={currentUser}
+                account={currentAccount}
                 onLogout={handleLogout}
                 onDeleteAccount={handleDeleteAccount}
               />

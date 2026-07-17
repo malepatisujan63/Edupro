@@ -5,7 +5,7 @@ import { sendStudyMateRequest, addComment, subscribeToComments } from '../lib/fi
 import { checkRateLimit } from '../utils/rateLimiter';
 import { validateContentSafety } from '../utils/safetyFilter';
 
-export const QnAPlatform: React.FC<{ currentUser?: any }> = ({ currentUser }) => {
+export const QnAPlatform: React.FC<{ currentUser?: any; account?: any }> = ({ currentUser, account }) => {
   const [rootComments, setRootComments] = useState<CommentNode[]>([]);
   const [replyingToId, setReplyingToId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
@@ -97,6 +97,7 @@ export const QnAPlatform: React.FC<{ currentUser?: any }> = ({ currentUser }) =>
       upvotes: 0,
     });
     
+    if (account) account.recordDwell('DSA & Algorithms', 5);
     setReplyingToId(null);
     setReplyText('');
   };
@@ -134,6 +135,7 @@ export const QnAPlatform: React.FC<{ currentUser?: any }> = ({ currentUser }) =>
       upvotes: 1,
     });
     
+    if (account) account.recordDwell('DSA & Algorithms', 10);
     setNewDoubtTitle('');
     setNewDoubtContent('');
     setIsAsking(false);

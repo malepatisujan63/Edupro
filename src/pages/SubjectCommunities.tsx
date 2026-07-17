@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Heart, MessageCircle, Share2, Bookmark, Users, Plus, X, Sparkles } from 'lucide-react';
 import { createCommunity, subscribeToCommunities, type FirestoreCommunity } from '../lib/firestoreService';
 
-export const SubjectCommunities: React.FC<{ currentUser?: any }> = ({ currentUser }) => {
+export const SubjectCommunities: React.FC<{ currentUser?: any; account?: any }> = ({ currentUser, account }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [communities, setCommunities] = useState<FirestoreCommunity[]>([]);
   const [isCreating, setIsCreating] = useState(false);
@@ -159,19 +159,20 @@ export const SubjectCommunities: React.FC<{ currentUser?: any }> = ({ currentUse
             {/* Actions */}
             <div className="pt-2 flex items-center justify-between border-t border-white/5">
               <div className="flex items-center gap-4 sm:gap-5">
-                <button onClick={() => alert('Upvoted!')} className="flex items-center gap-2 text-xs sm:text-sm font-extrabold text-white hover:text-[#9B5DE5] transition-all group/btn">
+                <button onClick={() => { if (account) account.recordDwell(comm.category, 3); alert('Upvoted! Dwell affinity boosted for ' + comm.category); }} className="flex items-center gap-2 text-xs sm:text-sm font-extrabold text-white hover:text-[#9B5DE5] transition-all group/btn">
                   <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover/btn:fill-[#9B5DE5] group-hover/btn:text-[#9B5DE5]" />
                   <span>{comm.upvotes}</span>
                 </button>
 
-                <button onClick={() => alert('Opened Koinexa Room Chat!')} className="flex items-center gap-2 text-xs sm:text-sm font-bold text-white hover:text-[#4169E1] transition-all">
+                <button onClick={() => { if (account) account.recordDwell(comm.category, 5); alert('Opened Koinexa Room Chat! Category affinity boosted (+5 pts)'); }} className="flex items-center gap-2 text-xs sm:text-sm font-bold text-white hover:text-[#4169E1] transition-all">
                   <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span>Room Chat</span>
                 </button>
 
                 <button onClick={() => {
+                  if (account) account.recordDwell(comm.category, 10);
                   setCommunities(prev => prev.map(c => c.id === comm.id ? { ...c, memberCount: c.memberCount + 1 } : c));
-                  alert(`Joined ${comm.title}! You now receive instant study broadcast notifications.`);
+                  alert(`Joined ${comm.title}! +10 Dwell points added to your personal Max-Heap for ${comm.category}.`);
                 }} className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-[#00CFFF]/20 to-[#4169E1]/20 hover:from-[#00CFFF] hover:to-[#4169E1] text-white font-black text-xs shadow-md transition-all border border-[#00CFFF]/40">
                   <Plus className="w-3.5 h-3.5" />
                   <span>Join Hub</span>

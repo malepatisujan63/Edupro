@@ -4,6 +4,7 @@ import { subscribeToPosts, createPost, backgroundUploadAndAttach, type Firestore
 
 interface ResourceLibraryProps {
   currentUser?: any | null;
+  account?: any | null;
 }
 
 // ── Instant 0ms Resource & Note Upload Modal
@@ -25,7 +26,13 @@ const ResourceUploadModal: React.FC<{
       const selected = e.target.files[0];
       setFile(selected);
       if (selected.type.startsWith('image/') || selected.type.startsWith('video/')) {
-        setLocalUrl(URL.createObjectURL(selected));
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (event.target?.result) {
+            setLocalUrl(event.target.result as string);
+          }
+        };
+        reader.readAsDataURL(selected);
       } else {
         setLocalUrl(selected.name);
       }
@@ -162,7 +169,7 @@ const ResourceUploadModal: React.FC<{
   );
 };
 
-export const ResourceLibrary: React.FC<ResourceLibraryProps> = ({ currentUser }) => {
+export const ResourceLibrary: React.FC<ResourceLibraryProps> = ({ currentUser, account }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy] = useState<'dsa' | 'latest'>('dsa');
   const [resources, setResources] = useState<FirestorePost[]>([]);
@@ -175,15 +182,19 @@ export const ResourceLibrary: React.FC<ResourceLibraryProps> = ({ currentUser })
     return () => unsub();
   }, []);
 
-  // DSA Watch-time & Interaction Dwell Scoring
+  // DSA Watch-time & Interaction Dwell Scoring (connected to global OOP StudentAccount)
   const [dwellScores, setDwellScores] = useState<Record<string, number>>({
     'Operating Systems': 12,
     'DSA': 18,
     'DBMS': 8,
     'Web Development': 15,
+    ...(account?.getDwellScores() || {}),
   });
 
   const handleInteraction = (category: string, bonus: number = 2) => {
+    if (account) {
+      account.recordDwell(category, bonus);
+    }
     setDwellScores((prev) => ({
       ...prev,
       [category]: (prev[category] || 0) + bonus,
