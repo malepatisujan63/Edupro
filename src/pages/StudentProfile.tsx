@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { LogOut, Trash2, Grid, Bookmark, PlaySquare, ChevronDown, UserPlus, MessageCircle, Settings, CheckCircle } from 'lucide-react';
+import { LogOut, Trash2, Grid, Bookmark, PlaySquare, ChevronDown, UserPlus, MessageCircle, Settings, Lock } from 'lucide-react';
 import { fetchUserProfile, fetchPostsByUser, sendStudyMateRequest, acceptStudyMateRequest, type FirestoreUser, type FirestorePost } from '../lib/supabaseService';
-import { globalSocialGraph } from '../dsa-engine';
 
 interface StudentProfileProps {
   currentUser: any;
@@ -13,7 +12,6 @@ interface StudentProfileProps {
 
 export const StudentProfile: React.FC<StudentProfileProps> = ({
   currentUser,
-  account,
   viewProfileId,
   onLogout,
   onDeleteAccount,

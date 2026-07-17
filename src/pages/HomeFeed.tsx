@@ -184,9 +184,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ currentUser, account }) => {
   const [isPulseOpen,      setIsPulseOpen]      = useState(false);
   const [storiesList,      setStoriesList]      = useState<FirestoreStory[]>([]);
 
-  // ── Personalized DSA Dwell & Max-Heap Sensor State
-  const [isDsaHudOpen, setIsDsaHudOpen] = useState(true);
-  const [dwellVersion, setDwellVersion] = useState(0);
+
 
   // ── Inline Social Media Photo / Video Post Creation State
   const [postContent, setPostContent] = useState('');
@@ -216,7 +214,6 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ currentUser, account }) => {
   const recordDwell = useCallback((category: string, bonus: number) => {
     if (account) {
       account.recordDwell(category, bonus);
-      setDwellVersion(v => v + 1);
     }
   }, [account]);
 
@@ -280,7 +277,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ currentUser, account }) => {
         return scoreB - scoreA;
       })
       .slice(0, visibleCount);
-  }, [posts, visibleCount, account, currentUser?.uid, dwellVersion]);
+  }, [posts, visibleCount, account, currentUser?.uid]);
 
   // ── Like toggle (rate-limited, 1-per-user, Firestore-enforced)
   const handleLikeToggle = useCallback(async (post: FirestorePost) => {
