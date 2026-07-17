@@ -53,19 +53,12 @@ export const IOSFloatingNav: React.FC<IOSFloatingNavProps> = ({
 
   return (
     <>
-      {/* Top App Brand Floating Badge */}
+      {/* Top App Brand Floating Badge (Koinexa Banner Picture) */}
       <div className="fixed top-3 left-4 sm:left-6 z-40 pointer-events-auto flex items-center">
-        {/* Dark theme logo */}
         <img
           src="/koinexa-banner.png"
           alt="Koinexa"
-          className="kx-logo-dark h-10 sm:h-12 md:h-14 w-auto object-contain transition-transform hover:scale-105 drop-shadow-[0_4px_16px_rgba(0,0,0,0.85)]"
-        />
-        {/* Light theme logo */}
-        <img
-          src="/koinexa-banner-light.png"
-          alt="Koinexa Light"
-          className="kx-logo-light h-10 sm:h-12 md:h-14 w-auto object-contain transition-transform hover:scale-105"
+          className="h-10 sm:h-12 md:h-14 w-auto object-contain transition-transform hover:scale-105 drop-shadow-[0_4px_16px_rgba(0,0,0,0.85)]"
         />
       </div>
 
