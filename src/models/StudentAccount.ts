@@ -5,7 +5,7 @@
 import { MaxHeap, type HeapItem } from '../dsa-engine/MaxHeap';
 import { Trie, type TrieItem } from '../dsa-engine/Trie';
 import { UndoStack, type UndoAction } from '../dsa-engine/StackQueue';
-import { type FirestoreUser, type FirestorePost } from '../lib/firestoreService';
+import { type FirestoreUser, type FirestorePost } from '../lib/supabaseService';
 
 // ─── Interfaces (Java-style contracts) ───────────────────────────
 export interface IStudentAccount {

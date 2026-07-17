@@ -3,7 +3,7 @@
 // Java equivalent: public class AccountManager (Singleton pattern)
 
 import { StudentAccount } from './StudentAccount';
-import { type FirestoreUser } from '../lib/firestoreService';
+import { type FirestoreUser } from '../lib/supabaseService';
 
 /**
  * Singleton AccountManager — manages the lifecycle of StudentAccount objects.

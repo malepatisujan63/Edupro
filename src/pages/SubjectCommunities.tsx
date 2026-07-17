@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Heart, MessageCircle, Share2, Bookmark, Users, Plus, X, Sparkles } from 'lucide-react';
-import { createCommunity, subscribeToCommunities, type FirestoreCommunity } from '../lib/firestoreService';
+import { createCommunity, subscribeToCommunities, type FirestoreCommunity } from '../lib/supabaseService';
 
 export const SubjectCommunities: React.FC<{ currentUser?: any; account?: any }> = ({ currentUser, account }) => {
   const [searchQuery, setSearchQuery] = useState('');

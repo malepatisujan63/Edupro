@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Download, Search, Heart, MessageCircle, Share2, Bookmark, FileText, Play, Zap, Plus } from 'lucide-react';
-import { subscribeToPosts, createPost, backgroundUploadAndAttach, type FirestorePost } from '../lib/firestoreService';
+import { subscribeToPosts, createPost, backgroundUploadAndAttach, type FirestorePost } from '../lib/supabaseService';
 import { uploadToCloudinary, getZeroLagPreviewUrl } from '../lib/cloudinaryService';
 
 interface ResourceLibraryProps {

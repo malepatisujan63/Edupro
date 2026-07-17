@@ -3,7 +3,7 @@ import { Heart, MessageCircle, Share2, Bookmark, BookmarkCheck, FileText, Code, 
 import {
   subscribeToPosts, likePost, unlikePost,
   fetchLikedPostIds, sendStudyMateRequest, subscribeToComments, addComment, subscribeToStories, createStory, createPost, backgroundUploadAndAttach, type FirestorePost, type FirestoreComment, type FirestoreStory,
-} from '../lib/firestoreService';
+} from '../lib/supabaseService';
 import { uploadToCloudinary, getZeroLagPreviewUrl } from '../lib/cloudinaryService';
 import { checkRateLimit } from '../utils/rateLimiter';
 import { type StudentAccount } from '../models/StudentAccount';

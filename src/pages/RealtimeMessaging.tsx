@@ -9,7 +9,7 @@ import {
   Phone,
   Square,
 } from 'lucide-react';
-import { subscribeToCommunities, type FirestoreCommunity } from '../lib/firestoreService';
+import { subscribeToCommunities, type FirestoreCommunity } from '../lib/supabaseService';
 
 interface ChatMessage {
   id: string;

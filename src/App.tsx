@@ -9,7 +9,7 @@ import { QnAPlatform } from './pages/QnAPlatform';
 import { RealtimeMessaging } from './pages/RealtimeMessaging';
 import { StudentProfile } from './pages/StudentProfile';
 import { preloadPlatformData } from './dsa-engine';
-import { createPost, backgroundUploadAndAttach } from './lib/firestoreService';
+import { createPost, backgroundUploadAndAttach } from './lib/supabaseService';
 import { AppleTimerExtension } from './components/extensions/AppleTimerExtension';
 import { checkRateLimit } from './utils/rateLimiter';
 import { validateContentSafety, verifyFileMagicBytes } from './utils/safetyFilter';

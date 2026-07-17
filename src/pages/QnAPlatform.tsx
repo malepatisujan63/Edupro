@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { HelpCircle, Heart, MessageCircle, Share2, Bookmark, CheckCircle2, Send, Sparkles, UserPlus } from 'lucide-react';
 import { type CommentNode } from '../dsa-engine';
-import { sendStudyMateRequest, addComment, subscribeToComments } from '../lib/firestoreService';
+import { sendStudyMateRequest, addComment, subscribeToComments } from '../lib/supabaseService';
 import { checkRateLimit } from '../utils/rateLimiter';
 import { validateContentSafety } from '../utils/safetyFilter';
 

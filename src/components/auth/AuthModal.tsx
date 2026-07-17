@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ShieldCheck, AlertTriangle, CheckCircle2, Trash2, Loader, Lock, Mail } from 'lucide-react';
 import { globalRegistrationHash, globalPlatformTrie, globalSocialGraph } from '../../dsa-engine';
-import { saveUserProfile, fetchUserProfileByEmail } from '../../lib/firestoreService';
+import { saveUserProfile, fetchUserProfileByEmail } from '../../lib/supabaseService';
 import { hashPassword, verifyPassword } from '../../utils/authHasher';
 
 declare global {
