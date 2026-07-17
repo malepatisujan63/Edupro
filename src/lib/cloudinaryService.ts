@@ -13,9 +13,9 @@ export interface CloudinaryUploadResult {
   bytes: number;
 }
 
-// Default Koinexa Unsigned Cloudinary configuration for instant campus demo streaming
-const CLOUDINARY_CLOUD_NAME = 'dxkufsejm'; // Koinexa public demo CDN bucket
-const CLOUDINARY_UPLOAD_PRESET = 'edunetwork_media'; // Unsigned preset fallback
+// Unsigned Cloudinary configuration (reads from .env or defaults to Koinexa demo CDN)
+const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dxkufsejm';
+const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'edunetwork_media';
 
 /**
  * Upload an image, video, or PDF directly to Cloudinary edge CDN.
