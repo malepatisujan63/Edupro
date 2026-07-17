@@ -168,6 +168,41 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
         )}
       </div>
 
+      {/* ── GOATED Placement Honor Roll & Skill Matrix Radar ── */}
+      <div className="kx-card p-6 space-y-5 rounded-3xl border border-[#00CFFF]/30 bg-gradient-to-r from-[#00CFFF]/10 via-[#9B5DE5]/10 to-[#4169E1]/10 shadow-2xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-3">
+          <div>
+            <span className="text-[10px] font-mono text-[#00CFFF] uppercase tracking-wider block">O(1) Graph Verified Mastery</span>
+            <h2 className="text-base font-black text-white flex items-center gap-2">
+              <Zap className="w-5 h-5 text-[#00CFFF]" />
+              <span>Koinexa Placement Honor Roll & Skill Radar</span>
+            </h2>
+          </div>
+          <span className="px-3 py-1 rounded-full bg-gradient-to-r from-[#00CFFF] to-[#9B5DE5] text-white text-xs font-black self-start sm:self-auto shadow-md">
+            👑 Top 1% Campus Elite
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {[
+            { skill: 'DSA & Graph Theory (Trees, DP, Greedy)', level: 94, color: 'bg-[#00CFFF]' },
+            { skill: 'Operating Systems & Virtual Memory Paging', level: 88, color: 'bg-[#9B5DE5]' },
+            { skill: 'Full-Stack MERN & Cloud Architecture', level: 92, color: 'bg-[#4169E1]' },
+            { skill: 'System Design & High-Throughput APIs', level: 85, color: 'bg-emerald-400' },
+          ].map((item, i) => (
+            <div key={i} className="p-3.5 rounded-2xl bg-slate-950/90 border border-white/10 space-y-2 shadow-inner">
+              <div className="flex justify-between text-xs font-black text-white">
+                <span className="truncate pr-2">{item.skill}</span>
+                <span className="text-[#00CFFF] font-mono">{item.level}%</span>
+              </div>
+              <div className="w-full h-2 rounded-full bg-slate-900 overflow-hidden p-[1px]">
+                <div className={`h-full rounded-full ${item.color} shadow-sm transition-all duration-1000`} style={{ width: `${item.level}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Account Settings */}
       <div className="kx-card p-6 space-y-4 border-[#9B5DE5]/30">
         <h2 className="text-base font-bold text-white flex items-center gap-2 border-b border-white/10 pb-3">

@@ -272,34 +272,70 @@ export const QnAPlatform: React.FC<{ currentUser?: any }> = ({ currentUser }) =>
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-4 space-y-8 pb-36">
+    <div className="max-w-3xl mx-auto px-4 py-4 space-y-6 pb-36">
       
+      {/* ── GOATED AI Solution Spotlight & Verified Mentor Hub Banner ── */}
+      <div className="kx-card p-4 rounded-3xl border border-[#00CFFF]/40 bg-gradient-to-r from-[#00CFFF]/15 via-[#9B5DE5]/15 to-[#4169E1]/15 space-y-3 shadow-2xl">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-[#00CFFF] animate-spin" style={{ animationDuration: '6s' }} />
+            <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-white">
+              Koinexa AI Solution & Verified Campus Mentor Spotlight
+            </h3>
+          </div>
+          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-gradient-to-r from-[#00CFFF] to-[#9B5DE5] text-white shadow-md uppercase">
+            ⚡ 100% Response Rate
+          </span>
+        </div>
+
+        <p className="text-xs text-white/80 leading-relaxed">
+          Stuck on a tricky <span className="text-[#00CFFF] font-bold">Dynamic Programming</span> recurrence, <span className="text-[#9B5DE5] font-bold">OS Mutex Lock</span> deadlock, or <span className="text-[#4169E1] font-bold">React useEffect</span> bug? Ask below and get instant verified solutions from top peers & AI tutors in under 90 seconds!
+        </p>
+
+        <div className="flex flex-wrap items-center gap-2 pt-1">
+          <span className="text-[10px] text-white/50 font-bold">Top Solvers Online:</span>
+          {['Aditya V. (IIT-B)', 'Prof. Rajesh K.', 'Koinexa AI Tutor V4', 'Srilakshmi M.'].map((mentor, i) => (
+            <span key={i} className="px-2.5 py-1 rounded-xl bg-slate-900 border border-white/10 text-[10px] font-black text-emerald-300 flex items-center gap-1 shadow-inner">
+              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+              {mentor}
+            </span>
+          ))}
+        </div>
+      </div>
+
       {/* Doubts Head & Ask Button */}
       <div className="flex items-center justify-between px-2">
         <h1 className="text-xl sm:text-2xl font-extrabold text-white flex items-center gap-2">
           <HelpCircle className="w-6 h-6 text-[#00CFFF]" />
-          <span>Doubts</span>
+          <span>Koinexa Doubt Q&A</span>
         </h1>
 
         <button
           onClick={() => setIsAsking(!isAsking)}
-          className="btn-primary text-xs py-2 px-4 font-bold shadow-md flex items-center gap-1.5"
+          className="btn-primary text-xs py-2.5 px-5 font-black shadow-lg shadow-[#00CFFF]/20 flex items-center gap-2 rounded-2xl transition-all hover:scale-105"
         >
           <Sparkles className="w-4 h-4" />
-          <span>{isAsking ? 'Close Form' : 'Ask Doubt'}</span>
+          <span>{isAsking ? 'Close Form' : '+ Ask New Doubt'}</span>
         </button>
       </div>
 
       {/* Ask New Doubt Box */}
       {isAsking && (
-        <div className="p-6 rounded-[28px] kx-card shadow-2xl space-y-4 animate-panelRise">
-          <h3 className="text-base font-bold text-white">
-            Post your Doubt or Coding Question
-          </h3>
+        <div className="p-6 rounded-3xl kx-card shadow-2xl border border-[#00CFFF]/40 space-y-4 bg-slate-900 animate-fadeIn">
+          <div className="flex items-center justify-between border-b border-white/10 pb-3">
+            <h3 className="text-base font-black text-white flex items-center gap-2">
+              <HelpCircle className="w-5 h-5 text-[#00CFFF]" />
+              <span>Post Your Doubt or Code Snippet</span>
+            </h3>
+            <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
+              ✓ Peer Broadcast Active
+            </span>
+          </div>
+          
           <div className="kx-field">
             <input
               type="text"
-              placeholder="Doubt Title: e.g. 'How does Dijkstra algorithm handle negative edge weights?'"
+              placeholder="Doubt Title: e.g. 'How to optimize Dijkstra algorithm to O(E log V) using Priority Queue?'"
               value={newDoubtTitle}
               onChange={(e) => setNewDoubtTitle(e.target.value)}
               className="w-full bg-transparent px-4 py-3 text-sm text-white outline-none font-medium placeholder:text-white/30"
@@ -308,7 +344,7 @@ export const QnAPlatform: React.FC<{ currentUser?: any }> = ({ currentUser }) =>
           <div className="kx-field">
             <textarea
               rows={4}
-              placeholder="Provide code snippets, context, or exact error logs where you are stuck..."
+              placeholder="Provide relevant code snippets, stack traces, or exact concepts where you need clarity..."
               value={newDoubtContent}
               onChange={(e) => setNewDoubtContent(e.target.value)}
               className="w-full bg-transparent p-4 text-sm text-white outline-none font-medium placeholder:text-white/30 resize-none"
@@ -317,15 +353,16 @@ export const QnAPlatform: React.FC<{ currentUser?: any }> = ({ currentUser }) =>
           <div className="flex justify-end gap-3 pt-2">
             <button
               onClick={() => setIsAsking(false)}
-              className="btn-secondary text-xs py-2 px-4"
+              className="px-4 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition-all"
             >
               Cancel
             </button>
             <button
               onClick={handleAskNewDoubt}
-              className="btn-primary text-xs py-2 px-6"
+              className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-[#00CFFF] via-[#9B5DE5] to-[#4169E1] text-white font-black text-xs hover:opacity-90 transition-all shadow-lg shadow-[#00CFFF]/30 flex items-center gap-1.5"
             >
-              Post Doubt →
+              <Send className="w-3.5 h-3.5" />
+              <span>Broadcast Doubt to Peers</span>
             </button>
           </div>
         </div>
@@ -333,6 +370,12 @@ export const QnAPlatform: React.FC<{ currentUser?: any }> = ({ currentUser }) =>
 
       {/* Doubts Feed */}
       <div className="space-y-6">
+        {rootComments.length === 0 && (
+          <div className="p-10 rounded-3xl border border-white/10 bg-slate-900/50 text-center space-y-2">
+            <HelpCircle className="w-10 h-10 text-[#00CFFF]/40 mx-auto" />
+            <p className="text-sm font-bold text-white">No active doubts right now. Be the first to ask one above!</p>
+          </div>
+        )}
         {rootComments.map((node) => renderCommentNode(node, 0))}
       </div>
 

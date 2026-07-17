@@ -207,8 +207,19 @@ export const ResourceLibrary: React.FC<ResourceLibraryProps> = ({ currentUser })
       return 0;
     });
 
+  const [quickFilter, setQuickFilter] = useState<string>('ALL');
+
+  const finalDisplayedResources = filteredResources.filter((res) => {
+    if (quickFilter === 'ALL') return true;
+    if (quickFilter === 'SHEETS') return res.mediaType !== 'video';
+    if (quickFilter === 'VIDEOS') return res.mediaType === 'video';
+    if (quickFilter === 'DSA') return res.category?.toUpperCase().includes('DSA') || res.title.toUpperCase().includes('DSA');
+    if (quickFilter === 'OS') return res.category?.toUpperCase().includes('OPERATING') || res.title.toUpperCase().includes('OS');
+    return true;
+  });
+
   return (
-    <div className="max-w-2xl mx-auto px-4 py-4 space-y-8 pb-36">
+    <div className="max-w-3xl mx-auto px-4 py-4 space-y-6 pb-36">
       
       {/* Top Search Bar & Upload Button */}
       <div className="flex items-center gap-3">
@@ -217,7 +228,7 @@ export const ResourceLibrary: React.FC<ResourceLibraryProps> = ({ currentUser })
             <Search className="w-4 h-4 text-[#4169E1] absolute left-4" />
             <input
               type="text"
-              placeholder="Search notes & videos..."
+              placeholder="Search notes, cheat sheets, & video crash courses..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-transparent pl-11 pr-4 py-3 text-sm text-white placeholder:text-white/30 outline-none font-medium"
@@ -227,11 +238,54 @@ export const ResourceLibrary: React.FC<ResourceLibraryProps> = ({ currentUser })
 
         <button
           onClick={() => setIsUploadModalOpen(true)}
-          className="px-4 py-3 rounded-full bg-gradient-to-r from-[#00CFFF] to-[#9B5DE5] hover:opacity-95 text-white font-black text-xs flex items-center gap-2 shadow-lg shadow-[#00CFFF]/20 transition-all shrink-0 active:scale-95"
+          className="px-5 py-3 rounded-2xl bg-gradient-to-r from-[#00CFFF] via-[#9B5DE5] to-[#4169E1] hover:opacity-95 text-white font-black text-xs flex items-center gap-2 shadow-lg shadow-[#00CFFF]/25 transition-all shrink-0 active:scale-95"
         >
           <Plus className="w-4 h-4" />
-          <span className="hidden sm:inline">Upload Note</span>
+          <span className="hidden sm:inline">+ Upload Sheet</span>
         </button>
+      </div>
+
+      {/* ── GOATED High-Yield Placement Cheat Sheets & Quick-Filter Dock ── */}
+      <div className="kx-card p-4 rounded-3xl border border-[#00CFFF]/30 bg-gradient-to-r from-[#00CFFF]/10 via-[#9B5DE5]/10 to-[#4169E1]/10 space-y-3 shadow-xl">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-base">⚡</span>
+            <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-white">
+              Koinexa High-Yield Exam & Placement Cheat Sheets Filter
+            </h3>
+          </div>
+          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-900 border border-white/10 text-[#00CFFF] font-mono">
+            O(1) Instant Lookup
+          </span>
+        </div>
+
+        <div className="flex flex-wrap gap-2 pt-1">
+          {[
+            { id: 'ALL', label: '🌟 All Study Notes & Videos' },
+            { id: 'SHEETS', label: '📄 High-Yield Cheat Sheets' },
+            { id: 'VIDEOS', label: '🎬 Video Crash Courses' },
+            { id: 'DSA', label: '💡 DSA & Trees Sheets' },
+            { id: 'OS', label: '⚡ OS & DBMS Quick Rev' },
+          ].map((tab) => {
+            const isSelected = quickFilter === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setQuickFilter(tab.id);
+                  handleInteraction(tab.id === 'DSA' ? 'DSA' : 'Operating Systems', 5);
+                }}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all duration-300 border ${
+                  isSelected
+                    ? 'bg-gradient-to-r from-[#00CFFF] to-[#4169E1] text-white border-transparent shadow-md shadow-[#00CFFF]/30 scale-105'
+                    : 'bg-slate-900/80 text-white/70 border-white/10 hover:text-white hover:border-[#00CFFF]/40'
+                }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <ResourceUploadModal
@@ -240,15 +294,15 @@ export const ResourceLibrary: React.FC<ResourceLibraryProps> = ({ currentUser })
         currentUser={currentUser}
       />
 
-      {/* Pure Instagram-Like Notes & Videos Feed (Clean borderless, dark background #000000 posts with white text) */}
-      <div className="space-y-8">
-        {filteredResources.length === 0 ? (
-          <div className="text-center py-16 space-y-3 bg-white/[0.02] rounded-3xl border border-white/10 p-8">
+      {/* Pure Instagram-Like Notes & Videos Feed */}
+      <div className="space-y-6">
+        {finalDisplayedResources.length === 0 ? (
+          <div className="text-center py-16 space-y-3 bg-slate-900/40 rounded-3xl border border-white/10 p-8">
             <FileText className="w-12 h-12 text-[#00CFFF] mx-auto opacity-60 animate-pulse" />
-            <p className="text-base font-bold text-white">No academic study notes uploaded yet</p>
-            <p className="text-xs text-white/50">Click "Upload Note" right above to share the first study sheet or video!</p>
+            <p className="text-base font-bold text-white">No resources matching "{quickFilter}" found</p>
+            <p className="text-xs text-white/50">Try switching filters or click "+ Upload Sheet" right above!</p>
           </div>
-        ) : filteredResources.map((res) => {
+        ) : finalDisplayedResources.map((res) => {
           const authorName = res.authorName || 'Student Contributor';
           const authorCollege = res.authorCollege || 'Koinexa Campus';
           const category = res.category || 'General';
