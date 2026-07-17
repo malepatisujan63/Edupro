@@ -639,7 +639,7 @@
 }
 
 /* ════════════════════════════════════════════════════════════════════════════
-   LIGHT THEME OVERRIDES
+   LIGHT THEME OVERRIDES (GLOBAL INVERSION)
    ════════════════════════════════════════════════════════════════════════════ */
 body.light-theme {
   background: #FFFFFF !important;
@@ -655,16 +655,38 @@ body.light-theme h6 {
   color: #000000 !important;
 }
 
-/* Make backgrounds of panels slightly off-white instead of dark gray */
+/* ── OVERRIDE ALL HARDCODED TAILWIND BACKGROUNDS ── */
+body.light-theme .bg-\[\#000000\],
+body.light-theme .bg-black {
+  background-color: #FFFFFF !important;
+}
+
 body.light-theme .bg-\[\#111111\], 
 body.light-theme .bg-\[\#1A1A1A\],
 body.light-theme .bg-\[\#0A0A0A\],
-body.light-theme .bg-\[\#05050A\] {
-  background-color: #F9FAFB !important; /* Tailwind gray-50 */
-  border-color: #E5E7EB !important; /* Tailwind gray-200 */
+body.light-theme .bg-\[\#05050A\],
+body.light-theme .bg-\[\#0D0D0D\] {
+  background-color: #F8FAFC !important; /* Very light slate */
+  border-color: #E2E8F0 !important;
 }
 
-/* Target specific Koinexa text logo images and give them a white background/invert */
+/* ── OVERRIDE ALL HARDCODED TAILWIND TEXT COLORS ── */
+body.light-theme .text-white { color: #0F172A !important; }
+body.light-theme .text-white\/30 { color: rgba(15, 23, 42, 0.3) !important; }
+body.light-theme .text-white\/40 { color: rgba(15, 23, 42, 0.4) !important; }
+body.light-theme .text-white\/50 { color: rgba(15, 23, 42, 0.5) !important; }
+body.light-theme .text-white\/60 { color: rgba(15, 23, 42, 0.6) !important; }
+body.light-theme .text-white\/70 { color: rgba(15, 23, 42, 0.7) !important; }
+body.light-theme .text-white\/80 { color: rgba(15, 23, 42, 0.8) !important; }
+body.light-theme .text-white\/90 { color: rgba(15, 23, 42, 0.9) !important; }
+
+/* ── OVERRIDE ALL HARDCODED TAILWIND BORDERS ── */
+body.light-theme .border-white\/5 { border-color: rgba(0, 0, 0, 0.05) !important; }
+body.light-theme .border-white\/10 { border-color: rgba(0, 0, 0, 0.1) !important; }
+body.light-theme .border-white\/20 { border-color: rgba(0, 0, 0, 0.2) !important; }
+body.light-theme .border-white\/30 { border-color: rgba(0, 0, 0, 0.3) !important; }
+
+/* ── TARGET KOINEXA LOGOS ── */
 body.light-theme img[alt="Koinexa"] {
   background-color: #FFFFFF !important;
   border-radius: 12px;
