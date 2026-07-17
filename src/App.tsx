@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { IOSFloatingNav, type NavTab } from './components/layout/IOSFloatingNav';
+import { NotificationPanel } from './components/layout/NotificationPanel';
 import { AuthModal } from './components/auth/AuthModal';
 import { DSAIntelligenceHUD } from './components/dsa/DSAIntelligenceHUD';
 import { HomeFeed } from './pages/HomeFeed';
@@ -220,42 +221,7 @@ export const App: React.FC = () => {
 
       {/* Slide-Over Notification Panel ($O(1)$ Queue Feed) */}
       {isNotificationsOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm animate-fadeIn">
-          <div className="w-full max-w-sm h-full glass-panel rounded-none border-l border-white/10 p-6 space-y-6 flex flex-col shadow-2xl animate-panelRise">
-            <div className="flex items-center justify-between pb-4 border-b border-white/15">
-              <h3 className="text-lg font-extrabold text-white flex items-center gap-2">
-                <Bell className="w-5 h-5 text-[#9B5DE5]" />
-                <span>Notification Panel</span>
-              </h3>
-              <button
-                onClick={() => setIsNotificationsOpen(false)}
-                className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-white/15 transition-all"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto space-y-4 divide-y divide-white/10 pr-1">
-              <div className="flex flex-col items-center justify-center h-full text-white/40 pt-10">
-                <Bell className="w-8 h-8 mb-3 opacity-50" />
-                <p className="text-sm font-bold">No new notifications</p>
-                <p className="text-xs mt-1">You're all caught up!</p>
-              </div>
-            </div>
-
-            <div className="pt-3 border-t border-white/15">
-              <button
-                onClick={() => {
-                  alert('All notifications marked read ($O(1)$ queue reset).');
-                  setIsNotificationsOpen(false);
-                }}
-                className="w-full btn-secondary text-xs py-2.5 font-bold"
-              >
-                Clear All Notifications
-              </button>
-            </div>
-          </div>
-        </div>
+        <NotificationPanel currentUser={currentUser} onClose={() => setIsNotificationsOpen(false)} />
       )}
 
       {/* Create New Post Modal (Instagram Dark Theme) */}
