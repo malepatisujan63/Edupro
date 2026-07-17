@@ -272,6 +272,34 @@ export async function fetchUserProfileByEmail(email: string): Promise<FirestoreU
   return data ? rowToUser(data) : null;
 }
 
+import { globalPlatformTrie } from '../dsa-engine';
+
+export async function populateTrieWithAllUsers(): Promise<void> {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*');
+  if (error) {
+    console.error('[Supabase populateTrieWithAllUsers]', error.message);
+    return;
+  }
+  
+  if (data) {
+    data.forEach(row => {
+      const user = rowToUser(row);
+      const locationInfo = [user.college, user.department, user.semester ? `Sem ${user.semester}` : ''].filter(Boolean).join(' • ');
+      globalPlatformTrie.indexItem({
+        id: user.uid,
+        title: user.name,
+        subtitle: locationInfo,
+        type: 'user',
+        tags: [...(user.badges || []), ...(user.skills || [])],
+        avatarUrl: user.avatarUrl
+      });
+    });
+  }
+}
+
+
 // ─────────────────────────────────────────────
 // FILE UPLOAD — Cloudinary CDN (g4yhhqgd / koinexa)
 // ALL media goes to Cloudinary — zero Firebase Storage dependency
