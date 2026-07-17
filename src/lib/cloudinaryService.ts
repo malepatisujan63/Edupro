@@ -13,9 +13,9 @@ export interface CloudinaryUploadResult {
   bytes: number;
 }
 
-// Unsigned Cloudinary configuration (reads from .env or defaults to Koinexa demo CDN)
-const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'dxkufsejm';
-const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'edunetwork_media';
+// Unsigned Cloudinary configuration (reads from .env or defaults to Koinexa CDN bucket)
+const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'g4yhhqgd';
+const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'koinexa';
 
 /**
  * Upload an image, video, or PDF directly to Cloudinary edge CDN.
