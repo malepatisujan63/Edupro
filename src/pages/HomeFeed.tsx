@@ -4,6 +4,7 @@ import {
   subscribeToPosts, likePost, unlikePost,
   fetchLikedPostIds, sendStudyMateRequest, subscribeToComments, addComment, subscribeToStories, createStory, createPost, backgroundUploadAndAttach, type FirestorePost, type FirestoreComment, type FirestoreStory,
 } from '../lib/firestoreService';
+import { uploadToCloudinary, getZeroLagPreviewUrl } from '../lib/cloudinaryService';
 import { checkRateLimit } from '../utils/rateLimiter';
 import { type StudentAccount } from '../models/StudentAccount';
 
@@ -201,13 +202,8 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ currentUser, account }) => {
       setAttachedFile(file);
       setAttachedMediaType(type);
       if (type === 'image' || type === 'video') {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          if (event.target?.result) {
-            setAttachedMediaUrl(event.target.result as string);
-          }
-        };
-        reader.readAsDataURL(file);
+        const previewUrl = getZeroLagPreviewUrl(file);
+        setAttachedMediaUrl(previewUrl);
       } else {
         setAttachedMediaUrl(file.name);
       }
@@ -565,9 +561,19 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ currentUser, account }) => {
               }
               setIsPosting(true);
               try {
-                const localPreview = attachedMediaUrl || undefined;
+                let finalMediaUrl = attachedMediaUrl || undefined;
                 const fileToUpload = attachedFile;
                 const mediaTypeToSave = attachedMediaType || undefined;
+
+                // Zero-Lag Cloudinary CDN edge transfer ($O(1)$ memory, no base64 string lag)
+                if (fileToUpload && mediaTypeToSave) {
+                  try {
+                    const cdnResult = await uploadToCloudinary(fileToUpload);
+                    finalMediaUrl = cdnResult.secureUrl;
+                  } catch (cdnErr) {
+                    console.warn('Cloudinary CDN unsigned transfer fallback to background sync:', cdnErr);
+                  }
+                }
 
                 const postId = await createPost({
                   title: postContent.trim() || `[${mediaTypeToSave?.toUpperCase() || 'POST'}] ${fileToUpload?.name || 'Shared Moment'}`,
@@ -575,17 +581,17 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ currentUser, account }) => {
                   authorName: currentUser.name || 'Student',
                   authorCollege: currentUser.college || 'Koinexa Campus',
                   authorAvatarUrl: currentUser.avatarUrl || '',
-                  upvotes: 0,
+                  upvotes: 1,
                   commentsCount: 0,
                   category: 'General',
                   type: mediaTypeToSave === 'video' ? 'post' : 'note',
-                  mediaUrl: localPreview,
+                  mediaUrl: finalMediaUrl,
                   mediaType: mediaTypeToSave,
                 });
 
-                if (fileToUpload && mediaTypeToSave) {
+                if (fileToUpload && mediaTypeToSave && (!finalMediaUrl || finalMediaUrl.startsWith('blob:'))) {
                   backgroundUploadAndAttach(fileToUpload, currentUser.uid, postId, 'posts')
-                    .catch(err => console.warn('Cloud sync skipped, using instant Data URL:', err.message));
+                    .catch(err => console.warn('Cloud sync skipped, using instant stream:', err.message));
                 }
 
                 setPostContent('');

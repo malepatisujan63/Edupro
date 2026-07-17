@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Download, Search, Heart, MessageCircle, Share2, Bookmark, FileText, Play, Zap, Plus } from 'lucide-react';
 import { subscribeToPosts, createPost, backgroundUploadAndAttach, type FirestorePost } from '../lib/firestoreService';
+import { uploadToCloudinary, getZeroLagPreviewUrl } from '../lib/cloudinaryService';
 
 interface ResourceLibraryProps {
   currentUser?: any | null;
@@ -26,13 +27,8 @@ const ResourceUploadModal: React.FC<{
       const selected = e.target.files[0];
       setFile(selected);
       if (selected.type.startsWith('image/') || selected.type.startsWith('video/')) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          if (event.target?.result) {
-            setLocalUrl(event.target.result as string);
-          }
-        };
-        reader.readAsDataURL(selected);
+        const previewUrl = getZeroLagPreviewUrl(selected);
+        setLocalUrl(previewUrl);
       } else {
         setLocalUrl(selected.name);
       }
@@ -47,8 +43,17 @@ const ResourceUploadModal: React.FC<{
     const user = currentUser || { uid: 'anon', name: 'Student Contributor', college: 'Koinexa Campus' };
 
     try {
-      const previewUrl = localUrl || undefined;
+      let previewUrl = localUrl || undefined;
       const mediaTypeVal = format === 'Video Lecture' ? 'video' : format === 'Photo Diagram' ? 'image' : 'pdf';
+
+      if (file && (mediaTypeVal === 'image' || mediaTypeVal === 'video')) {
+        try {
+          const cdnRes = await uploadToCloudinary(file);
+          previewUrl = cdnRes.secureUrl;
+        } catch (err) {
+          console.warn('Cloudinary unsigned CDN upload fallback:', err);
+        }
+      }
 
       // Write immediately to Firestore (0ms optimistic latency)
       const postId = await createPost({
@@ -64,6 +69,10 @@ const ResourceUploadModal: React.FC<{
         mediaUrl: previewUrl,
         mediaType: mediaTypeVal as any,
       });
+
+      if (file && (!previewUrl || previewUrl.startsWith('blob:'))) {
+        backgroundUploadAndAttach(file, user.uid, postId, 'resources').catch(() => {});
+      }
 
       // Launch background upload engine
       if (file) {
