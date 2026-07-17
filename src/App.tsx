@@ -37,6 +37,15 @@ export const App: React.FC = () => {
   const [currentAccount, setCurrentAccount] = useState<StudentAccount | null>(null);
   const [activeDm,       setActiveDm]       = useState<{id: string, name: string} | null>(null);
   const [isInitialized,  setIsInitialized]  = useState(false);
+  const [theme,          setTheme]          = useState<'dark' | 'light'>('dark');
+
+  useEffect(() => {
+    if (theme === 'light') {
+      document.body.classList.add('light-theme');
+    } else {
+      document.body.classList.remove('light-theme');
+    }
+  }, [theme]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'video' | 'pdf') => {
     const files = e.target.files;
@@ -218,6 +227,8 @@ export const App: React.FC = () => {
                   setActiveDm({ id, name });
                   setActiveTab('messaging');
                 }}
+                theme={theme}
+                setTheme={setTheme}
               />
             )}
           </main>

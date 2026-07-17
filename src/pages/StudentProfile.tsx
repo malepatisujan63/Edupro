@@ -9,6 +9,8 @@ interface StudentProfileProps {
   onLogout: () => void;
   onDeleteAccount: () => void;
   onStartMessage?: (userId: string, userName: string) => void;
+  theme?: 'light' | 'dark';
+  setTheme?: (t: 'light' | 'dark') => void;
 }
 
 export const StudentProfile: React.FC<StudentProfileProps> = ({
@@ -17,6 +19,8 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
   onLogout,
   onDeleteAccount,
   onStartMessage,
+  theme,
+  setTheme
 }) => {
   const isViewingSelf = !viewProfileId || viewProfileId === (currentUser.uid || currentUser.id);
   const targetId = isViewingSelf ? (currentUser.uid || currentUser.id) : viewProfileId!;
@@ -288,6 +292,17 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
             </div>
 
             <div className="space-y-4">
+               {/* Theme Switcher */}
+               {setTheme && (
+                 <button 
+                   onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} 
+                   className="w-full py-4 rounded-2xl font-bold bg-[#111] border border-white/10 text-white hover:bg-white/10 flex items-center justify-between px-6 transition-all shadow-inner"
+                 >
+                   <span className="flex items-center gap-2">Theme Preference</span>
+                   <span className="text-xs text-[#00CFFF] bg-[#00CFFF]/10 px-3 py-1 rounded-full uppercase tracking-wider">{theme}</span>
+                 </button>
+               )}
+
                <button onClick={onLogout} className="w-full py-4 rounded-2xl font-bold bg-[#111] border border-white/10 text-white hover:bg-white/10 flex items-center justify-center gap-2 transition-all shadow-inner"><LogOut className="w-5 h-5"/> Sign Out</button>
                <button onClick={() => { if(confirm('Are you absolutely sure you want to permanently delete your account? This action cannot be undone.')) onDeleteAccount(); }} className="w-full py-4 rounded-2xl font-bold bg-[#FF3B30]/10 border border-[#FF3B30]/30 text-[#FF3B30] hover:bg-[#FF3B30]/20 flex items-center justify-center gap-2 transition-all shadow-inner"><Trash2 className="w-5 h-5"/> Delete Account</button>
             </div>
