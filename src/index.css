@@ -803,3 +803,14 @@ body.light-theme img[alt="Koinexa"] {
   padding: 0 !important;
   border-radius: 0 !important;
 }
+
+/* =============================================================================
+   DUAL LOGO SWAP — dark/light logo per theme
+   ============================================================================= */
+/* Dark theme: show dark logo, hide light logo */
+.kx-logo-dark  { display: block; }
+.kx-logo-light { display: none;  }
+
+/* Light theme: hide dark logo, show light logo */
+body.light-theme .kx-logo-dark  { display: none  !important; }
+body.light-theme .kx-logo-light { display: block !important; }
