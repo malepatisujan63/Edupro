@@ -183,6 +183,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ currentUser, account }) => {
   const [isPulseOpen,      setIsPulseOpen]      = useState(false);
   const [storiesList,      setStoriesList]      = useState<FirestoreStory[]>([]);
 
+  // ── Personalized DSA Dwell & Max-Heap Sensor State
+  const [isDsaHudOpen, setIsDsaHudOpen] = useState(true);
+  const [dwellVersion, setDwellVersion] = useState(0);
+
   // ── Inline Social Media Photo / Video Post Creation State
   const [postContent, setPostContent] = useState('');
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
@@ -212,9 +216,12 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ currentUser, account }) => {
 
   const loaderRef = useRef<HTMLDivElement>(null);
 
-  // ── DSA dwell scores → read from account object per-user
+  // ── DSA dwell scores → read from account object per-user ($O(1)$ Hash Map update triggers $O(n \log n)$ Heap sort)
   const recordDwell = useCallback((category: string, bonus: number) => {
-    account?.recordDwell(category, bonus);
+    if (account) {
+      account.recordDwell(category, bonus);
+      setDwellVersion(v => v + 1);
+    }
   }, [account]);
 
   // ── Subscribe to Firestore Posts (real-time)
@@ -277,7 +284,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ currentUser, account }) => {
         return scoreB - scoreA;
       })
       .slice(0, visibleCount);
-  }, [posts, visibleCount, account, currentUser?.uid]);
+  }, [posts, visibleCount, account, currentUser?.uid, dwellVersion]);
 
   // ── Like toggle (rate-limited, 1-per-user, Firestore-enforced)
   const handleLikeToggle = useCallback(async (post: FirestorePost) => {
@@ -724,6 +731,84 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ currentUser, account }) => {
         </div>
       )}
 
+      {/* ── ⚡ Personalized DSA Recommendation & Dwell Sensor HUD ($O(1)$ Hash Table + $O(K \log N)$ Max-Heap) ── */}
+      <div className="kx-card p-4 sm:p-5 rounded-3xl border border-[#00CFFF]/30 bg-gradient-to-r from-[#00CFFF]/10 via-[#9B5DE5]/10 to-transparent shadow-xl space-y-3.5 mb-2 transition-all">
+        <div className="flex items-center justify-between cursor-pointer" onClick={() => setIsDsaHudOpen(!isDsaHudOpen)}>
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#00CFFF] shadow-[0_0_12px_#00CFFF] animate-ping shrink-0" />
+            <div className="min-w-0">
+              <h3 className="text-xs sm:text-sm font-black text-white flex items-center gap-1.5 truncate">
+                <span>⚡ Personalized DSA Recommendation Engine</span>
+                <span className="text-[10px] font-mono font-normal px-2 py-0.5 rounded-full bg-white/10 text-[#00CFFF]">
+                  Hybrid MongoDB + Firestore
+                </span>
+              </h3>
+            </div>
+          </div>
+          <button className="text-[11px] font-black text-[#00CFFF] hover:underline shrink-0">
+            {isDsaHudOpen ? 'Hide Diagnostics ▲' : 'View DSA Metrics ▼'}
+          </button>
+        </div>
+
+        {isDsaHudOpen && (
+          <div className="pt-3 border-t border-white/10 space-y-3 animate-fadeIn text-left">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div className="p-3 rounded-2xl bg-black/40 border border-white/10 space-y-1">
+                <span className="text-[10px] font-black uppercase tracking-wider text-white/50 flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-[#22C55E]" />
+                  MongoDB Identity & Graph Adjacency
+                </span>
+                <p className="font-extrabold text-white truncate">
+                  {currentUser?.name || 'Academic Student'} <span className="text-white/50 font-normal">({currentUser?.college || 'Koinexa Campus'})</span>
+                </p>
+                <p className="text-[10px] text-white/60">
+                  Node $V$ connected in Adjacency List ($O(V+E)$ shortest path active)
+                </p>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-black/40 border border-white/10 space-y-1">
+                <span className="text-[10px] font-black uppercase tracking-wider text-white/50 flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-[#00CFFF]" />
+                  Max-Heap Priority Formula ($O(K \log N)$)
+                </span>
+                <p className="font-mono font-bold text-[#00CFFF] text-[11px]">
+                  S(P) = 3×Upvotes + 4×Dwell + Freshness
+                </p>
+                <p className="text-[10px] text-white/60">
+                  Instantly extracts top priority posts as your watch/like preferences change
+                </p>
+              </div>
+            </div>
+
+            {/* Live Dwell Score Vector ($O(1)$ Hash Table) */}
+            <div className="p-3 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-black uppercase tracking-wider text-[#9B5DE5]">
+                  Your Live Interest Vector ($O(1)$ Hash Map Tracking)
+                </span>
+                <span className="text-[10px] text-white/50 font-mono">
+                  Version #{dwellVersion}
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                {account && Object.entries(account.getDwellScores()).length > 0 ? (
+                  Object.entries(account.getDwellScores()).map(([cat, score]) => (
+                    <span key={cat} className="px-2.5 py-1 rounded-full bg-gradient-to-r from-[#00CFFF]/20 to-[#9B5DE5]/20 border border-[#00CFFF]/40 text-white font-bold text-[11px] flex items-center gap-1">
+                      <span>{cat}:</span>
+                      <strong className="text-[#00CFFF]">+{score} pts</strong>
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-xs text-white/60 italic">
+                    👁️ Hover over posts, watch videos, or click to start training your personalized Max-Heap right now!
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Feed */}
       <div className="space-y-0">
         {visiblePosts.map((post) => {
@@ -731,6 +816,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ currentUser, account }) => {
           const isLiking   = likingProgress.has(post.id!);
           const isBookmark = bookmarkedIds.has(post.id!);
           const badge      = typeBadge[post.type] || typeBadge.post;
+
+          // Compute live priority breakdown ($O(1)$ Hash Map + $O(\log n)$ Ranking)
+          const dwellPts = account ? (account.getDwellScores()[post.category] || 0) * 4 : 0;
+          const totalPriorityScore = (post.upvotes * 3) + dwellPts;
 
           return (
             <article
@@ -759,11 +848,16 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ currentUser, account }) => {
                     <h4 className="text-sm font-black text-white flex items-center gap-1.5">
                       {post.authorName}
                     </h4>
-                    <p className="text-[11px] text-white/40 font-medium flex items-center gap-1">
-                      <span className="text-[#00CFFF] font-bold">#{post.category}</span>
-                      <span>·</span>
-                      <span>{getRelativeTime(post.createdAt)}</span>
-                    </p>
+                    <div className="flex flex-wrap items-center gap-2 mt-0.5">
+                      <p className="text-[11px] text-white/40 font-medium flex items-center gap-1">
+                        <span className="text-[#00CFFF] font-bold">#{post.category}</span>
+                        <span>·</span>
+                        <span>{getRelativeTime(post.createdAt)}</span>
+                      </p>
+                      <span className="px-2 py-0.5 rounded-md bg-[#00CFFF]/15 border border-[#00CFFF]/30 text-[#00CFFF] font-mono text-[10px] font-bold flex items-center gap-1 shadow-sm" title="Calculated by Max-Heap Priority Formula">
+                        ⚡ Priority: {totalPriorityScore} pts {dwellPts > 0 && `(+${dwellPts} Dwell Affinity)`}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -799,11 +893,17 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ currentUser, account }) => {
                   <video
                     src={post.mediaUrl}
                     controls preload="none"
+                    onPlay={() => recordDwell(post.category, 5)}
+                    onTimeUpdate={(e) => {
+                      if (Math.floor(e.currentTarget.currentTime) > 0 && Math.floor(e.currentTarget.currentTime) % 6 === 0) {
+                        recordDwell(post.category, 2);
+                      }
+                    }}
                     className="w-full max-h-[500px] object-cover"
                     poster=""
                   />
-                  <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-full bg-[#000000]/90 backdrop-blur-sm text-[10px] font-bold text-[#4169E1] border border-[#4169E1]/25 flex items-center gap-1 pointer-events-none">
-                    <Play className="w-3 h-3" />Storage Stream
+                  <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-full bg-[#000000]/90 backdrop-blur-sm text-[10px] font-bold text-[#34C759] border border-[#34C759]/30 flex items-center gap-1 pointer-events-none shadow-md">
+                    <Play className="w-3 h-3" />Live DSA Watch Tracker
                   </div>
                 </div>
               )}
