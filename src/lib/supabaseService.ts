@@ -648,6 +648,14 @@ export async function addComment(comment: Omit<FirestoreComment, 'id' | 'created
     .select('id')
     .single();
   if (error) throw new Error(`[Supabase addComment] ${error.message}`);
+  
+  if (comment.parentId) {
+    const { data: post } = await supabase.from('posts').select('comments_count').eq('id', comment.parentId).single();
+    if (post) {
+      await supabase.from('posts').update({ comments_count: (post.comments_count || 0) + 1 }).eq('id', comment.parentId);
+    }
+  }
+  
   return data.id;
 }
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Heart, MessageCircle, Share2, Bookmark, Users, Plus, X, Sparkles } from 'lucide-react';
 import { createCommunity, subscribeToCommunities, type FirestoreCommunity } from '../lib/supabaseService';
 
-export const SubjectCommunities: React.FC<{ currentUser?: any; account?: any }> = ({ currentUser, account }) => {
+export const SubjectCommunities: React.FC<{ currentUser?: any; account?: any; onOpenRoomChat?: (roomTitle: string) => void }> = ({ currentUser, account, onOpenRoomChat }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [communities, setCommunities] = useState<FirestoreCommunity[]>([]);
   const [isCreating, setIsCreating] = useState(false);
@@ -164,7 +164,10 @@ export const SubjectCommunities: React.FC<{ currentUser?: any; account?: any }> 
                   <span>{comm.upvotes}</span>
                 </button>
 
-                <button onClick={() => { if (account) account.recordDwell(comm.category, 5); alert('Opened Koinexa Room Chat! Category affinity boosted (+5 pts)'); }} className="flex items-center gap-2 text-xs sm:text-sm font-bold text-white hover:text-[#4169E1] transition-all">
+                <button onClick={() => { 
+                  if (account) account.recordDwell(comm.category, 5); 
+                  if (onOpenRoomChat) onOpenRoomChat(comm.title);
+                }} className="flex items-center gap-2 text-xs sm:text-sm font-bold text-white hover:text-[#4169E1] transition-all">
                   <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span>Room Chat</span>
                 </button>

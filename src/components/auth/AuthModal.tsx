@@ -23,10 +23,11 @@ interface AuthModalProps {
   currentUser: any;
   onLoginSuccess: (user: any) => void;
   onDeleteAccount: () => void;
+  initialStep?: 'SIGN_IN' | 'REGISTER';
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({
-  isOpen, onClose, currentUser, onLoginSuccess, onDeleteAccount,
+  isOpen, onClose, currentUser, onLoginSuccess, onDeleteAccount, initialStep
 }) => {
   type Step = 'SIGN_IN' | 'REGISTER' | 'REG_DETAILS' | 'LOGGED_IN';
   const [step, setStep] = useState<Step>('SIGN_IN');
@@ -61,7 +62,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   // ── Reset on open
   useEffect(() => {
     if (isOpen) {
-      setStep('SIGN_IN'); setErrorMsg(''); setSuccessMsg('');
+      setStep(initialStep || 'SIGN_IN'); setErrorMsg(''); setSuccessMsg('');
       setCaptchaChecked(false);
     }
   }, [isOpen]);

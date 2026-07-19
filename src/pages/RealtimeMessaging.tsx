@@ -21,10 +21,11 @@ import {
 
 interface RealtimeMessagingProps {
   activeDm?: { id: string, name: string } | null;
+  initialChannel?: string;
   currentUser: any;
 }
 
-export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({ activeDm, currentUser }) => {
+export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({ activeDm, initialChannel, currentUser }) => {
   const [communities, setCommunities] = useState<FirestoreCommunity[]>([]);
   
   const dmChannelId = activeDm ? `dm_${[currentUser.uid, activeDm.id].sort().join('_')}` : null;
@@ -36,10 +37,12 @@ export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({ activeDm, 
   const [messages, setMessages] = useState<FirestoreMessage[]>([]);
 
   useEffect(() => {
-    if (activeDm && dmChannelId) {
+    if (initialChannel) {
+      setActiveChannel(initialChannel);
+    } else if (activeDm && dmChannelId) {
       setActiveChannel(dmChannelId);
     }
-  }, [activeDm, dmChannelId]);
+  }, [activeDm, dmChannelId, initialChannel]);
 
   useEffect(() => {
     const unsub = subscribeToCommunities((comms) => setCommunities(comms));
