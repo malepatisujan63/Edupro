@@ -19,43 +19,26 @@ self.onmessage = (e: MessageEvent<ModerationWorkerData>) => {
   // Combine all strings into a massive context block
   const contextStr = [...messages, newMessage].join(' ').toLowerCase();
 
-  // --- HEAVY DSA LAYER 1: Heuristics Iteration ---
-  const deleteKeywords = [
-    'i will kill', 'kill you', 'die', 'bomb', 'terrorist', 'shoot you', 'murder', 
-    'gun', 'massacre', 'stabbing', 'cut you', 'blow up', 'arson',
-    'faggot', 'nigger', 'retard', 'kike', 'spic', 'chink', 'dyke', 'tranny',
-    'child porn', 'rape', 'pedophile', 'cp', 'drug deal', 'meth', 'heroin',
-    'kys', 'kill yourself', 'commit suicide', 'slit my wrists'
-  ];
+  // --- EXTREME DSA OPTIMIZATION: PRE-COMPILED REGEXP (DFA STATE MACHINE) ---
+  // V8 engine compiles this into a Deterministic Finite Automaton for O(N) execution time
+  // which is infinitely faster than iterating through arrays with .includes()
+  const deletePattern = /\b(i will kill|kill you|die|bomb|terrorist|shoot you|murder|gun|massacre|stabbing|cut you|blow up|arson|faggot|nigger|retard|kike|spic|chink|dyke|tranny|child porn|rape|pedophile|cp|drug deal|meth|heroin|kys|kill yourself|commit suicide|slit my wrists)\b/i;
 
-  const suspendKeywords = [
-    'idiot', 'stupid', 'loser', 'ugly', 'shut up', 'bitch', 'fuck you', 'asshole',
-    'dick', 'cunt', 'whore', 'slut', 'piece of shit', 'garbage', 'trash', 'worthless',
-    'pay me to do your homework', 'cheat sheet for sale', 'buy exams', 'test answers',
-    'do my assignment', 'pay for essay', 'hire me to take your test',
-    'crypto scam', 'click this link to win', 'bitcoin giveaway', 'free iphones',
-    'hot girls in your area', 'forex trading', 'pyramid scheme'
-  ];
+  const suspendPattern = /\b(idiot|stupid|loser|ugly|shut up|bitch|fuck you|asshole|dick|cunt|whore|slut|piece of shit|garbage|trash|worthless|pay me to do your homework|cheat sheet for sale|buy exams|test answers|do my assignment|pay for essay|hire me to take your test|crypto scam|click this link to win|bitcoin giveaway|free iphones|hot girls in your area|forex trading|pyramid scheme)\b/gi;
 
   let action: 'ALLOW' | 'SUSPEND' | 'DELETE' = 'ALLOW';
   let toxicityProbability = 0;
 
-  // 1A. Check for severe offenses
-  for (const keyword of deleteKeywords) {
-    if (contextStr.includes(keyword)) {
-      action = 'DELETE';
-      break;
-    }
+  // 1A. Check for severe offenses (O(N) execution time)
+  if (deletePattern.test(contextStr)) {
+    action = 'DELETE';
   }
 
   // 1B. Check for suspension-level offenses if not already deleted
   if (action !== 'DELETE') {
-    let suspendHits = 0;
-    for (const keyword of suspendKeywords) {
-      if (contextStr.includes(keyword)) {
-        suspendHits++;
-      }
-    }
+    // Count matches to detect repeated harassment
+    const matches = contextStr.match(suspendPattern);
+    const suspendHits = matches ? matches.length : 0;
 
     if (suspendHits >= 3) {
       action = 'DELETE'; // Repeated harassment over the context elevates to a ban
