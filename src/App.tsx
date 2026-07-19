@@ -16,7 +16,7 @@ import { checkRateLimit } from './utils/rateLimiter';
 import { validateContentSafety, verifyFileMagicBytes } from './utils/safetyFilter';
 import { accountManager } from './models/AccountManager';
 import { type StudentAccount } from './models/StudentAccount';
-import { ShieldCheck, Lock, ArrowRight, CheckCircle2, Bell, Plus, X, Image as ImageIcon, FileText, Send, Video, Trash2, Loader, Users, BookOpen, Rocket, Quote } from 'lucide-react';
+import { CheckCircle2, Bell, Plus, X, Image as ImageIcon, FileText, Send, Video, Trash2, Loader, Users, BookOpen, Rocket, Quote } from 'lucide-react';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<NavTab>('home');
