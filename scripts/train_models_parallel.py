@@ -6,7 +6,7 @@ import time
 import os
 import joblib
 import concurrent.futures
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
@@ -46,10 +46,10 @@ def train_language_model(lang):
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # 1. TF-IDF to vectorize text mathematically
+    # 1. HashingVectorizer maps infinite vocabulary to a fixed-size mathematical array (No OOV problem!)
     # 2. Multi-Layer Perceptron (Neural Network)
     pipeline = Pipeline([
-        ('tfidf', TfidfVectorizer(max_features=2000, ngram_range=(1, 2))),
+        ('hashing', HashingVectorizer(n_features=1000, ngram_range=(1, 2), alternate_sign=False)),
         ('nn', MLPClassifier(hidden_layer_sizes=(32, 16), max_iter=5, random_state=42))
     ])
 
