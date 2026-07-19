@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Users, BookOpen, Rocket, Quote, Mail, Lock, Eye, EyeOff, Loader, AlertTriangle, CheckCircle2, ArrowRight, User, Zap, Star, TrendingUp } from 'lucide-react';
+import { Users, BookOpen, Rocket, Quote, Mail, Lock, Eye, EyeOff, Loader, AlertTriangle, CheckCircle2, ArrowRight, User } from 'lucide-react';
 import { globalRegistrationHash, globalPlatformTrie, globalSocialGraph } from '../../dsa-engine';
 import { saveUserProfile, fetchUserProfileByEmail } from '../../lib/supabaseService';
 import { hashPassword, verifyPassword } from '../../utils/authHasher';
@@ -145,12 +145,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
 
   const switchView = (v: AuthView) => { setView(v); setErrorMsg(''); };
 
-  const stats = [
-    { icon: <Users className="w-3.5 h-3.5" />, value: '12K+', label: 'Students', color: 'text-[#00CFFF]' },
-    { icon: <Star className="w-3.5 h-3.5" />, value: '200+', label: 'Colleges', color: 'text-[#9B5DE5]' },
-    { icon: <TrendingUp className="w-3.5 h-3.5" />, value: '50K+', label: 'Posts', color: 'text-[#34C759]' },
-  ];
-
   const features = [
     { icon: <Users className="w-5 h-5" />, label: 'Connect', sub: 'with peers across India', accent: '#9B5DE5' },
     { icon: <BookOpen className="w-5 h-5" />, label: 'Learn', sub: 'together in study hubs', accent: '#00CFFF' },
@@ -278,11 +272,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
         {/* ════ LEFT PANEL ════ */}
         <div className="flex-1 min-w-0 flex flex-col gap-7" style={{ animation: mounted ? 'kx-fadeL 0.7s 0.1s ease both' : 'none', opacity: 0, animationFillMode: 'forwards' }}>
 
-          {/* Live status badge */}
-          <div className="flex items-center gap-2 w-fit px-4 py-2 rounded-full border border-[#34C759]/25 bg-[#34C759]/8 backdrop-blur-sm">
-            <span className="w-2 h-2 rounded-full bg-[#34C759] animate-pulse" />
-            <span className="text-[11px] font-bold text-[#34C759] tracking-wide">LIVE · 3,247 students online now</span>
-          </div>
+
 
           {/* Headline */}
           <div>
@@ -303,19 +293,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
             </p>
           </div>
 
-          {/* Stats Row */}
-          <div className="flex items-center gap-6">
-            {stats.map((s, i) => (
-              <div key={s.label} className="flex items-center gap-2.5 group">
-                {i > 0 && <div className="w-px h-8 bg-white/10 mr-3" />}
-                <div className={`${s.color} opacity-70`}>{s.icon}</div>
-                <div>
-                  <p className={`text-lg font-black ${s.color} leading-none`}>{s.value}</p>
-                  <p className="text-[10px] text-white/40 font-medium">{s.label}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+
 
           {/* Feature Cards */}
           <div className="flex flex-col gap-3">
@@ -381,10 +359,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
             {view === 'login' && (
               <div className="space-y-5 relative z-10">
                 <div className="text-center mb-1">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#4169E1]/10 border border-[#4169E1]/20 mb-3">
-                    <Zap className="w-3 h-3 text-[#00CFFF]" />
-                    <span className="text-[10px] font-bold text-[#00CFFF] tracking-wider">SECURE LOGIN</span>
-                  </div>
+
                   <h2 className="text-[1.6rem] font-black text-white leading-tight">
                     Log in to <span className="kx-shimmer-text">Koinexa</span>
                   </h2>
@@ -450,10 +425,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
             {view === 'register' && (
               <div className="space-y-4 relative z-10">
                 <div className="text-center mb-1">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#9B5DE5]/10 border border-[#9B5DE5]/20 mb-3">
-                    <Star className="w-3 h-3 text-[#9B5DE5]" />
-                    <span className="text-[10px] font-bold text-[#9B5DE5] tracking-wider">JOIN 12K+ STUDENTS</span>
-                  </div>
+
                   <h2 className="text-[1.6rem] font-black text-white leading-tight">
                     Join <span className="kx-shimmer-text">Koinexa</span>
                   </h2>
