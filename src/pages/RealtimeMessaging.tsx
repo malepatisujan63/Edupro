@@ -23,9 +23,15 @@ interface RealtimeMessagingProps {
   activeDm?: { id: string, name: string } | null;
   initialChannel?: string;
   currentUser: any;
+  onDeleteAccount?: () => void;
+  onSuspendAccount?: () => void;
 }
 
-export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({ activeDm, initialChannel, currentUser }) => {
+import { analyzeConversationContext } from '../lib/moderationEngine';
+
+export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({ 
+  activeDm, initialChannel, currentUser, onDeleteAccount, onSuspendAccount 
+}) => {
   const [communities, setCommunities] = useState<FirestoreCommunity[]>([]);
   
   const dmChannelId = activeDm ? `dm_${[currentUser.uid, activeDm.id].sort().join('_')}` : null;
@@ -57,6 +63,7 @@ export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({ activeDm, 
   }, [activeChannel]);
 
   const [inputMsg, setInputMsg] = useState('');
+  const [isModerating, setIsModerating] = useState(false);
   const [isRecordingAudio, setIsRecordingAudio] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -143,8 +150,30 @@ export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({ activeDm, 
 
   const handleSendMessage = async () => {
     if (!inputMsg.trim()) return;
-    const content = inputMsg;
+    const content = inputMsg.trim();
     setInputMsg('');
+
+    // --- Intelligent Moderation Context Analysis ---
+    setIsModerating(true);
+    try {
+      // Gather context: last 15 messages in this channel
+      const recentContext = messages.slice(-15).map(m => m.content || '');
+      
+      const action = await analyzeConversationContext(recentContext, content);
+      
+      if (action === 'DELETE') {
+        onDeleteAccount?.();
+        return;
+      } else if (action === 'SUSPEND') {
+        onSuspendAccount?.();
+        return;
+      }
+    } catch (err) {
+      console.warn("Moderation engine skipped due to error", err);
+    } finally {
+      setIsModerating(false);
+    }
+    // -----------------------------------------------
     
     const optimisticMsg: FirestoreMessage = {
       id: `temp_${Date.now()}`,
@@ -394,22 +423,25 @@ export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({ activeDm, 
             <Mic className="w-5 h-5" />
           </button>
 
-          <div className="flex-1 kx-field flex items-center overflow-hidden">
-            <input
-              type="text"
-              placeholder={activeChannelDisplay ? `Message ${activeChannelDisplay}…` : 'Select a channel…'}
-              value={inputMsg}
-              onChange={(e) => setInputMsg(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-              className="flex-1 bg-transparent pl-5 pr-3 py-3 text-sm text-white outline-none placeholder:text-white/30"
-            />
+          <div className="flex-1 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center px-4 py-1.5 focus-within:border-[#00CFFF]/50 focus-within:bg-white/[0.06] transition-all relative">
+              <input
+                type="text"
+                placeholder={isModerating ? "AI Context Engine analyzing..." : "Type a message..."}
+                value={inputMsg}
+                disabled={isModerating}
+                onChange={e => setInputMsg(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleSendMessage()}
+                className={`w-full bg-transparent border-none text-sm text-white placeholder-white/30 outline-none ${isModerating ? 'opacity-50' : ''}`}
+              />
+            </div>
+
             <button
               onClick={handleSendMessage}
-              className="shrink-0 w-9 h-9 mr-1 rounded-full bg-gradient-to-br from-[#00CFFF] via-[#4169E1] to-[#9B5DE5] hover:opacity-90 text-white flex items-center justify-center shadow-md transition-transform active:scale-90"
+              disabled={!inputMsg.trim() || isModerating}
+              className="p-3.5 rounded-2xl bg-gradient-to-br from-[#00CFFF] to-[#4169E1] text-white shadow-lg hover:shadow-[#00CFFF]/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 flex items-center justify-center shrink-0"
             >
-              <Send className="w-4 h-4 ml-0.5" />
+              <Send className={`w-5 h-5 ${isModerating ? 'animate-pulse' : ''}`} />
             </button>
-          </div>
         </div>
 
       </div>

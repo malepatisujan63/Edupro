@@ -31,9 +31,10 @@ export interface FirestoreUser {
   createdCommunities?: string[];
   likedPosts?: string[];
   avatarUrl: string;
-  role: 'student' | 'senior' | 'mentor';
-  reputationPoints: number;
-  badges: string[];
+  role?: 'student' | 'admin' | 'moderator';
+  reputationPoints?: number;
+  badges?: string[];
+  accountStatus?: 'active' | 'suspended';
   createdAt: any;
 }
 

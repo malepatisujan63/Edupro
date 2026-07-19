@@ -38,6 +38,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
     try {
       const user = await fetchUserProfileByEmail(email.trim().toLowerCase());
       if (!user) { setErrorMsg('No account found with that email.'); return; }
+      if (user.accountStatus === 'suspended') { setErrorMsg('Your account is currently suspended for violating our terms of service.'); return; }
       if (!await verifyPassword(password, user.password)) { setErrorMsg('Incorrect password.'); return; }
       onLoginSuccess(user);
     } catch (e: any) { setErrorMsg(e.message || 'Login failed.'); }

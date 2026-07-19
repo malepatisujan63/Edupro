@@ -115,6 +115,22 @@ export const App: React.FC = () => {
     alert('Account deleted and purged from all UniqueRegistrationHashSet and Graph indices ($O(1)$).');
   };
 
+  const handleSuspendAccount = async () => {
+    if (currentUser) {
+      try {
+        // Mock persistence update
+        import('./lib/supabaseService').then(({ saveUserProfile }) => {
+          saveUserProfile({ ...currentUser, accountStatus: 'suspended' });
+        });
+      } catch (e) {}
+    }
+    setCurrentUser(null);
+    setCurrentAccount(null);
+    setActiveTab('home');
+    localStorage.removeItem('edunetwork_user');
+    alert('Your account has been SUSPENDED due to severe violation of community guidelines.');
+  };
+
   return (
     <div className="min-h-screen font-sans selection:bg-[#4169E1]/40 selection:text-white relative overflow-x-hidden" style={{background: 'var(--bg-canvas)', color: 'var(--text-primary)', transition: 'background 0.3s ease, color 0.3s ease'}}>
       
@@ -194,7 +210,15 @@ export const App: React.FC = () => {
               />
             )}
             {activeTab === 'qna' && <QnAPlatform currentUser={currentUser} account={currentAccount} />}
-            {activeTab === 'messaging' && <RealtimeMessaging activeDm={activeDm} initialChannel={initialChannel} currentUser={currentUser} />}
+            {activeTab === 'messaging' && (
+              <RealtimeMessaging 
+                activeDm={activeDm} 
+                initialChannel={initialChannel} 
+                currentUser={currentUser}
+                onDeleteAccount={handleDeleteAccount}
+                onSuspendAccount={handleSuspendAccount}
+              />
+            )}
             {activeTab === 'profile' && (
               <StudentProfile
                 currentUser={currentUser}
