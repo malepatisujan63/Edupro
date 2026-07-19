@@ -145,13 +145,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
 
         {/* Buttons */}
         <div className="flex items-center gap-3">
-          <button onClick={() => go('login')}
-            className="px-5 py-2 rounded-full text-sm font-semibold text-white/70 hover:text-white border border-white/10 hover:border-white/20 transition-all duration-200">
+          <button onClick={() => go('login')} className="btn-secondary py-2.5">
             Sign In
           </button>
-          <button onClick={() => go('register')}
-            className="px-5 py-2 rounded-full text-sm font-bold text-white transition-all duration-200 active:scale-95"
-            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', boxShadow: '0 4px 18px rgba(99,102,241,0.35)' }}>
+          <button onClick={() => go('register')} className="btn-primary py-2.5">
             Open an Account
           </button>
         </div>
@@ -222,13 +219,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
 
         {/* ════ RIGHT — AUTH CARD ════ */}
         <div className="w-full max-w-[400px] shrink-0 lp-r">
-          <div className="rounded-[28px] p-7"
-            style={{
-              background: 'rgba(12,12,22,0.85)',
-              backdropFilter: 'blur(32px)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              boxShadow: '0 24px 64px rgba(0,0,0,0.7), 0 0 0 1px rgba(99,102,241,0.08)',
-            }}>
+          <div className="glass-card p-8">
 
             {/* Error */}
             {errorMsg && (
@@ -274,9 +265,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
                   </div>
                 </div>
 
-                <button onClick={handleLogin} disabled={isLoading}
-                  className="w-full py-3.5 rounded-2xl text-sm font-bold text-white flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98] disabled:opacity-40"
-                  style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', boxShadow: '0 4px 20px rgba(99,102,241,0.35)' }}>
+                <button onClick={handleLogin} disabled={isLoading} className="btn-primary w-full py-4 text-base">
                   {isLoading ? <Loader className="w-4 h-4 animate-spin" /> : <><span>Log In</span><ArrowRight className="w-4 h-4" /></>}
                 </button>
 
@@ -286,7 +275,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
                   <div className="flex-1 h-px bg-white/[0.06]" />
                 </div>
 
-                <button className="w-full py-3 rounded-2xl border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] hover:border-white/[0.14] text-white text-sm font-medium flex items-center justify-center gap-2.5 transition-all duration-200 active:scale-[0.98]">
+                <button className="w-full py-3.5 rounded-2xl border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] hover:border-white/[0.14] text-white text-sm font-medium flex items-center justify-center gap-2.5 transition-all duration-200 active:scale-[0.96]">
                   <svg className="w-4 h-4 shrink-0" viewBox="0 0 48 48">
                     <path fill="#FFC107" d="M43.6 20H24v8h11.3c-1.6 4.4-5.8 7.5-11.3 7.5C17 35.5 11 29.5 11 22.5S17 9.5 24 9.5c3 0 5.7 1.1 7.8 2.9l5.7-5.7C33.9 4.2 29.2 2 24 2 12.9 2 4 10.9 4 22s8.9 20 20 20c11 0 20-8 20-20 0-1.3-.1-2.7-.4-2z"/>
                     <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.4 18.9 12 24 12c3 0 5.7 1.1 7.8 2.9l5.7-5.7C33.9 5.2 29.2 3 24 3 16.1 3 9.3 7.9 6.3 14.7z"/>
@@ -325,9 +314,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
                     </div>
                   ))}
                 </div>
-                <button onClick={handleRegisterNext} disabled={isLoading}
-                  className="w-full py-3.5 rounded-2xl text-sm font-bold text-white flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98] disabled:opacity-40"
-                  style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', boxShadow: '0 4px 20px rgba(99,102,241,0.35)' }}>
+                <button onClick={handleRegisterNext} disabled={isLoading} className="btn-primary w-full py-4 text-base">
                   {isLoading ? <Loader className="w-4 h-4 animate-spin" /> : <><span>Continue</span><ArrowRight className="w-4 h-4" /></>}
                 </button>
                 <p className="text-center text-xs text-white/30">
@@ -383,9 +370,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
                   </div>
                 )}
 
-                <button onClick={handleComplete} disabled={isLoading || !studentType}
-                  className="w-full py-3.5 rounded-2xl text-sm font-bold text-white flex items-center justify-center gap-2 transition-all duration-200 active:scale-[0.98] disabled:opacity-40"
-                  style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', boxShadow: '0 4px 20px rgba(99,102,241,0.35)' }}>
+                <button onClick={handleComplete} disabled={isLoading || !studentType} className="btn-primary w-full py-4 text-base">
                   {isLoading ? <Loader className="w-4 h-4 animate-spin" /> : <><CheckCircle2 className="w-4 h-4" /><span>Complete Registration</span></>}
                 </button>
                 <button onClick={() => go('register')} className="w-full text-center text-xs text-white/25 hover:text-white/50 transition-colors">← Back</button>

@@ -36,6 +36,34 @@
 
     --shadow-card:     0 24px 48px rgba(0,0,0,0.8);
     --input-placeholder: rgba(255,255,255,0.30);
+
+    /* ── iOS-grade Radius Scale ── */
+    --r-xs:   10px;
+    --r-sm:   16px;
+    --r-md:   22px;
+    --r-lg:   28px;
+    --r-xl:   36px;
+    --r-full: 9999px;
+
+    /* ── Layered Shadow Scale (soft, not harsh) ── */
+    --shadow-xs: 0 1px 3px rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.55), 0 1px 3px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.65), 0 2px 6px rgba(0,0,0,0.35);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.75), 0 3px 10px rgba(0,0,0,0.4);
+    --shadow-xl: 0 16px 56px rgba(0,0,0,0.85), 0 6px 18px rgba(0,0,0,0.45);
+
+    /* ── iOS Spring Easing Curves ── */
+    --ease-spring:  cubic-bezier(0.34, 1.56, 0.64, 1);   /* overshoot — reveals, scale-up */
+    --ease-snappy:  cubic-bezier(0.22, 1,    0.36, 1);   /* fast settle — hover, focus   */
+    --ease-press:   cubic-bezier(0.36, 0,    0.66, 0);   /* ease-in — press down         */
+    --ease-out:     cubic-bezier(0.16, 1,    0.3,  1);   /* existing spring — keep       */
+
+    /* ── Typography Scale ── */
+    --tracking-display: -0.04em;
+    --tracking-title:   -0.03em;
+    --tracking-heading: -0.025em;
+    --tracking-body:    -0.01em;
+    --tracking-label:    0.04em;
   }
 
 
@@ -43,10 +71,15 @@
   body {
     background: var(--bg-canvas);
     color: var(--text-primary);
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", system-ui, sans-serif;
     font-weight: 400;
+    font-size: 15px;
+    line-height: 1.6;
+    letter-spacing: var(--tracking-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
     overflow-x: hidden;
     min-height: 100vh;
     transition: background 0.3s ease, color 0.3s ease;
@@ -55,7 +88,20 @@
   h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
     color: var(--text-primary);
-    letter-spacing: -0.025em;
+    letter-spacing: var(--tracking-heading);
+    line-height: 1.15;
+    font-feature-settings: "kern" 1, "liga" 1;
+  }
+  h1 { letter-spacing: var(--tracking-display); line-height: 1.04; }
+  h2 { letter-spacing: var(--tracking-title);   line-height: 1.1;  }
+  h3 { letter-spacing: var(--tracking-heading);  line-height: 1.15; }
+  /* Labels & caps use positive tracking for legibility */
+  .kx-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--text-muted);
   }
 
   /* ── Scrollbar ── */
@@ -81,63 +127,83 @@
   .kx-card {
     position: relative;
     background: var(--bg-canvas);
-    border-radius: 20px;
+    border-radius: var(--r-md);
     color: var(--text-primary);
-    transition: transform 280ms cubic-bezier(0.16,1,0.3,1),
-                box-shadow 280ms cubic-bezier(0.16,1,0.3,1),
-                background 0.3s ease;
+    transition:
+      transform  240ms var(--ease-snappy),
+      box-shadow 240ms var(--ease-snappy),
+      background 0.3s ease;
     z-index: 0;
   }
   .kx-card::before {
     content: '';
     position: absolute;
     inset: -1px;
-    border-radius: 21px;
+    border-radius: calc(var(--r-md) + 1px);
     background: linear-gradient(135deg, #00CFFF 0%, #4169E1 50%, #9B5DE5 100%);
     z-index: -1;
-    opacity: 0.5;
-    transition: opacity 280ms ease;
+    opacity: 0.45;
+    transition: opacity 240ms var(--ease-snappy);
   }
   .kx-card::after {
     content: '';
     position: absolute;
     inset: 0;
-    border-radius: 20px;
+    border-radius: var(--r-md);
     background: var(--bg-canvas);
     z-index: -1;
   }
   .kx-card:hover::before { opacity: 1; }
   .kx-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0 40px rgba(0,207,255,0.12), 0 0 80px rgba(155,93,229,0.08);
+    transform: translateY(-3px);
+    box-shadow:
+      0 0 0 0 transparent,
+      0 12px 40px rgba(0,0,0,0.7),
+      0 0 32px rgba(0,207,255,0.10),
+      0 0 64px rgba(155,93,229,0.07);
+  }
+  .kx-card:active {
+    transform: scale(0.993) translateY(0);
+    transition-duration: 100ms;
   }
 
   /* ── GLASS CARD (glassmorphism with Koinexa gradient border) ── */
   .glass-card, .glass-panel {
     position: relative;
     background: var(--bg-modal);
-    backdrop-filter: blur(32px) saturate(160%);
-    -webkit-backdrop-filter: blur(32px) saturate(160%);
-    border-radius: 24px;
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border-radius: var(--r-lg);
     color: var(--text-primary);
-    transition: transform 280ms cubic-bezier(0.16,1,0.3,1),
-                box-shadow 280ms cubic-bezier(0.16,1,0.3,1),
-                background 0.3s ease;
+    transition:
+      transform  240ms var(--ease-snappy),
+      box-shadow 240ms var(--ease-snappy),
+      background 0.3s ease;
     z-index: 0;
     border: 1px solid transparent;
     background-clip: padding-box;
     box-shadow:
-      0 0 0 1px rgba(65,105,225,0.2),
-      var(--shadow-card),
-      inset 0 1px 0 var(--border-subtle);
+      0 0 0 1px rgba(65,105,225,0.18),
+      0 2px 4px rgba(0,0,0,0.4),
+      0 8px 24px rgba(0,0,0,0.65),
+      0 24px 48px rgba(0,0,0,0.8),
+      inset 0 1px 0 var(--border-subtle),
+      inset 0 -1px 0 rgba(0,0,0,0.2);
   }
   .glass-card:hover, .glass-panel:hover {
-    transform: translateY(-2px);
+    transform: translateY(-3px);
     box-shadow:
-      0 0 0 1px rgba(0,207,255,0.35),
+      0 0 0 1px rgba(0,207,255,0.3),
+      0 2px 4px rgba(0,0,0,0.4),
+      0 12px 32px rgba(0,0,0,0.75),
       0 32px 64px rgba(0,0,0,0.9),
-      0 0 30px rgba(65,105,225,0.10),
-      inset 0 1px 0 var(--border-mid);
+      0 0 24px rgba(65,105,225,0.08),
+      inset 0 1px 0 var(--border-mid),
+      inset 0 -1px 0 rgba(0,0,0,0.2);
+  }
+  .glass-card:active, .glass-panel:active {
+    transform: scale(0.994) translateY(0);
+    transition-duration: 100ms;
   }
 
   /* ── GLASS PILL NAV ── */
@@ -201,12 +267,13 @@
   /* ── PRIMARY: Koinexa Gradient Fill ── */
   .btn-primary, .glass-action-btn-primary {
     position: relative;
-    border-radius: 999px;
+    border-radius: var(--r-full);
     background: linear-gradient(135deg, #00CFFF 0%, #4169E1 50%, #9B5DE5 100%);
     color: #FFFFFF;
     font-weight: 700;
     font-size: 14px;
-    padding: 11px 22px;
+    letter-spacing: -0.01em;
+    padding: 12px 24px;
     border: none;
     cursor: pointer;
     display: inline-flex;
@@ -214,53 +281,76 @@
     justify-content: center;
     gap: 8px;
     overflow: hidden;
-    transition: transform 120ms ease-out, filter 120ms ease-out, box-shadow 120ms ease-out;
-    box-shadow: 0 0 24px rgba(65,105,225,0.4), 0 4px 16px rgba(0,0,0,0.4);
+    /* Two-phase transition: fast press, spring release */
+    transition:
+      transform  120ms var(--ease-press),
+      filter     120ms var(--ease-press),
+      box-shadow 240ms var(--ease-snappy);
+    box-shadow:
+      0 0 0 1px rgba(0,207,255,0.2),
+      0 2px 8px rgba(0,0,0,0.5),
+      0 0 20px rgba(65,105,225,0.35);
+    will-change: transform;
   }
-  /* Glossy specular highlight on top third */
+  /* Glossy specular highlight — thinner, more refined */
   .btn-primary::before, .glass-action-btn-primary::before {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0;
-    height: 40%;
-    background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 100%);
+    height: 44%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 100%);
     pointer-events: none;
     border-radius: inherit;
   }
   .btn-primary:hover, .glass-action-btn-primary:hover {
-    filter: brightness(1.12);
-    box-shadow: 0 0 32px rgba(0,207,255,0.35), 0 0 60px rgba(155,93,229,0.2), 0 6px 20px rgba(0,0,0,0.5);
+    filter: brightness(1.1);
+    box-shadow:
+      0 0 0 1px rgba(0,207,255,0.3),
+      0 4px 12px rgba(0,0,0,0.5),
+      0 0 28px rgba(0,207,255,0.3),
+      0 0 52px rgba(155,93,229,0.15);
+    transition:
+      transform  200ms var(--ease-snappy),
+      filter     200ms var(--ease-snappy),
+      box-shadow 200ms var(--ease-snappy);
   }
   .btn-primary:active, .glass-action-btn-primary:active {
-    transform: scale(0.97);
-    filter: brightness(0.95);
+    transform: scale(0.96);
+    filter: brightness(0.94);
+    transition-duration: 90ms;
   }
 
   /* ── SECONDARY: Canvas bg with gradient border ── */
   .btn-secondary, .glass-action-btn {
     position: relative;
-    border-radius: 999px;
+    border-radius: var(--r-full);
     background: var(--bg-canvas);
     color: var(--text-primary);
     font-weight: 600;
     font-size: 14px;
-    padding: 11px 22px;
-    border: 1px solid rgba(65,105,225,0.35);
+    letter-spacing: -0.01em;
+    padding: 12px 24px;
+    border: 1px solid rgba(65,105,225,0.3);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    transition: all 120ms ease-out;
-    box-shadow: 0 0 0 0 rgba(0,207,255,0);
+    transition:
+      transform     120ms var(--ease-press),
+      border-color  200ms var(--ease-snappy),
+      box-shadow    200ms var(--ease-snappy),
+      background    200ms var(--ease-snappy);
+    will-change: transform;
   }
   .btn-secondary:hover, .glass-action-btn:hover {
-    border-color: rgba(0,207,255,0.6);
-    box-shadow: 0 0 16px rgba(0,207,255,0.15);
-    background: rgba(0,207,255,0.05);
+    border-color: rgba(0,207,255,0.55);
+    box-shadow: 0 0 0 3px rgba(65,105,225,0.1), 0 0 14px rgba(0,207,255,0.12);
+    background: rgba(0,207,255,0.04);
   }
   .btn-secondary:active, .glass-action-btn:active {
-    transform: scale(0.97);
+    transform: scale(0.96);
+    transition-duration: 90ms;
   }
 
   /* ── ICON BUTTON ── */
@@ -268,20 +358,28 @@
     width: 44px; height: 44px;
     border-radius: 50%;
     background: var(--bg-card);
-    border: 1px solid rgba(65,105,225,0.25);
+    border: 1px solid rgba(65,105,225,0.22);
     color: var(--text-primary);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: all 120ms ease-out;
+    transition:
+      transform    120ms var(--ease-press),
+      border-color 180ms var(--ease-snappy),
+      box-shadow   180ms var(--ease-snappy),
+      background   180ms var(--ease-snappy);
     cursor: pointer;
+    will-change: transform;
   }
   .btn-icon:hover {
-    border-color: rgba(0,207,255,0.5);
-    background: rgba(0,207,255,0.08);
-    box-shadow: 0 0 12px rgba(0,207,255,0.2);
+    border-color: rgba(0,207,255,0.45);
+    background: rgba(0,207,255,0.07);
+    box-shadow: 0 0 0 3px rgba(65,105,225,0.08), 0 0 10px rgba(0,207,255,0.18);
   }
-  .btn-icon:active { transform: scale(0.93); }
+  .btn-icon:active {
+    transform: scale(0.91);
+    transition-duration: 90ms;
+  }
 
   /* ── DESTRUCTIVE ── */
   .btn-destructive {
@@ -324,11 +422,12 @@
   /* ── GLASS CHIP ── */
   .glass-chip {
     background: var(--bg-modal);
-    backdrop-filter: blur(20px) saturate(160%);
-    -webkit-backdrop-filter: blur(20px) saturate(160%);
-    border: 1px solid rgba(65,105,225,0.2);
-    border-radius: 12px;
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(65,105,225,0.18);
+    border-radius: var(--r-sm);
     color: var(--text-primary);
+    box-shadow: var(--shadow-xs), inset 0 1px 0 var(--border-subtle);
   }
 
   /* ── GRADIENT TEXT UTILITY ── */
@@ -352,10 +451,13 @@
 /* ── KX FIELD (wrapper div — activates on focus-within) ─────────────────── */
 .kx-field {
   position: relative;
-  border: 1.5px solid rgba(65, 105, 225, 0.18);
-  border-radius: 14px;
+  border: 1.5px solid rgba(65, 105, 225, 0.16);
+  border-radius: var(--r-sm);
   background: var(--bg-input);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  transition:
+    border-color 200ms var(--ease-snappy),
+    box-shadow   200ms var(--ease-snappy),
+    background   200ms var(--ease-snappy);
 }
 
 .kx-field:focus-within {
@@ -366,22 +468,27 @@
   background-size: 200% 100%;
   animation: panFlow 2.5s linear infinite;
   box-shadow:
-    0 0 12px rgba(0, 207, 255, 0.35),
-    0 0 28px rgba(65, 105, 225, 0.25),
-    0 0 52px rgba(155, 93, 229, 0.12);
+    0 0 0 3px rgba(65, 105, 225, 0.12),
+    0 0 12px rgba(0, 207, 255, 0.25),
+    0 0 28px rgba(65, 105, 225, 0.18);
 }
 
 /* ── KX INPUT (direct on the <input> element) ────────────────────────────── */
 .kx-input-flow {
   background: var(--bg-input);
-  border: 1.5px solid rgba(65, 105, 225, 0.18);
-  border-radius: 14px;
+  border: 1.5px solid rgba(65, 105, 225, 0.16);
+  border-radius: var(--r-sm);
   color: var(--text-primary);
-  padding: 12px 16px;
+  padding: 13px 16px;
   width: 100%;
-  font-size: 14px;
+  font-size: 15px;
+  letter-spacing: var(--tracking-body);
   outline: none;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, color 0.3s ease;
+  transition:
+    border-color 200ms var(--ease-snappy),
+    box-shadow   200ms var(--ease-snappy),
+    background   200ms var(--ease-snappy),
+    color        0.3s ease;
 }
 .kx-input-flow::placeholder { color: var(--input-placeholder); }
 
@@ -393,9 +500,9 @@
   background-size: 200% 100%;
   animation: panFlow 2.5s linear infinite;
   box-shadow:
-    0 0 10px rgba(0, 207, 255, 0.30),
-    0 0 24px rgba(65, 105, 225, 0.20),
-    0 0 44px rgba(155, 93, 229, 0.10);
+    0 0 0 3px rgba(65, 105, 225, 0.1),
+    0 0 10px rgba(0, 207, 255, 0.22),
+    0 0 22px rgba(65, 105, 225, 0.15);
 }
 
 /* ── KX PILL (pill-shaped flowing border — nav/buttons) ──────────────────── */
@@ -542,19 +649,24 @@
   /* ── FORM INPUTS ── */
   .kx-input {
     background: var(--bg-input);
-    border: 1px solid rgba(65,105,225,0.25);
-    border-radius: 14px;
+    border: 1px solid rgba(65,105,225,0.2);
+    border-radius: var(--r-sm);
     color: var(--text-primary);
-    padding: 12px 16px;
-    font-size: 14px;
-    transition: border-color 150ms ease, box-shadow 150ms ease, background 0.3s ease, color 0.3s ease;
+    padding: 13px 16px;
+    font-size: 15px;
+    letter-spacing: var(--tracking-body);
+    transition:
+      border-color 200ms var(--ease-snappy),
+      box-shadow   200ms var(--ease-snappy),
+      background   0.3s ease,
+      color        0.3s ease;
     outline: none;
     width: 100%;
   }
   .kx-input::placeholder { color: var(--input-placeholder); }
   .kx-input:focus {
-    border-color: rgba(0,207,255,0.6);
-    box-shadow: 0 0 0 3px rgba(65,105,225,0.15);
+    border-color: rgba(0,207,255,0.55);
+    box-shadow: 0 0 0 3px rgba(65,105,225,0.12), 0 0 8px rgba(0,207,255,0.15);
   }
 
   /* ── BADGE / TAG ── */
@@ -576,19 +688,31 @@
    ANIMATIONS
    ════════════════════════════════════════════════════════════════════════════ */
 @keyframes panelRise {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(14px) scale(0.99); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Variant with slight overshoot — for modals/sheets */
+@keyframes panelRiseSpring {
+  0%   { opacity: 0; transform: translateY(18px) scale(0.97); }
+  60%  { opacity: 1; transform: translateY(-2px) scale(1.005); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes scaleUp {
-  0%   { opacity: 0; transform: scale(0.88); }
-  70%  { transform: scale(1.02); }
+  0%   { opacity: 0; transform: scale(0.86); }
+  60%  { transform: scale(1.025); }
   100% { opacity: 1; transform: scale(1); }
 }
 
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes shimmer {
@@ -608,10 +732,20 @@
   100% { opacity: 0; transform: translate(-50%,-50%) scale(1.1); }
 }
 
-.animate-panelRise { animation: panelRise 320ms cubic-bezier(0.16,1,0.3,1) forwards; }
-.animate-scaleUp   { animation: scaleUp  360ms cubic-bezier(0.34,1.56,0.64,1) forwards; }
-.animate-fadeIn    { animation: fadeIn   200ms ease forwards; }
-.animate-kxPulse   { animation: kxPulse 2.5s ease-in-out infinite; }
+/* ── Animation utilities ── */
+.animate-panelRise       { animation: panelRise       340ms cubic-bezier(0.22,1,0.36,1) both; }
+.animate-panelRiseSpring { animation: panelRiseSpring 480ms cubic-bezier(0.34,1.56,0.64,1) both; }
+.animate-scaleUp         { animation: scaleUp         400ms cubic-bezier(0.34,1.56,0.64,1) both; }
+.animate-fadeIn          { animation: fadeIn          220ms cubic-bezier(0.22,1,0.36,1) both; }
+.animate-slideInRight    { animation: slideInRight    340ms cubic-bezier(0.22,1,0.36,1) both; }
+.animate-kxPulse         { animation: kxPulse 2.5s ease-in-out infinite; }
+
+/* ── Stagger delay utilities (varied rhythm — not all same) ── */
+.stagger-1  { animation-delay: 60ms;  }
+.stagger-2  { animation-delay: 130ms; }
+.stagger-3  { animation-delay: 210ms; }
+.stagger-4  { animation-delay: 300ms; }
+.stagger-5  { animation-delay: 400ms; }
 
 /* ── Skeleton shimmer ── */
 .skeleton {
