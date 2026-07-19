@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { IOSFloatingNav, type NavTab } from './components/layout/IOSFloatingNav';
 import { NotificationPanel } from './components/layout/NotificationPanel';
 import { AuthModal } from './components/auth/AuthModal';
+import { LandingPage } from './components/auth/LandingPage';
 import { DSAIntelligenceHUD } from './components/dsa/DSAIntelligenceHUD';
 import { HomeFeed } from './pages/HomeFeed';
 import { ResourceLibrary } from './pages/ResourceLibrary';
@@ -16,13 +17,12 @@ import { checkRateLimit } from './utils/rateLimiter';
 import { validateContentSafety, verifyFileMagicBytes } from './utils/safetyFilter';
 import { accountManager } from './models/AccountManager';
 import { type StudentAccount } from './models/StudentAccount';
-import { CheckCircle2, Bell, Plus, X, Image as ImageIcon, FileText, Send, Video, Trash2, Loader, Users, BookOpen, Rocket, Quote } from 'lucide-react';
+import { CheckCircle2, Bell, Plus, X, Image as ImageIcon, FileText, Send, Video, Trash2, Loader } from 'lucide-react';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<NavTab>('home');
   const [viewProfileId, setViewProfileId] = useState<string | null>(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [authInitialStep, setAuthInitialStep] = useState<'SIGN_IN' | 'REGISTER'>('SIGN_IN');
   const [isDSAHUDOpen, setIsDSAHUDOpen] = useState(false);
   const [isTimerOpen, setIsTimerOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -154,131 +154,15 @@ export const App: React.FC = () => {
         </div>
       )}
 
-      {/* If currentUser is null, enforce the Mandatory GOATED Glassmorphism Landing Page */}
+      {/* GOATED LANDING PAGE — Full split-screen, auth form embedded inline on right */}
       {!currentUser ? (
-        <div className="min-h-screen relative flex items-center justify-start p-6 lg:p-12 z-10 overflow-hidden font-sans">
-          
-          {/* Background Image & Ambient Overlay */}
-          <div className="absolute inset-0 z-0">
-            <img 
-              src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" 
-              alt="Students studying" 
-              className="w-full h-full object-cover"
-            />
-            {/* Dark gradient overlay to ensure text readability while maintaining contrast */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#05050A]/95 via-[#05050A]/70 to-transparent" />
-            <div className="absolute inset-0 bg-black/30" />
-          </div>
+        <LandingPage onLoginSuccess={(user) => {
+          setCurrentUser(user);
+          const account = accountManager.createAccount(user);
+          setCurrentAccount(account);
+          localStorage.setItem('edunetwork_user', JSON.stringify(user));
+        }} />
 
-          {/* Top Navigation Bar */}
-          <div className="absolute top-6 left-6 right-6 z-20">
-            <div className="max-w-[1400px] mx-auto bg-[#000000]/40 backdrop-blur-2xl border border-white/10 rounded-3xl p-4 sm:px-6 sm:py-3.5 flex items-center justify-between shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
-              
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00CFFF] to-[#9B5DE5] flex items-center justify-center font-black text-white text-lg shadow-lg">
-                  K
-                </div>
-                <span className="text-2xl font-extrabold text-white tracking-tight">koinex<span className="text-white/60">a</span></span>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <button 
-                  onClick={() => { setAuthInitialStep('SIGN_IN'); setIsAuthOpen(true); }}
-                  className="px-5 py-2.5 rounded-full text-sm font-bold text-white border border-white/15 hover:bg-white/10 transition-all shadow-sm"
-                >
-                  Sign In
-                </button>
-                <button 
-                  onClick={() => { setAuthInitialStep('REGISTER'); setIsAuthOpen(true); }}
-                  className="px-5 py-2.5 rounded-full text-sm font-black text-white bg-gradient-to-r from-[#00CFFF] via-[#4169E1] to-[#9B5DE5] hover:opacity-90 shadow-lg shadow-[#4169E1]/40 transition-transform active:scale-95"
-                >
-                  Open an Account
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Main Welcome Panel */}
-          <div className="relative z-10 w-full max-w-[500px] mt-16 animate-fadeInLeft">
-            <div className="bg-[#000000]/50 backdrop-blur-[32px] border border-white/15 rounded-[40px] p-8 sm:p-10 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
-              
-              <h1 className="text-[3.2rem] leading-[1.1] font-black text-white tracking-tight mb-2">
-                Welcome to <br/>
-                <span className="bg-gradient-to-r from-[#00CFFF] via-[#4169E1] to-[#9B5DE5] text-transparent bg-clip-text drop-shadow-lg">
-                  Koinexa
-                </span>
-              </h1>
-              
-              <div className="w-24 h-1 rounded-full bg-gradient-to-r from-[#00CFFF] to-[#9B5DE5] mb-8 opacity-80" />
-
-              <p className="text-lg font-bold text-white/90 mb-4 leading-snug">
-                The student social platform for India's top colleges.
-              </p>
-              
-              <p className="text-sm font-medium text-white/60 mb-10 leading-relaxed pr-4">
-                Share knowledge, solve doubts, discover opportunities and build connections that last a lifetime.
-              </p>
-
-              {/* Feature 3-Grid */}
-              <div className="grid grid-cols-3 gap-3 p-4 rounded-3xl bg-white/5 border border-white/10">
-                
-                <div className="flex flex-col items-center justify-center text-center gap-2 p-2 hover:bg-white/5 rounded-2xl transition-all cursor-default">
-                  <div className="w-10 h-10 rounded-full bg-[#9B5DE5]/15 border border-[#9B5DE5]/30 flex items-center justify-center text-[#9B5DE5]">
-                    <Users className="w-5 h-5" />
-                  </div>
-                  <div className="space-y-0.5">
-                    <p className="text-xs font-bold text-white">Connect</p>
-                    <p className="text-[10px] font-medium text-white/40">with peers</p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col items-center justify-center text-center gap-2 p-2 border-x border-white/5 hover:bg-white/5 rounded-2xl transition-all cursor-default">
-                  <div className="w-10 h-10 rounded-full bg-[#00CFFF]/15 border border-[#00CFFF]/30 flex items-center justify-center text-[#00CFFF]">
-                    <BookOpen className="w-5 h-5" />
-                  </div>
-                  <div className="space-y-0.5">
-                    <p className="text-xs font-bold text-white">Learn</p>
-                    <p className="text-[10px] font-medium text-white/40">together</p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col items-center justify-center text-center gap-2 p-2 hover:bg-white/5 rounded-2xl transition-all cursor-default">
-                  <div className="w-10 h-10 rounded-full bg-[#9B5DE5]/15 border border-[#9B5DE5]/30 flex items-center justify-center text-[#9B5DE5]">
-                    <Rocket className="w-5 h-5" />
-                  </div>
-                  <div className="space-y-0.5">
-                    <p className="text-xs font-bold text-white">Grow</p>
-                    <p className="text-[10px] font-medium text-white/40">together</p>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom Left Quote Card */}
-          <div className="absolute bottom-6 left-6 sm:left-12 max-w-2xl z-10 animate-fadeInUp delay-300">
-            <div className="bg-[#000000]/50 backdrop-blur-2xl border border-white/10 rounded-3xl py-4 px-6 sm:px-8 flex items-center justify-between shadow-2xl relative overflow-hidden group">
-              
-              {/* Dot Grid Accent Background */}
-              <div className="absolute top-0 right-0 bottom-0 w-1/2 bg-[radial-gradient(ellipse_at_right,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[size:12px_12px] opacity-40 pointer-events-none" />
-
-              <div className="flex items-start gap-4 relative z-10">
-                <Quote className="w-8 h-8 text-[#4169E1] opacity-70 shrink-0 mt-1" />
-                <div>
-                  <p className="text-sm font-bold text-white/90 italic leading-snug">
-                    "Alone we can do so little; <br className="hidden sm:block"/> together we can do so much."
-                  </p>
-                  <p className="text-xs font-bold text-[#9B5DE5] mt-2">
-                    — Helen Keller
-                  </p>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-        </div>
       ) : (
         <>
           {/* iOS / visionOS Floating Transparent Pill Dock */}
@@ -538,7 +422,6 @@ export const App: React.FC = () => {
       {/* Strict Authentication Modal (GOATED Aesthetic) */}
       <AuthModal
         isOpen={isAuthOpen}
-        initialStep={authInitialStep}
         onClose={() => setIsAuthOpen(false)}
         currentUser={currentUser}
         onLoginSuccess={(user) => {
