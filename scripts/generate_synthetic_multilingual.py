@@ -8,7 +8,15 @@ LANGUAGES = [
     "Kannada", "Marathi", "Bengali", "Gujarati", "Punjabi", 
     "Odia", "Urdu"
 ]
-ROWS_PER_LANGUAGE = 50000
+ROWS_PER_LANGUAGE = 100000
+
+# Load the massive profanity dictionary we just compiled
+PROFANITY_DICT = {}
+try:
+    with open(os.path.join("datasets", "profanity_dict.json"), "r", encoding="utf-8") as f:
+        PROFANITY_DICT = json.load(f)
+except FileNotFoundError:
+    print("Warning: profanity_dict.json not found. Run fetch_profanity_dictionaries.py first.")
 
 # Base Lexicons (Simplified representation for generation)
 TOXIC_TEMPLATES = [
@@ -92,11 +100,39 @@ def map_severity_to_action(severity):
 
 def main():
     print(f"Generating Multilingual Datasets for {len(LANGUAGES)} languages...")
+    print(f"Goal: {ROWS_PER_LANGUAGE} rows per language (Total: {len(LANGUAGES) * ROWS_PER_LANGUAGE} rows)")
     
     for lang in LANGUAGES:
         dataset = []
+        
+        # Extract profanity for this specific language (fallback to english if missing)
+        lang_key = lang.lower()
+        bad_words = PROFANITY_DICT.get(lang_key, PROFANITY_DICT.get("english", ["fuck", "bitch"]))
+        
         for i in range(ROWS_PER_LANGUAGE):
-            # Pick a random template category
+            # 20% chance to generate an extreme sexual/profanity edge case using the massive dictionary
+            if random.random() < 0.2:
+                bad_word = random.choice(bad_words)
+                # Various sentence structures injecting the bad word
+                structures = [
+                    f"you are a {bad_word}",
+                    f"shut up {bad_word}",
+                    f"what a {bad_word}",
+                    f"{bad_word}",
+                    f"i will {bad_word} you",
+                    f"go to hell {bad_word}",
+                    f"you absolute {bad_word}"
+                ]
+                final_text = random.choice(structures)
+                dataset.append({
+                    "text": final_text,
+                    "severity": "critical",
+                    "action": "DELETE",
+                    "language": lang
+                })
+                continue
+            
+            # Pick a random template category for the remaining 80%
             t = random.choice(TOXIC_TEMPLATES)
             
             # Pick a phrase from that language's specific dictionary

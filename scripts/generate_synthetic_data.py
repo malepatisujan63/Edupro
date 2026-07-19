@@ -13,7 +13,7 @@ import io
 # of high-quality synthetic data points for Neural Network training.
 
 OUTPUT_FILE = "synthetic_training_dataset.json"
-TARGET_ROWS = 100000  # Adjust up to 1,000,000+ (lakhs)
+TARGET_ROWS = 500000  # 5 Lakhs
 
 # Base Lexicons
 LANGUAGES = ["English", "Hindi", "Telugu", "Tamil", "Malayalam", "Code-Mixed"]
@@ -39,7 +39,27 @@ TOXIC_TEMPLATES = [
         "templates": [
             ("i will {violence} you tomorrow", "kal main tujhe {violence_hi}"),
             ("don't come to college or I'll {violence} you", "college ki raku, ninnu {violence_te}"),
-            ("i swear i will {violence} you", "naan unnai {violence_ta} da")
+            ("i swear i will {violence} you", "naan unnai {violence_ta} da"),
+            ("i am going to blow up the school", "main school uda dunga"),
+            ("i will bring a bomb to class", "class lo bomb pedatha")
+        ]
+    },
+    {
+        "category": "Threat", "subcategory": "Self Harm", "intent": "suicide",
+        "severity": "critical", "toxicity_score": "0.99", "profanity": False,
+        "templates": [
+            ("i want to end it all", "mujhe marne ka man kar raha hai"),
+            ("i'm going to commit suicide tonight", "nenu ivala suicide cheskunta"),
+            ("goodbye forever everyone", "ellarkum bye naan sethudren")
+        ]
+    },
+    {
+        "category": "Harassment", "subcategory": "Bullying", "intent": "mockery",
+        "severity": "medium", "toxicity_score": "0.80", "profanity": False,
+        "templates": [
+            ("nobody even likes you", "tujhe koi pasand nahi karta"),
+            ("you're so ugly it hurts", "nuvvu chala worst ga unnav"),
+            ("just drop out already", "college vitu po da")
         ]
     },
     {
