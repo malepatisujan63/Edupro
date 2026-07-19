@@ -12,12 +12,25 @@ export interface ModerationWorkerResult {
   toxicityProbability: number;
 }
 
+// --- GOD-TIER OPTIMIZATION: LRU CACHE ---
+// We maintain a tiny Hash Map in RAM. If the user spams the same context,
+// we pull the pre-computed math result instantly in O(1) time without firing
+// the RegExp DFA or the SIMD Matrix Math.
+const LRU_CACHE_LIMIT = 500;
+const lruCache = new Map<string, ModerationWorkerResult>();
+
 // Self-executing worker listener
 self.onmessage = (e: MessageEvent<ModerationWorkerData>) => {
   const { messages, newMessage } = e.data;
   
   // Combine all strings into a massive context block
   const contextStr = [...messages, newMessage].join(' ').toLowerCase();
+
+  // 1. O(1) Cache Hit Check
+  if (lruCache.has(contextStr)) {
+    self.postMessage(lruCache.get(contextStr));
+    return;
+  }
 
   // --- EXTREME DSA OPTIMIZATION: PRE-COMPILED REGEXP (DFA STATE MACHINE) ---
   // V8 engine compiles this into a Deterministic Finite Automaton for O(N) execution time
@@ -63,5 +76,14 @@ self.onmessage = (e: MessageEvent<ModerationWorkerData>) => {
 
   // Send the result back to the Main Thread
   const result: ModerationWorkerResult = { action, toxicityProbability };
+
+  // 3. Save to O(1) Cache
+  lruCache.set(contextStr, result);
+  // Enforce memory limit to prevent RAM leaks
+  if (lruCache.size > LRU_CACHE_LIMIT) {
+    const firstKey = lruCache.keys().next().value;
+    if (firstKey !== undefined) lruCache.delete(firstKey);
+  }
+
   self.postMessage(result);
 };

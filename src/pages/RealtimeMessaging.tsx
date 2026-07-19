@@ -64,6 +64,35 @@ export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({
 
   const [inputMsg, setInputMsg] = useState('');
   const [isModerating, setIsModerating] = useState(false);
+  const [liveWarning, setLiveWarning] = useState<string | null>(null);
+
+  // --- GOD TIER OPTIMIZATION: CPU DEBOUNCING ---
+  // Real-time typing moderation without draining mobile battery.
+  // We wait 300ms after the user *stops* typing before firing the SIMD Math / RegExp.
+  useEffect(() => {
+    if (!inputMsg.trim()) {
+      setLiveWarning(null);
+      return;
+    }
+    
+    const timeoutId = setTimeout(async () => {
+      try {
+        const recentContext = messages.slice(-15).map(m => m.content || '');
+        const action = await analyzeConversationContext(recentContext, inputMsg.trim());
+        if (action === 'DELETE') {
+          setLiveWarning('⚠️ CRITICAL WARNING: This message violates severe community guidelines. Sending it will result in account termination.');
+        } else if (action === 'SUSPEND') {
+          setLiveWarning('⚠️ WARNING: This message contains prohibited language.');
+        } else {
+          setLiveWarning(null);
+        }
+      } catch (e) {
+        setLiveWarning(null);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [inputMsg, messages]);
   const [isRecordingAudio, setIsRecordingAudio] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -151,14 +180,11 @@ export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({
   const handleSendMessage = async () => {
     if (!inputMsg.trim()) return;
     const content = inputMsg.trim();
-    setInputMsg('');
 
-    // --- Intelligent Moderation Context Analysis ---
+    // Final security check in case they bypassed the debounce
     setIsModerating(true);
     try {
-      // Gather context: last 15 messages in this channel
       const recentContext = messages.slice(-15).map(m => m.content || '');
-      
       const action = await analyzeConversationContext(recentContext, content);
       
       if (action === 'DELETE') {
@@ -173,7 +199,9 @@ export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({
     } finally {
       setIsModerating(false);
     }
-    // -----------------------------------------------
+    
+    setInputMsg('');
+    setLiveWarning(null);
     
     const optimisticMsg: FirestoreMessage = {
       id: `temp_${Date.now()}`,
@@ -411,6 +439,15 @@ export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({
           </div>
         )}
 
+        {/* Live AI Typying Warning (Debounced) */}
+        {liveWarning && !isRecordingAudio && (
+          <div className="px-5 py-3 bg-[#FF3B30]/15 border-t border-[#FF3B30]/30 flex items-center justify-between animate-fade-in">
+            <div className="flex items-center gap-3 text-[#FF3B30] font-bold text-xs">
+              <span>{liveWarning}</span>
+            </div>
+          </div>
+        )}
+
         {/* Input Dock */}
         <div className="p-4 bg-[#000000] border-t border-[rgba(65,105,225,0.15)] flex items-center gap-3">
           <button
@@ -423,7 +460,7 @@ export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({
             <Mic className="w-5 h-5" />
           </button>
 
-          <div className="flex-1 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center px-4 py-1.5 focus-within:border-[#00CFFF]/50 focus-within:bg-white/[0.06] transition-all relative">
+          <div className={`flex-1 rounded-2xl bg-white/[0.03] border flex items-center px-4 py-1.5 focus-within:bg-white/[0.06] transition-all relative ${liveWarning ? 'border-[#FF3B30]' : 'border-white/10 focus-within:border-[#00CFFF]/50'}`}>
               <input
                 type="text"
                 placeholder={isModerating ? "AI Context Engine analyzing..." : "Type a message..."}
@@ -437,7 +474,7 @@ export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({
 
             <button
               onClick={handleSendMessage}
-              disabled={!inputMsg.trim() || isModerating}
+              disabled={!inputMsg.trim() || isModerating || !!liveWarning}
               className="p-3.5 rounded-2xl bg-gradient-to-br from-[#00CFFF] to-[#4169E1] text-white shadow-lg hover:shadow-[#00CFFF]/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 flex items-center justify-center shrink-0"
             >
               <Send className={`w-5 h-5 ${isModerating ? 'animate-pulse' : ''}`} />
