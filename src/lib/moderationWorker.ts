@@ -20,7 +20,7 @@ const LRU_CACHE_LIMIT = 500;
 const lruCache = new Map<string, ModerationWorkerResult>();
 
 // Self-executing worker listener
-self.onmessage = (e: MessageEvent<ModerationWorkerData>) => {
+self.onmessage = async (e: MessageEvent<ModerationWorkerData>) => {
   const { messages, newMessage } = e.data;
   
   // Combine all strings into a massive context block
@@ -32,6 +32,35 @@ self.onmessage = (e: MessageEvent<ModerationWorkerData>) => {
     return;
   }
 
+  let action: 'ALLOW' | 'SUSPEND' | 'DELETE' = 'ALLOW';
+  let toxicityProbability = 0;
+
+  try {
+    // --- TRUE AI INTEGRATION: PYTHON FASTAPI ---
+    // Attempt to connect to the Multithreaded Python Backend to use the 
+    // 12 specialized Indian Language Neural Networks!
+    const response = await fetch('http://localhost:8000/api/moderate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: contextStr })
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      action = data.action;
+      toxicityProbability = data.confidence;
+      
+      const result: ModerationWorkerResult = { action, toxicityProbability };
+      lruCache.set(contextStr, result);
+      if (lruCache.size > LRU_CACHE_LIMIT) lruCache.delete(lruCache.keys().next().value!);
+      self.postMessage(result);
+      return; // Successfully used Python AI, exit here.
+    }
+  } catch (err) {
+    // Python Server is offline, fallback to local Extreme DSA (RegExp/SIMD Math)
+    console.warn("Python AI Backend offline. Falling back to local offline Engine.");
+  }
+
   // --- EXTREME DSA OPTIMIZATION: PRE-COMPILED REGEXP (DFA STATE MACHINE) ---
   // V8 engine compiles this into a Deterministic Finite Automaton for O(N) execution time
   // which is infinitely faster than iterating through arrays with .includes()
@@ -39,43 +68,43 @@ self.onmessage = (e: MessageEvent<ModerationWorkerData>) => {
 
   const suspendPattern = /\b(idiot|stupid|loser|ugly|shut up|bitch|fuck you|asshole|dick|cunt|whore|slut|piece of shit|garbage|trash|worthless|pay me to do your homework|cheat sheet for sale|buy exams|test answers|do my assignment|pay for essay|hire me to take your test|crypto scam|click this link to win|bitcoin giveaway|free iphones|hot girls in your area|forex trading|pyramid scheme)\b/gi;
 
-  let action: 'ALLOW' | 'SUSPEND' | 'DELETE' = 'ALLOW';
-  let toxicityProbability = 0;
+  let fallbackAction: 'ALLOW' | 'SUSPEND' | 'DELETE' = 'ALLOW';
+  let fallbackProb = 0;
 
   // 1A. Check for severe offenses (O(N) execution time)
   if (deletePattern.test(contextStr)) {
-    action = 'DELETE';
+    fallbackAction = 'DELETE';
   }
 
   // 1B. Check for suspension-level offenses if not already deleted
-  if (action !== 'DELETE') {
+  if (fallbackAction !== 'DELETE') {
     // Count matches to detect repeated harassment
     const matches = contextStr.match(suspendPattern);
     const suspendHits = matches ? matches.length : 0;
 
     if (suspendHits >= 3) {
-      action = 'DELETE'; // Repeated harassment over the context elevates to a ban
+      fallbackAction = 'DELETE'; // Repeated harassment over the context elevates to a ban
     } else if (suspendHits > 0) {
-      action = 'SUSPEND'; // Single or minor offense is a suspension
+      fallbackAction = 'SUSPEND'; // Single or minor offense is a suspension
     }
   }
 
   // --- HEAVY DSA LAYER 2: Neural Network Math Matrix ---
   // If the heuristic engine didn't catch anything, we fall back to the Custom Neural Network
   // to probabilistically evaluate the sentiment of the context for masked toxicity.
-  if (action === 'ALLOW') {
+  if (fallbackAction === 'ALLOW') {
     // This is mathematically expensive O(N) inference
-    toxicityProbability = ToxicityNeuralNet.predict(contextStr);
+    fallbackProb = ToxicityNeuralNet.predict(contextStr);
     
-    if (toxicityProbability >= 0.92) {
-      action = 'DELETE'; // Highly confident neural prediction of extreme toxicity
-    } else if (toxicityProbability >= 0.75) {
-      action = 'SUSPEND'; // Confident neural prediction of suspension-level toxicity
+    if (fallbackProb >= 0.92) {
+      fallbackAction = 'DELETE'; // Highly confident neural prediction of extreme toxicity
+    } else if (fallbackProb >= 0.75) {
+      fallbackAction = 'SUSPEND'; // Confident neural prediction of suspension-level toxicity
     }
   }
 
-  // Send the result back to the Main Thread
-  const result: ModerationWorkerResult = { action, toxicityProbability };
+  // Send the fallback result back to the Main Thread
+  const result: ModerationWorkerResult = { action: fallbackAction, toxicityProbability: fallbackProb };
 
   // 3. Save to O(1) Cache
   lruCache.set(contextStr, result);
