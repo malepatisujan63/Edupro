@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Home,
   Play,
@@ -32,6 +32,28 @@ export const IOSFloatingNav: React.FC<IOSFloatingNavProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<{ results: TrieItem[]; latencyMs: number; pathString: string } | null>(null);
 
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = React.useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY.current + 10) {
+        // Scrolling down -> hide
+        setIsVisible(false);
+      } else if (currentScrollY < lastScrollY.current - 10) {
+        // Scrolling up -> show
+        setIsVisible(true);
+      }
+      
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const q = e.target.value;
     setSearchQuery(q);
@@ -63,7 +85,7 @@ export const IOSFloatingNav: React.FC<IOSFloatingNavProps> = ({
       </div>
 
       {/* iOS 18 Floating Liquid Glass Pill Navigation Dock (No Scroll Bar, Minimal Icons Only, High Transparency) */}
-      <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 w-auto max-w-[96%] pointer-events-none">
+      <div className={`fixed bottom-5 left-1/2 -translate-x-1/2 z-50 w-auto max-w-[96%] pointer-events-none transition-transform duration-500 ease-in-out ${isVisible ? 'translate-y-0' : 'translate-y-32'}`}>
         <div className="pointer-events-auto mx-auto kx-nav-dock p-1.5 sm:p-2 flex items-center justify-center gap-1 sm:gap-1.5 transition-all duration-300 shadow-2xl overflow-visible">
           
           {/* Main Pill Tabs: Icon only for sleek minimal fit */}

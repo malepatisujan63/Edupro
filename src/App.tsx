@@ -78,6 +78,19 @@ export const App: React.FC = () => {
     if (!isInitialized) {
       preloadPlatformData();
       populateTrieWithAllUsers();
+      
+      const storedUser = localStorage.getItem('edunetwork_user');
+      if (storedUser) {
+        try {
+          const user = JSON.parse(storedUser);
+          setCurrentUser(user);
+          const account = accountManager.createAccount(user);
+          setCurrentAccount(account);
+        } catch (e) {
+          console.error('Failed to parse stored user session');
+        }
+      }
+
       setIsInitialized(true);
     }
   }, [isInitialized]);
@@ -88,12 +101,15 @@ export const App: React.FC = () => {
     if (currentUser?.uid) accountManager.destroyAccount(currentUser.uid);
     setCurrentUser(null);
     setCurrentAccount(null);
+    localStorage.removeItem('edunetwork_user');
     alert('You have successfully logged out. Mandatory Authentication Gate reactivated.');
   };
 
   const handleDeleteAccount = () => {
     setCurrentUser(null);
+    setCurrentAccount(null);
     setActiveTab('home');
+    localStorage.removeItem('edunetwork_user');
     alert('Account deleted and purged from all UniqueRegistrationHashSet and Graph indices ($O(1)$).');
   };
 
@@ -440,6 +456,7 @@ export const App: React.FC = () => {
           // Create per-account OOP instance with fresh DSA engines
           const account = accountManager.createAccount(user);
           setCurrentAccount(account);
+          localStorage.setItem('edunetwork_user', JSON.stringify(user));
           setIsAuthOpen(false);
         }}
         onDeleteAccount={handleDeleteAccount}

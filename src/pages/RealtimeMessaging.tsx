@@ -26,16 +26,20 @@ interface RealtimeMessagingProps {
 
 export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({ activeDm, currentUser }) => {
   const [communities, setCommunities] = useState<FirestoreCommunity[]>([]);
-  const baseChannels: string[] = ['Global Network', ...communities.map(c => c.title)];
-  const channels = activeDm ? [...baseChannels, activeDm.name] : baseChannels;
+  
+  const dmChannelId = activeDm ? `dm_${[currentUser.uid, activeDm.id].sort().join('_')}` : null;
+  const baseChannels = [{ id: 'Global Network', displayName: 'Global Network' }, ...communities.map(c => ({ id: c.title, displayName: c.title }))];
+  const channels = dmChannelId && activeDm ? [...baseChannels, { id: dmChannelId, displayName: activeDm.name }] : baseChannels;
+  
   const [activeChannel, setActiveChannel] = useState<string>('Global Network');
+  const activeChannelDisplay = channels.find(c => c.id === activeChannel)?.displayName || activeChannel;
   const [messages, setMessages] = useState<FirestoreMessage[]>([]);
 
   useEffect(() => {
-    if (activeDm) {
-      setActiveChannel(activeDm.name);
+    if (activeDm && dmChannelId) {
+      setActiveChannel(dmChannelId);
     }
-  }, [activeDm]);
+  }, [activeDm, dmChannelId]);
 
   useEffect(() => {
     const unsub = subscribeToCommunities((comms) => setCommunities(comms));
@@ -109,6 +113,17 @@ export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({ activeDm, 
   };
 
   const sendVoiceNoteMessage = async (audioUrl: string, durationSec: number) => {
+    const optimisticMsg: FirestoreMessage = {
+      id: `temp_${Date.now()}`,
+      channel: activeChannel,
+      senderId: currentUser.uid,
+      senderName: currentUser.name,
+      audioBlobUrl: audioUrl,
+      audioDurationSeconds: durationSec,
+      createdAt: new Date().toISOString(),
+    };
+    setMessages(prev => [...prev, optimisticMsg]);
+
     try {
       await sendMessage({
         channel: activeChannel,
@@ -119,6 +134,7 @@ export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({ activeDm, 
       });
     } catch (err) {
       console.error(err);
+      setMessages(prev => prev.filter(m => m.id !== optimisticMsg.id));
     }
   };
 
@@ -126,6 +142,17 @@ export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({ activeDm, 
     if (!inputMsg.trim()) return;
     const content = inputMsg;
     setInputMsg('');
+    
+    const optimisticMsg: FirestoreMessage = {
+      id: `temp_${Date.now()}`,
+      channel: activeChannel,
+      senderId: currentUser.uid,
+      senderName: currentUser.name,
+      content,
+      createdAt: new Date().toISOString(),
+    };
+    setMessages(prev => [...prev, optimisticMsg]);
+
     try {
       await sendMessage({
         channel: activeChannel,
@@ -135,6 +162,7 @@ export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({ activeDm, 
       });
     } catch (err) {
       console.error(err);
+      setMessages(prev => prev.filter(m => m.id !== optimisticMsg.id));
     }
   };
 
@@ -171,27 +199,27 @@ export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({ activeDm, 
           <div className="space-y-2.5">
             {channels.map((ch) => (
               <button
-                key={ch}
-                onClick={() => setActiveChannel(ch)}
+                key={ch.id}
+                onClick={() => setActiveChannel(ch.id)}
                 className={`w-full p-3.5 rounded-[20px] text-left transition-all flex items-center gap-3.5 border ${
-                  activeChannel === ch
+                  activeChannel === ch.id
                     ? 'bg-[#111111] border-white/40 shadow-lg text-white scale-[1.02]'
                     : 'bg-[#0D0D0D] border-white/10 text-white/70 hover:text-white hover:bg-[#111111]'
                 }`}
               >
                 <div className="relative shrink-0">
                   <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-[#00CFFF]/40 to-[#9B5DE5]/60 border border-white/20 flex items-center justify-center font-bold text-white shadow-md">
-                    {ch[0]}
+                    {ch.displayName[0]}
                   </div>
                   <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[#34C759] border-2 border-[#05050A]" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-bold truncate text-white">{ch}</h4>
-                    {activeChannel === ch && <span className="w-2 h-2 rounded-full bg-[#00CFFF]" />}
+                    <h4 className="text-sm font-bold truncate text-white">{ch.displayName}</h4>
+                    {activeChannel === ch.id && <span className="w-2 h-2 rounded-full bg-[#00CFFF]" />}
                   </div>
                   <p className="text-[11px] text-white/50 truncate font-normal">
-                    {ch === 'Global Network' ? 'General Channel' : 'Community Channel'}
+                    {ch.id === 'Global Network' ? 'General Channel' : (ch.id.startsWith('dm_') ? 'Direct Message' : 'Community Channel')}
                   </p>
                 </div>
               </button>
@@ -234,10 +262,10 @@ export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({ activeDm, 
             
             <div>
               <h3 className="text-lg font-black text-white flex items-center gap-2">
-                {activeChannel}
+                {activeChannelDisplay}
               </h3>
               <p className="text-xs text-white/60 font-normal">
-                Community Chat
+                {activeChannel.startsWith('dm_') ? 'Direct Message' : 'Community Chat'}
               </p>
             </div>
           </div>
@@ -366,7 +394,7 @@ export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({ activeDm, 
           <div className="flex-1 kx-field flex items-center overflow-hidden">
             <input
               type="text"
-              placeholder={activeChannel ? `Message ${activeChannel}…` : 'Select a channel…'}
+              placeholder={activeChannelDisplay ? `Message ${activeChannelDisplay}…` : 'Select a channel…'}
               value={inputMsg}
               onChange={(e) => setInputMsg(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
