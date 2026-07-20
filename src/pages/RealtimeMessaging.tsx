@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   MessageSquare,
   Send,
@@ -342,7 +343,8 @@ export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({
 
         {/* Chat Messages Log (iMessage Grouping & Spring-In Bubbles) */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-[#000000]">
-          {filteredMessages.map((msg) => {
+          <AnimatePresence mode="popLayout">
+          {filteredMessages.map((msg, index) => {
             const isMe = msg.senderId === currentUser?.uid;
             // Format timestamp
             let timeString = '';
@@ -351,7 +353,14 @@ export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({
               timeString = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             }
             return (
-              <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} animate-springIn group`}>
+              <motion.div 
+                key={msg.id} 
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25, delay: index * 0.05 }}
+                className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} group`}
+              >
                 <div className="flex items-center gap-2 mb-1 px-2">
                   <span className="text-xs font-semibold text-white/80">{msg.senderName}</span>
                   <span className="text-[10px] text-white/50 font-mono">{timeString}</span>
@@ -417,9 +426,10 @@ export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({
                   )}
                 </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
+          </AnimatePresence>
         </div>
 
         {/* Recording Voice Note Banner if active */}

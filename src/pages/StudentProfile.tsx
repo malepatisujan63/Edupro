@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Grid, LogOut, Trash2, X, Settings } from 'lucide-react';
 import { fetchUserProfile, fetchPostsByUser, sendStudyMateRequest, saveUserProfile, type FirestoreUser, type FirestorePost } from '../lib/supabaseService';
 
@@ -148,7 +149,12 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
       </div>
 
       {/* ── PROFILE HEADER SECTION ── */}
-      <div className="px-4 sm:px-8 relative -mt-16 sm:-mt-20 z-20 flex flex-col sm:flex-row items-center sm:items-end justify-between gap-6">
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        className="px-4 sm:px-8 relative -mt-16 sm:-mt-20 z-20 flex flex-col sm:flex-row items-center sm:items-end justify-between gap-6"
+      >
         
         {/* Avatar & Core Info */}
         <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6 w-full">
@@ -197,10 +203,15 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
             </>
           )}
         </div>
-      </div>
+      </motion.div>
 
       {/* ── BIO & GLASS STAT BAR ── */}
-      <div className="px-4 sm:px-8 mt-8 flex flex-col md:flex-row gap-8 items-start">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2 }}
+        className="px-4 sm:px-8 mt-8 flex flex-col md:flex-row gap-8 items-start"
+      >
         
         {/* Left: Bio Details */}
         <div className="w-full md:flex-1 space-y-4">
@@ -225,9 +236,10 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
             <span className="text-[11px] font-bold uppercase tracking-widest text-white/50 mt-1">Study Mates</span>
           </div>
         </div>
-      </div>
+      </motion.div>
 
         {/* Edit Profile Modal (Only show if editing and viewing self) */}
+        <AnimatePresence>
         {isViewingSelf && isEditing && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xl animate-fadeIn">
             <div className="w-full max-w-lg bg-[#05050A]/90 rounded-[32px] p-8 shadow-[0_0_80px_rgba(65,105,225,0.2)] relative border border-white/10 max-h-[90vh] overflow-y-auto custom-scrollbar">
@@ -269,10 +281,12 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
               SAVE CHANGES
             </button>
           </div>
-        </div>
+          </div>
         )}
+        </AnimatePresence>
 
         {/* Settings Modal */}
+        <AnimatePresence>
         {isViewingSelf && isSettingsOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xl animate-fadeIn">
             <div className="w-full max-w-sm bg-[#05050A]/90 rounded-[32px] p-8 shadow-[0_0_80px_rgba(65,105,225,0.2)] relative border border-white/10">
@@ -294,8 +308,9 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
                <button onClick={() => { if(confirm('Are you absolutely sure you want to permanently delete your account? This action cannot be undone.')) onDeleteAccount(); }} className="w-full py-4 rounded-2xl font-bold bg-[#FF3B30]/10 border border-[#FF3B30]/30 text-[#FF3B30] hover:bg-[#FF3B30]/20 flex items-center justify-center gap-2 transition-all shadow-inner"><Trash2 className="w-5 h-5"/> Delete Account</button>
             </div>
           </div>
-        </div>
+          </div>
         )}
+        </AnimatePresence>
 
       {/* Tabs Row */}
       <div className="mt-12 border-t border-white/20 flex justify-center">
@@ -308,10 +323,18 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
       <h3 className="text-lg font-bold mb-4 mt-2">Posts</h3>
 
       {/* Grid Content */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4 max-w-4xl">
+      <motion.div layout className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4 max-w-4xl">
+        <AnimatePresence>
         {posts.length > 0 ? (
           posts.map((post, idx) => (
-            <div key={post.id || idx} className="aspect-square bg-[#0A0A0A] border border-white/10 rounded-2xl relative group cursor-pointer overflow-hidden hover:border-[#4169E1] transition-all duration-300 hover:shadow-[0_0_30px_rgba(65,105,225,0.3)] hover:-translate-y-1">
+            <motion.div 
+              key={post.id || idx} 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ delay: idx * 0.05 }}
+              className="aspect-square bg-[#0A0A0A] border border-white/10 rounded-2xl relative group cursor-pointer overflow-hidden hover:border-[#4169E1] transition-all duration-300 hover:shadow-[0_0_30px_rgba(65,105,225,0.3)] hover:-translate-y-1"
+            >
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10 flex flex-col justify-end p-4">
                 <p className="text-xs font-bold text-white truncate drop-shadow-md">{post.title}</p>
                 <p className="text-[10px] text-[#00CFFF] font-semibold mt-1 flex items-center gap-1"><Grid className="w-3 h-3"/> View Post</p>
@@ -327,16 +350,17 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
                   <p className="text-xs font-semibold text-white/90 line-clamp-3 leading-snug">{post.title}</p>
                 </div>
               )}
-            </div>
+            </motion.div>
           ))
         ) : (
-          <div className="col-span-2 md:col-span-3 text-center py-20 text-white/50 flex flex-col items-center bg-[#111111] rounded-2xl border border-white/5">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="col-span-2 md:col-span-3 text-center py-20 text-white/50 flex flex-col items-center bg-[#111111] rounded-2xl border border-white/5">
             <Grid className="w-10 h-10 text-white/20 mb-3" />
             <p className="font-bold text-lg text-white">No Posts Yet</p>
             <p className="text-sm mt-1">Capture the moment or share your study notes.</p>
-          </div>
+          </motion.div>
         )}
-      </div>
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
 };

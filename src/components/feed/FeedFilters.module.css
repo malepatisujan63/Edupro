@@ -1,0 +1,60 @@
+.container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: rgba(14, 14, 20, 0.6);
+  backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 9999px;
+  margin: 0 auto 24px;
+  max-width: fit-content;
+  overflow-x: auto;
+}
+
+.container::-webkit-scrollbar {
+  display: none;
+}
+
+.filterBtn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: 9999px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+.filterBtn:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.activeText {
+  color: white;
+}
+
+.icon {
+  z-index: 1;
+}
+
+.label {
+  z-index: 1;
+}
+
+.activeBg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(0, 207, 255, 0.2), rgba(155, 93, 229, 0.2));
+  border: 1px solid rgba(0, 207, 255, 0.3);
+  border-radius: 9999px;
+  z-index: 0;
+  box-shadow: 0 4px 14px rgba(0, 207, 255, 0.1);
+}

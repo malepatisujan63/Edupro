@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { IOSFloatingNav, type NavTab } from './components/layout/IOSFloatingNav';
+import { BackgroundAmbient } from './components/layout/BackgroundAmbient';
+import { TopNavigation } from './components/layout/TopNavigation';
 import { NotificationPanel } from './components/layout/NotificationPanel';
+import { CreatePostModal } from './components/post/CreatePostModal';
 import { AuthModal } from './components/auth/AuthModal';
 import { LandingPage } from './components/auth/LandingPage';
 import { DSAIntelligenceHUD } from './components/dsa/DSAIntelligenceHUD';
@@ -134,41 +137,14 @@ export const App: React.FC = () => {
   return (
     <div className="min-h-screen font-sans selection:bg-[#4169E1]/40 selection:text-white relative overflow-x-hidden" style={{background: 'var(--bg-canvas)', color: 'var(--text-primary)', transition: 'background 0.3s ease, color 0.3s ease'}}>
       
-      {/* Koinexa Ambient Orbs — Subtle depth glow matching logo gradient */}
-      <div className="fixed -bottom-32 -left-32 w-[500px] h-[500px] bg-gradient-to-tr from-[#00CFFF]/8 to-[#4169E1]/4 rounded-full blur-[120px] pointer-events-none z-0" />
-      <div className="fixed -top-32 -right-32 w-[400px] h-[400px] bg-gradient-to-bl from-[#9B5DE5]/8 to-[#4169E1]/4 rounded-full blur-[100px] pointer-events-none z-0" />
-      <div className="fixed bottom-1/3 right-0 w-[300px] h-[300px] bg-[#4169E1]/4 rounded-full blur-[90px] pointer-events-none z-0" />
+      <BackgroundAmbient />
 
-      {/* Top-Right Actions Capsule — single clean gradient border, no nesting */}
-      {currentUser && (
-        <div className="fixed top-4 right-4 sm:right-6 z-40 pointer-events-auto">
-          <div className="kx-capsule">
-            {/* Notification Bell */}
-            <button
-              onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-              className={`kx-pill-flow flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold transition-all ${
-                isNotificationsOpen ? 'active' : ''
-              }`}
-            >
-              <Bell className="w-4 h-4 text-[#9B5DE5]" />
-              <span className="hidden sm:inline text-white">Notifications</span>
-              <span className="w-2 h-2 rounded-full bg-[#00CFFF] animate-pulse" />
-            </button>
-
-            {/* Post Button — gradient fill */}
-            <button
-              onClick={() => setIsCreatePostOpen(true)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-extrabold text-white transition-all
-                bg-gradient-to-r from-[#00CFFF] via-[#4169E1] to-[#9B5DE5]
-                hover:opacity-90 hover:shadow-[0_0_20px_rgba(65,105,225,0.5)]
-                shadow-[0_0_12px_rgba(65,105,225,0.3)]"
-            >
-              <Plus className="w-4 h-4 stroke-[3]" />
-              <span>Post</span>
-            </button>
-          </div>
-        </div>
-      )}
+      <TopNavigation 
+        currentUser={currentUser}
+        isNotificationsOpen={isNotificationsOpen}
+        setIsNotificationsOpen={setIsNotificationsOpen}
+        setIsCreatePostOpen={setIsCreatePostOpen}
+      />
 
       {/* GOATED LANDING PAGE — Full split-screen, auth form embedded inline on right */}
       {!currentUser ? (
@@ -242,206 +218,14 @@ export const App: React.FC = () => {
         <NotificationPanel currentUser={currentUser} onClose={() => setIsNotificationsOpen(false)} />
       )}
 
-      {/* Create New Post Modal (Instagram Dark Theme) */}
-      {isCreatePostOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-2xl animate-fadeIn">
-          <div className="w-full max-w-lg glass-panel p-6 space-y-5 animate-scaleUp">
-            <div className="flex items-center justify-between pb-3 border-b border-[rgba(255,255,255,0.08)]">
-              <h3 className="text-base font-extrabold text-white flex items-center gap-2">
-                <Plus className="w-5 h-5 text-[#00CFFF]" />
-                <span>Create New Post / Share Resource</span>
-              </h3>
-              <button
-                onClick={() => setIsCreatePostOpen(false)}
-                className="w-8 h-8 rounded-full bg-[#0D0D0D] border border-white/20 flex items-center justify-center text-white hover:bg-[#111111]"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              {/* Post textarea with flowing gradient border on focus */}
-              <div className="kx-field">
-                <textarea
-                  rows={4}
-                  placeholder="What's on campus today? Share notes, doubts, or resources…"
-                  value={postContent}
-                  onChange={(e) => setPostContent(e.target.value)}
-                  className="w-full bg-transparent p-4 text-sm text-white placeholder:text-white/30 outline-none resize-none"
-                />
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2 pt-1">
-                <label className="kx-pill-flow cursor-pointer px-3.5 py-2 text-xs text-white font-bold flex items-center gap-1.5">
-                  <ImageIcon className="w-4 h-4 text-[#00CFFF]" />
-                  <span>Photo</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleFileChange(e, 'image')}
-                    className="hidden"
-                  />
-                </label>
-
-                <label className="cursor-pointer px-3.5 py-2 rounded-full bg-white/5 border border-white/10 text-xs text-white font-bold flex items-center gap-1.5 hover:bg-white/15 transition-all shadow-sm">
-                  <Video className="w-4 h-4 text-[#34C759]" />
-                  <span>Attach Video</span>
-                  <input
-                    type="file"
-                    accept="video/*"
-                    onChange={(e) => handleFileChange(e, 'video')}
-                    className="hidden"
-                  />
-                </label>
-
-                <label className="cursor-pointer px-3.5 py-2 rounded-full bg-[#0D0D0D] border border-white/20 text-xs text-white font-bold flex items-center gap-1.5 hover:bg-[#111111] transition-all shadow-sm">
-                  <FileText className="w-4 h-4 text-[#4169E1]" />
-                  <span>Attach PDF Note</span>
-                  <input
-                    type="file"
-                    accept=".pdf,application/pdf"
-                    onChange={(e) => handleFileChange(e, 'pdf')}
-                    className="hidden"
-                  />
-                </label>
-              </div>
-
-              {/* Live Attachment Preview HUD */}
-              {attachedFile && (
-                <div className="p-3 rounded-[18px] bg-white/5 border border-white/10 flex items-center justify-between gap-3 animate-panelRise shadow-sm">
-                  <div className="flex items-center gap-3 min-w-0">
-                    {attachedMediaType === 'image' && attachedMediaUrl && (
-                      <img src={attachedMediaUrl} alt="" className="w-14 h-14 rounded-xl object-cover border border-white/20 shrink-0" />
-                    )}
-                    {attachedMediaType === 'video' && attachedMediaUrl && (
-                      <video src={attachedMediaUrl} className="w-16 h-14 rounded-xl object-cover border border-white/20 shrink-0" />
-                    )}
-                    {attachedMediaType === 'pdf' && (
-                      <div className="w-12 h-12 rounded-xl bg-[#4169E1]/20 border border-[#4169E1]/40 flex items-center justify-center shrink-0">
-                        <FileText className="w-6 h-6 text-[#4169E1]" />
-                      </div>
-                    )}
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-white truncate">{attachedFile.name}</p>
-                      <p className="text-[10px] text-[#34C759] font-mono font-bold">
-                        ⚡ {(attachedFile.size / 1024).toFixed(1)} KB • {attachedMediaType?.toUpperCase()} Attached ($O(1)$ stream)
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setAttachedFile(null);
-                      setAttachedMediaUrl(null);
-                      setAttachedMediaType(null);
-                    }}
-                    className="p-1.5 rounded-full hover:bg-white/10 text-white/70 hover:text-white transition-all shrink-0"
-                  >
-                    <Trash2 className="w-4 h-4 text-[#9B5DE5]" />
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className="flex justify-end gap-3 pt-3 border-t border-white/15">
-              <button
-                onClick={() => {
-                  setIsCreatePostOpen(false);
-                  setAttachedFile(null);
-                  setAttachedMediaUrl(null);
-                  setAttachedMediaType(null);
-                }}
-                className="btn-secondary text-xs py-2 px-4 font-bold"
-              >
-                Cancel
-              </button>
-              <button
-                disabled={isPosting}
-                onClick={async () => {
-                  if (!postContent.trim() && !attachedFile) {
-                    alert('Please write a caption or attach a Photo/Video/PDF before posting!');
-                    return;
-                  }
-                  if (!currentUser?.uid) {
-                    alert('You must be signed in to post.');
-                    return;
-                  }
-
-                  // Safety Layer: Anti-Spam Rate Limiter (Max 3 posts per minute)
-                  const rateLimit = checkRateLimit(`create_post:${currentUser.uid}`, 3, 60000);
-                  if (!rateLimit.allowed) {
-                    const remainingSeconds = Math.ceil((rateLimit.resetTimeMs - Date.now()) / 1000);
-                    alert(`Rate Limit Triggered: Please wait ${remainingSeconds} seconds before creating another post.`);
-                    return;
-                  }
-
-                  // Safety Layer: Content Moderation & Profanity Filtering
-                  const contentCheck = validateContentSafety(postContent);
-                  if (!contentCheck.isSafe) {
-                    alert(`Safety Alert: Your post contains flagged keyword: "${contentCheck.flaggedWord}". Please keep content academic and campus-friendly.`);
-                    return;
-                  }
-
-                  try {
-                    const localPreview = attachedMediaUrl || undefined;
-                    const fileToUpload = attachedFile;
-                    const mediaTypeToSave = attachedMediaType || undefined;
-
-                    // Write post immediately to Firestore (0ms optimistic latency)
-                    const postId = await createPost({
-                      title: postContent.trim() || `[${mediaTypeToSave?.toUpperCase()}] ${fileToUpload?.name || 'Attachment'}`,
-                      authorId: currentUser.uid,
-                      authorName: currentUser.name || 'Student',
-                      authorCollege: currentUser.college || 'Campus',
-                      authorAvatarUrl: currentUser.avatarUrl || '',
-                      upvotes: 0,
-                      commentsCount: 0,
-                      category: 'General',
-                      type: mediaTypeToSave === 'video' ? 'post' : 'note',
-                      mediaUrl: localPreview,
-                      mediaType: mediaTypeToSave,
-                    });
-
-                    // Launch non-blocking background upload engine + compression if file exists
-                    if (fileToUpload && mediaTypeToSave) {
-                      setUploadStatus({ fileName: fileToUpload.name, progress: 0, status: 'uploading' });
-                      backgroundUploadAndAttach(
-                        fileToUpload,
-                        currentUser.uid,
-                        postId,
-                        'posts',
-                        (pct) => setUploadStatus({ fileName: fileToUpload.name, progress: pct, status: 'uploading' })
-                      ).then(() => {
-                        setUploadStatus({ fileName: fileToUpload.name, progress: 100, status: 'completed' });
-                        setTimeout(() => setUploadStatus(null), 3500);
-                      }).catch((err) => {
-                        console.warn('Using universal Data URL stream as fallback (Storage sync skipped):', err.message);
-                        setUploadStatus(null);
-                      });
-                    }
-
-                    // Reset modal immediately (0ms block time)
-                    setPostContent('');
-                    setAttachedFile(null);
-                    setAttachedMediaUrl(null);
-                    setAttachedMediaType(null);
-                    setIsCreatePostOpen(false);
-                    setActiveTab('home');
-                  } catch (err: any) {
-                    alert(`Failed to post: ${err.message}`);
-                  }
-                }}
-                className="btn-primary text-xs py-2 px-6 font-bold flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-wait"
-              >
-                {isPosting ? (
-                  <><Loader className="w-3.5 h-3.5 animate-spin" /><span>Posting...</span></>
-                ) : (
-                  <><Send className="w-3.5 h-3.5" /><span>Share Post</span></>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Create New Post Modal (Instagram Dark Theme / Refactored) */}
+      <CreatePostModal 
+        isOpen={isCreatePostOpen}
+        onClose={() => setIsCreatePostOpen(false)}
+        currentUser={currentUser}
+        setUploadStatus={setUploadStatus}
+        setActiveTab={setActiveTab}
+      />
 
       {/* Strict Authentication Modal (GOATED Aesthetic) */}
       <AuthModal
