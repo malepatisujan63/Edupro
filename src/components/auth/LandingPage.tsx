@@ -223,8 +223,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
     );
   }
 
-  }
-
   return (
     <div className="min-h-screen w-full bg-[#030305] text-white font-sans selection:bg-[#4169E1]/30 selection:text-white overflow-x-hidden relative">
       
