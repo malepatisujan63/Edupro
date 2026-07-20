@@ -16,7 +16,6 @@ import { StudentProfile } from './pages/StudentProfile';
 import { preloadPlatformData } from './dsa-engine';
 import { populateTrieWithAllUsers } from './lib/supabaseService';
 import { AppleTimerExtension } from './components/extensions/AppleTimerExtension';
-import { verifyFileMagicBytes } from './utils/safetyFilter';
 import { accountManager } from './models/AccountManager';
 import { type StudentAccount } from './models/StudentAccount';
 import { CheckCircle2, Loader } from 'lucide-react';
@@ -28,7 +27,6 @@ export const App: React.FC = () => {
   const [isDSAHUDOpen, setIsDSAHUDOpen] = useState(false);
   const [isTimerOpen, setIsTimerOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<{ fileName: string; progress: number; status: 'uploading' | 'completed' } | null>(null);
 
