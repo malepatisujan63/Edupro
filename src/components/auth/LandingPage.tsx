@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
+import { motion, useTransform, useMotionValue, useSpring } from 'framer-motion';
 import { 
   Users, BookOpen, Rocket, Mail, Lock, Eye, EyeOff, Loader, 
   AlertTriangle, CheckCircle2, ArrowRight, User, Menu, 
