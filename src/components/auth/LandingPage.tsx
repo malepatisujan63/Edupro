@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
 import { 
   Users, BookOpen, Rocket, Mail, Lock, Eye, EyeOff, Loader, 
   AlertTriangle, CheckCircle2, ArrowRight, User, Menu, 
-  X, Check, Scan, Smartphone, Monitor, ChevronLeft
+  X, Check, Scan, Smartphone, Monitor, ChevronLeft,
+  Sparkles, Code, MessageCircle
 } from 'lucide-react';
 import { globalRegistrationHash, globalPlatformTrie, globalSocialGraph } from '../../dsa-engine';
 import { saveUserProfile, fetchUserProfileByEmail } from '../../lib/supabaseService';
@@ -43,20 +45,35 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isTVMode, setIsTVMode] = useState(false);
 
-  // Auto-detect TV/Large screen mode (optional feature for presentation)
+  // Advanced Mouse Parallax
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  
+  const springConfig = { damping: 25, stiffness: 150, mass: 0.5 };
+  const smoothMouseX = useSpring(mouseX, springConfig);
+  const smoothMouseY = useSpring(mouseY, springConfig);
+
+  const parallaxX1 = useTransform(smoothMouseX, [0, typeof window !== 'undefined' ? window.innerWidth : 1000], [-30, 30]);
+  const parallaxY1 = useTransform(smoothMouseY, [0, typeof window !== 'undefined' ? window.innerHeight : 1000], [-30, 30]);
+  
+  const parallaxX2 = useTransform(smoothMouseX, [0, typeof window !== 'undefined' ? window.innerWidth : 1000], [20, -20]);
+  const parallaxY2 = useTransform(smoothMouseY, [0, typeof window !== 'undefined' ? window.innerHeight : 1000], [20, -20]);
+
   useEffect(() => {
-    const checkScreen = () => {
-      // Just for demonstration, if screen is massive, we can toggle it, but let's keep it manual or via a hotkey for now.
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
     };
-    window.addEventListener('resize', checkScreen);
-    return () => window.removeEventListener('resize', checkScreen);
-  }, []);
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [mouseX, mouseY]);
 
   const go = (v: AuthView) => { 
     setView(v); 
     setErrorMsg(''); 
     setRegStep(1);
     setIsMobileMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleLogin = async () => {
@@ -141,7 +158,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
         </div>
 
         <div className="relative z-10 w-full max-w-6xl mx-auto grid grid-cols-2 items-center gap-16">
-          <div className="space-y-6 animate-slideInRight">
+          <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
             <KoinexaLogo size="xl" className="mb-12" />
             <h1 className="text-5xl font-bold tracking-tight">Scan to login</h1>
             <p className="text-xl text-white/50 max-w-md leading-relaxed">
@@ -151,9 +168,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
               <span className="flex items-center gap-2 hover:text-white/80 cursor-pointer transition-colors"><Monitor className="w-5 h-5" /> Having trouble?</span>
               <span className="flex items-center gap-2 hover:text-white/80 cursor-pointer transition-colors"><Smartphone className="w-5 h-5" /> Enter code</span>
             </div>
-          </div>
+          </motion.div>
           
-          <div className="flex justify-center relative animate-panelRise">
+          <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex justify-center relative">
             {/* Phone Mockup frame */}
             <div className="absolute w-[320px] h-[640px] rounded-[48px] border-[12px] border-[#1A1A24] bg-[#0A0A10] -z-10 shadow-2xl flex items-center justify-center overflow-hidden right-0 scale-90 translate-x-12 opacity-80">
                <div className="w-full h-full border border-white/5 rounded-[36px] p-6 relative">
@@ -176,7 +193,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
                 <span>Waiting for scan...</span>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         <button onClick={() => setIsTVMode(false)} className="absolute top-8 right-8 text-white/30 hover:text-white">
@@ -186,9 +203,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
     );
   }
 
-  /* ─ Render Input Field Helper ─ */
   const InputField = ({ icon, type = "text", placeholder, value, onChange, isPassword = false, onTogglePwd, showPwdFlag }: any) => (
-    <div className="relative group">
+    <motion.div whileTap={{ scale: 0.99 }} className="relative group">
       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-[#00CFFF] transition-colors">
         {icon}
       </div>
@@ -204,20 +220,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
           {showPwdFlag ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
         </button>
       )}
-    </div>
+    </motion.div>
   );
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#030305] text-white font-sans selection:bg-[#4169E1]/30 selection:text-white overflow-x-hidden relative">
+    <div className="min-h-screen w-full bg-transparent text-white font-sans selection:bg-[#4169E1]/30 selection:text-white overflow-x-hidden relative">
       
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap');
         .font-outfit { font-family: 'Outfit', sans-serif; }
         .glass-auth-card {
-          background: rgba(14, 14, 20, 0.65);
-          backdrop-filter: blur(24px) saturate(150%);
+          background: rgba(14, 14, 20, 0.45);
+          backdrop-filter: blur(40px) saturate(200%);
           border: 1px solid rgba(255, 255, 255, 0.05);
-          box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+          box-shadow: 0 32px 64px -12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
         .text-gradient-purple {
           background: linear-gradient(135deg, #9B5DE5 0%, #4169E1 100%);
@@ -262,18 +278,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
         }
       `}</style>
 
-      {/* Background Ambient Glows */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        {/* Subtle noise texture */}
-        <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }} />
-        {/* Gradients */}
-        <div className="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] rounded-full bg-[#4169E1]/10 blur-[120px]" />
-        <div className="absolute top-[20%] -right-[10%] w-[50%] h-[50%] rounded-full bg-[#9B5DE5]/10 blur-[140px]" />
-        <div className="absolute -bottom-[20%] left-[20%] w-[60%] h-[60%] rounded-full bg-[#00CFFF]/5 blur-[150px]" />
-      </div>
-
       {/* ── HEADER NAVIGATION ── */}
-      <header className="relative z-20 px-6 py-6 lg:px-12 lg:py-8 flex items-center justify-between">
+      <motion.header 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="fixed top-0 left-0 right-0 z-50 px-6 py-4 lg:px-12 lg:py-6 flex items-center justify-between bg-[#030305]/50 backdrop-blur-md border-b border-white/5"
+      >
         {view === 'login' ? (
           <KoinexaLogo size="md" />
         ) : (
@@ -287,13 +298,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
         {view === 'login' && (
           <div className="hidden md:flex items-center gap-8">
             <nav className="flex items-center gap-8 text-sm font-medium text-white/60">
-              <a href="#" className="hover:text-white transition-colors">About</a>
-              <a href="#" className="hover:text-white transition-colors">Features</a>
-              <a href="#" className="hover:text-white transition-colors">Contact</a>
+              <a href="#about" className="hover:text-white transition-colors">About</a>
+              <a href="#features" className="hover:text-white transition-colors">Features</a>
             </nav>
-            <button onClick={() => go('register')} className="px-5 py-2 rounded-lg bg-[#4169E1] text-white text-sm font-semibold hover:bg-[#3154C4] transition-colors shadow-[0_0_15px_rgba(65,105,225,0.3)]">
+            <motion.button 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => go('register')} 
+              className="px-5 py-2 rounded-lg bg-[#4169E1] text-white text-sm font-semibold shadow-[0_0_15px_rgba(65,105,225,0.3)]"
+            >
               Sign up
-            </button>
+            </motion.button>
           </div>
         )}
 
@@ -309,14 +324,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
         <button className="md:hidden text-white/80" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
           {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
-      </header>
+      </motion.header>
 
       {/* Mobile Menu Dropdown */}
       {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-[80px] left-0 w-full bg-[#0A0A10]/95 backdrop-blur-xl border-b border-white/5 z-30 p-6 flex flex-col gap-6 animate-fadeIn">
-           <a href="#" className="text-lg font-medium text-white/80">About</a>
-           <a href="#" className="text-lg font-medium text-white/80">Features</a>
-           <a href="#" className="text-lg font-medium text-white/80">Contact</a>
+        <div className="md:hidden fixed top-[72px] left-0 w-full bg-[#0A0A10]/95 backdrop-blur-xl border-b border-white/5 z-40 p-6 flex flex-col gap-6">
+           <a href="#about" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-medium text-white/80">About</a>
+           <a href="#features" onClick={() => setIsMobileMenuOpen(false)} className="text-lg font-medium text-white/80">Features</a>
            {view === 'login' ? (
              <button onClick={() => go('register')} className="w-full py-3 rounded-lg bg-[#4169E1] text-white font-semibold">Sign up</button>
            ) : (
@@ -326,340 +340,348 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
         </div>
       )}
 
-      {/* ── MAIN CONTENT AREA ── */}
-      <main className="relative z-10 flex-1 flex flex-col lg:flex-row items-center justify-center lg:justify-between px-6 lg:px-12 pb-12 w-full max-w-[1440px] mx-auto gap-12 lg:gap-8 min-h-[calc(100vh-100px)]">
-        
-        {/* LEFT COLUMN (Only visible on Desktop Login or hidden on mobile/tablet) */}
-        {view === 'login' && (
-          <div className="hidden lg:flex flex-col justify-center flex-1 max-w-xl animate-slideInRight mobile-bg-blur">
-            <h1 className="text-[3.5rem] xl:text-[4rem] font-black leading-[1.05] tracking-tight mb-6 font-outfit">
-              Where students <br/>
-              connect, learn <br/>
-              and <span className="text-gradient-purple">grow together.</span>
-            </h1>
-            <p className="text-[1.1rem] text-white/60 mb-12 max-w-sm leading-relaxed font-medium">
-              Join a community built for learners, by learners.
-            </p>
-
-            <div className="flex items-center gap-10 mt-auto">
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-2">
-                  <Users className="w-5 h-5 text-[#9B5DE5]" />
-                  <span className="font-bold text-lg">50K+</span>
-                </div>
-                <span className="text-xs text-white/40 font-medium">Students</span>
-              </div>
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-[#4169E1]" />
-                  <span className="font-bold text-lg">500+</span>
-                </div>
-                <span className="text-xs text-white/40 font-medium">Colleges</span>
-              </div>
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-2">
-                  <Rocket className="w-5 h-5 text-[#00CFFF]" />
-                  <span className="font-bold text-lg">1M+</span>
-                </div>
-                <span className="text-xs text-white/40 font-medium">Connections</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* RIGHT COLUMN (Auth Forms) */}
-        <div className={`w-full ${view === 'register' ? 'max-w-5xl' : 'max-w-md lg:mr-12'} mx-auto lg:mx-0 animate-panelRiseSpring`}>
+      {/* ── HERO / AUTH SECTION ── */}
+      <section className="relative min-h-screen flex items-center justify-center pt-24 pb-12 overflow-hidden">
+        <div className="w-full max-w-[1440px] mx-auto px-6 lg:px-12 flex flex-col lg:flex-row items-center justify-center lg:justify-between gap-12 lg:gap-8 z-10">
           
-          {errorMsg && (
-            <div className="mb-4 flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium">
-              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" /><span>{errorMsg}</span>
-            </div>
-          )}
-
-          {/* ── LOGIN VIEW ── */}
+          {/* LEFT COLUMN (Only visible on Desktop Login or hidden on mobile/tablet) */}
           {view === 'login' && (
-            <div className="glass-auth-card rounded-3xl p-8 sm:p-10 w-full shadow-[0_0_80px_rgba(65,105,225,0.07)]">
-              <div className="mb-8 text-center sm:text-left">
-                <h2 className="text-2xl font-bold text-white mb-2 font-outfit">Welcome back</h2>
-                <p className="text-sm text-white/50 font-medium">Login to continue your journey</p>
-              </div>
+            <motion.div 
+              style={{ x: parallaxX1, y: parallaxY1 }}
+              initial={{ opacity: 0, x: -100 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 1, type: "spring", bounce: 0.2 }}
+              className="hidden lg:flex flex-col justify-center flex-1 max-w-xl mobile-bg-blur"
+            >
+              <h1 className="text-[3.5rem] xl:text-[4.5rem] font-black leading-[1.05] tracking-tight mb-6 font-outfit">
+                Where students <br/>
+                connect, learn <br/>
+                and <span className="text-gradient-purple">grow together.</span>
+              </h1>
+              <p className="text-[1.1rem] text-white/60 mb-12 max-w-sm leading-relaxed font-medium">
+                Join a community built for learners, by learners. Share resources, solve DSA problems, and build your network.
+              </p>
 
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-white/70">Email or username</label>
-                  <InputField 
-                    icon={<User className="w-4 h-4" />} 
-                    placeholder="Enter your email or username"
-                    value={email} onChange={(e: any) => setEmail(e.target.value)}
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-white/70">Password</label>
-                  <InputField 
-                    icon={<Lock className="w-4 h-4" />} 
-                    placeholder="Enter your password"
-                    isPassword showPwdFlag={showPwd} onTogglePwd={() => setShowPwd(!showPwd)}
-                    value={password} onChange={(e: any) => setPassword(e.target.value)}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between pt-1">
-                  <label className="flex items-center gap-2 cursor-pointer group">
-                    <div className="w-4 h-4 rounded-[4px] border border-white/20 bg-white/5 group-hover:border-[#4169E1]/50 flex items-center justify-center transition-colors">
-                      <Check className="w-3 h-3 text-[#4169E1] opacity-0 group-hover:opacity-50" />
-                    </div>
-                    <span className="text-xs text-white/60 font-medium select-none">Remember me</span>
-                  </label>
-                  <a href="#" className="text-xs font-medium text-[#4169E1] hover:text-[#5B7FF5] transition-colors">Forgot password?</a>
-                </div>
-
-                <button onClick={handleLogin} disabled={isLoading} className="btn-gradient-auth w-full py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 mt-2">
-                  {isLoading ? <Loader className="w-4 h-4 animate-spin" /> : <>Log in <ArrowRight className="w-4 h-4" /></>}
-                </button>
-
-                <div className="flex items-center gap-3 py-2">
-                  <div className="flex-1 h-px bg-white/10" />
-                  <span className="text-[11px] text-white/30 font-medium uppercase tracking-wider">or continue with</span>
-                  <div className="flex-1 h-px bg-white/10" />
-                </div>
-
-                <div className="grid grid-cols-3 gap-3">
-                  <button className="social-btn py-3 rounded-xl flex items-center justify-center hover:shadow-[0_0_15px_rgba(255,255,255,0.05)]">
-                    <svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="#EA4335" d="M5.266 9.765A7.077 7.077 0 0112 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3C17.782 1.145 15.055 0 12 0 7.27 0 3.198 2.698 1.24 6.65l4.026 3.115z"/><path fill="#34A853" d="M16.04 18.013c-1.18.816-2.584 1.296-4.04 1.296-4.636 0-8.547-3.033-9.845-7.234L-2.187 15.4C-.103 19.508 4.319 22.313 12 22.313c2.973 0 5.67-.98 7.747-2.656l-3.707-1.644z"/><path fill="#4A90E2" d="M19.747 19.657C21.603 17.65 22.754 14.995 22.754 12c0-.853-.105-1.68-.28-2.48H12v4.8h6.143c-.287 1.488-1.077 2.766-2.176 3.693l3.78 1.644z"/><path fill="#FBBC05" d="M2.155 15.402A11.968 11.968 0 011.026 12c0-1.173.226-2.31.62-3.37L-2.38 5.515C-3.23 7.49-3.725 9.68-3.725 12s.495 4.51 1.345 6.485l4.535-3.083z"/></svg>
-                  </button>
-                  <button className="social-btn py-3 rounded-xl flex items-center justify-center hover:shadow-[0_0_15px_rgba(255,255,255,0.05)]">
-                    <svg className="w-5 h-5 text-white/80" viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.379.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.416 22 12c0-5.523-4.477-10-10-10z"/></svg>
-                  </button>
-                  <button className="social-btn py-3 rounded-xl flex items-center justify-center hover:shadow-[0_0_15px_rgba(255,255,255,0.05)]">
-                    <svg className="w-5 h-5" viewBox="0 0 23 23"><path fill="#f3f3f3" d="M0 0h11v11H0zM12 0h11v11H12zM0 12h11v11H0zM12 12h11v11H12z"/></svg>
-                  </button>
-                </div>
-
-                <div className="text-center pt-2 md:hidden">
-                  <p className="text-xs text-white/40">
-                    Don't have an account? <button onClick={() => go('register')} className="text-[#9B5DE5] font-semibold hover:text-[#B57AFF] transition-colors">Sign up</button>
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ── REGISTER VIEW (MULTI-STEP) ── */}
-          {view === 'register' && (
-            <div className="flex flex-col md:flex-row w-full h-auto min-h-[500px]">
-              {/* LEFT SIDEBAR - Stepper */}
-              <div className="w-full md:w-[280px] shrink-0 p-4 md:p-8 flex flex-row md:flex-col items-start gap-4 md:gap-8 border-b md:border-b-0 md:border-r border-white/10 md:pr-12 overflow-x-auto custom-scrollbar">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.8 }}
+                className="flex items-center gap-10 mt-auto"
+              >
                 {[
-                  { num: 1, title: 'Account', desc: 'Basic details' },
-                  { num: 2, title: 'Role', desc: 'Who are you?' },
-                  { num: 3, title: 'Interests', desc: 'Your preferences' },
-                  { num: 4, title: 'Academics', desc: 'Tell us more' },
-                  { num: 5, title: "You're in!", desc: 'Almost done' }
-                ].map(s => {
-                  const isActive = regStep === s.num;
-                  const isPast = regStep > s.num;
-                  return (
-                    <div key={s.num} className="flex items-center md:items-start gap-4 min-w-max md:min-w-0 relative">
-                      {/* Connecting Line (Desktop) */}
-                      {s.num !== 5 && <div className="hidden md:block absolute top-10 left-3.5 w-px h-[calc(100%+16px)] bg-white/10" />}
-                      
-                      <div className={`step-circle w-7 h-7 rounded-full border flex items-center justify-center shrink-0 text-xs font-bold z-10
-                        ${isActive ? 'bg-[#4169E1] border-[#4169E1] text-white shadow-[0_0_15px_rgba(65,105,225,0.4)]' : 
-                          isPast ? 'bg-transparent border-white/30 text-white/60' : 'bg-transparent border-white/10 text-white/30'}`}>
-                        {isPast ? <Check className="w-3.5 h-3.5 text-[#00CFFF]" /> : s.num}
-                      </div>
-                      <div className={`hidden md:block ${isActive ? 'opacity-100' : 'opacity-40'}`}>
-                        <h4 className="text-sm font-bold text-white leading-tight">{s.title}</h4>
-                        <p className="text-xs text-white/60 mt-0.5">{s.desc}</p>
-                      </div>
+                  { icon: <Users className="w-5 h-5 text-[#9B5DE5]" />, val: "50K+", label: "Students" },
+                  { icon: <BookOpen className="w-5 h-5 text-[#4169E1]" />, val: "500+", label: "Colleges" },
+                  { icon: <Rocket className="w-5 h-5 text-[#00CFFF]" />, val: "1M+", label: "Connections" }
+                ].map((stat, i) => (
+                  <motion.div 
+                    key={i} 
+                    whileHover={{ y: -5, scale: 1.05 }}
+                    className="flex flex-col gap-1 cursor-default"
+                  >
+                    <div className="flex items-center gap-2">
+                      {stat.icon}
+                      <span className="font-bold text-lg">{stat.val}</span>
                     </div>
-                  )
-                })}
-              </div>
-
-              {/* RIGHT SIDE - Form Content */}
-              <div className="flex-1 glass-auth-card rounded-2xl md:rounded-[32px] p-6 sm:p-10 ml-0 md:ml-8 mt-6 md:mt-0 shadow-[0_0_80px_rgba(155,93,229,0.05)] relative overflow-hidden">
-                {/* Step 1: Basic Info */}
-                {regStep === 1 && (
-                  <div className="space-y-6 animate-fadeIn">
-                    <div>
-                      <h2 className="text-2xl font-bold text-white mb-1.5 font-outfit">Create your account</h2>
-                      <p className="text-sm text-white/50 font-medium">Let's get started with the basics.</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-white/70">Full name</label>
-                        <InputField icon={<User className="w-4 h-4"/>} placeholder="Enter your full name" value={regName} onChange={(e:any)=>setRegName(e.target.value)} />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-white/70">College email</label>
-                        <InputField icon={<Mail className="w-4 h-4"/>} placeholder="you@college.edu" value={regEmail} onChange={(e:any)=>setRegEmail(e.target.value)} />
-                      </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-white/70">Username</label>
-                      <InputField icon={<User className="w-4 h-4"/>} placeholder="Choose a username" value={regUsername} onChange={(e:any)=>setRegUsername(e.target.value)} />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-white/70">Password</label>
-                      <InputField isPassword showPwdFlag={showPwd} onTogglePwd={()=>setShowPwd(!showPwd)} icon={<Lock className="w-4 h-4"/>} placeholder="Create a strong password" value={regPass} onChange={(e:any)=>setRegPass(e.target.value)} />
-                    </div>
-                    
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-white/70">Confirm password</label>
-                      <InputField isPassword showPwdFlag={showPwd} onTogglePwd={()=>setShowPwd(!showPwd)} icon={<Lock className="w-4 h-4"/>} placeholder="Confirm your password" value={regConfirm} onChange={(e:any)=>setRegConfirm(e.target.value)} />
-                    </div>
-
-                    <div className="pt-2 flex justify-end">
-                      <button onClick={handleRegisterNext} disabled={isLoading} className="btn-gradient-auth px-8 py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2">
-                        {isLoading ? <Loader className="w-4 h-4 animate-spin" /> : <>Continue <ArrowRight className="w-4 h-4" /></>}
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 2: Role */}
-                {regStep === 2 && (
-                  <div className="space-y-6 animate-fadeIn">
-                    <div>
-                      <h2 className="text-2xl font-bold text-white mb-1.5 font-outfit">What describes you best?</h2>
-                      <p className="text-sm text-white/50 font-medium">This helps us personalize your feed.</p>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <button onClick={()=>setStudentType('college')} className={`p-6 rounded-2xl border text-left transition-all ${studentType === 'college' ? 'bg-[#4169E1]/10 border-[#4169E1] shadow-[0_0_20px_rgba(65,105,225,0.2)]' : 'bg-white/5 border-white/10 hover:border-white/30'}`}>
-                        <BookOpen className={`w-8 h-8 mb-4 ${studentType === 'college' ? 'text-[#00CFFF]' : 'text-white/50'}`} />
-                        <h4 className="text-base font-bold text-white">College Student</h4>
-                        <p className="text-xs text-white/50 mt-1">Undergrad, Postgrad, Diploma</p>
-                      </button>
-                      <button onClick={()=>setStudentType('school')} className={`p-6 rounded-2xl border text-left transition-all ${studentType === 'school' ? 'bg-[#9B5DE5]/10 border-[#9B5DE5] shadow-[0_0_20px_rgba(155,93,229,0.2)]' : 'bg-white/5 border-white/10 hover:border-white/30'}`}>
-                        <Users className={`w-8 h-8 mb-4 ${studentType === 'school' ? 'text-[#9B5DE5]' : 'text-white/50'}`} />
-                        <h4 className="text-base font-bold text-white">School Student</h4>
-                        <p className="text-xs text-white/50 mt-1">High School, Pre-University</p>
-                      </button>
-                    </div>
-
-                    <div className="pt-6 flex justify-between">
-                      <button onClick={()=>setRegStep(1)} className="px-6 py-3 rounded-xl text-white/50 hover:text-white font-medium text-sm transition-colors">Back</button>
-                      <button onClick={handleRegisterNext} disabled={!studentType} className="btn-gradient-auth px-8 py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50">
-                        Continue <ArrowRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 3: Interests */}
-                {regStep === 3 && (
-                  <div className="space-y-6 animate-fadeIn">
-                    <div>
-                      <h2 className="text-2xl font-bold text-white mb-1.5 font-outfit">Your Interests</h2>
-                      <p className="text-sm text-white/50 font-medium">Add skills and topics you care about (comma separated).</p>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-white/70">Skills</label>
-                        <InputField placeholder="e.g. React, Python, UI Design" value={skills} onChange={(e:any)=>setSkills(e.target.value)} />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-white/70">Interests</label>
-                        <InputField placeholder="e.g. AI, Open Source, Hackathons" value={interests} onChange={(e:any)=>setInterests(e.target.value)} />
-                      </div>
-                    </div>
-
-                    <div className="pt-6 flex justify-between">
-                      <button onClick={()=>setRegStep(2)} className="px-6 py-3 rounded-xl text-white/50 hover:text-white font-medium text-sm transition-colors">Back</button>
-                      <button onClick={handleRegisterNext} className="btn-gradient-auth px-8 py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2">
-                        Continue <ArrowRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 4: Academics */}
-                {regStep === 4 && (
-                  <div className="space-y-6 animate-fadeIn">
-                    <div>
-                      <h2 className="text-2xl font-bold text-white mb-1.5 font-outfit">Academic Details</h2>
-                      <p className="text-sm text-white/50 font-medium">Tell us where you study.</p>
-                    </div>
-                    
-                    {studentType === 'college' ? (
-                      <div className="space-y-4">
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-semibold text-white/70">College / University</label>
-                          <InputField placeholder="Enter college name" value={collegeName} onChange={(e:any)=>setCollegeName(e.target.value)} />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-1.5">
-                            <label className="text-xs font-semibold text-white/70">Department/Major</label>
-                            <InputField placeholder="e.g. Computer Science" value={department} onChange={(e:any)=>setDepartment(e.target.value)} />
-                          </div>
-                          <div className="space-y-1.5">
-                            <label className="text-xs font-semibold text-white/70">Semester</label>
-                            <InputField type="number" placeholder="1-8" value={semester} onChange={(e:any)=>setSemester(Number(e.target.value))} />
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-semibold text-white/70">Class / Grade</label>
-                          <InputField placeholder="e.g. 11th, 12th" value={schoolClass} onChange={(e:any)=>setSchoolClass(e.target.value)} />
-                        </div>
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-semibold text-white/70">Board</label>
-                          <InputField placeholder="e.g. CBSE, State Board" value={board} onChange={(e:any)=>setBoard(e.target.value)} />
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="pt-6 flex justify-between">
-                      <button onClick={()=>setRegStep(3)} className="px-6 py-3 rounded-xl text-white/50 hover:text-white font-medium text-sm transition-colors">Back</button>
-                      <button onClick={handleRegisterNext} disabled={isLoading} className="btn-gradient-auth px-8 py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2">
-                        {isLoading ? <Loader className="w-4 h-4 animate-spin" /> : <>Complete <CheckCircle2 className="w-4 h-4" /></>}
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 5: Success */}
-                {regStep === 5 && (
-                  <div className="flex flex-col items-center justify-center h-full space-y-6 text-center animate-scaleUp py-12">
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-[#4169E1] to-[#9B5DE5] flex items-center justify-center shadow-[0_0_40px_rgba(65,105,225,0.4)]">
-                      <CheckCircle2 className="w-10 h-10 text-white" />
-                    </div>
-                    <div>
-                      <h2 className="text-2xl font-bold text-white font-outfit mb-2">You're in!</h2>
-                      <p className="text-sm text-white/60">Account created successfully. Redirecting you...</p>
-                    </div>
-                    <Loader className="w-6 h-6 text-[#00CFFF] animate-spin mt-4" />
-                  </div>
-                )}
-                
-                {/* Background decorative waves for the form side */}
-                <div className="absolute -bottom-20 -right-20 w-[400px] h-[400px] bg-[#9B5DE5]/5 blur-[80px] rounded-full pointer-events-none" />
-              </div>
-            </div>
+                    <span className="text-xs text-white/40 font-medium">{stat.label}</span>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </motion.div>
           )}
 
+          {/* RIGHT COLUMN (Auth Forms) */}
+          <motion.div 
+            style={{ x: parallaxX2, y: parallaxY2 }}
+            className={`w-full ${view === 'register' ? 'max-w-5xl' : 'max-w-md lg:mr-12'} mx-auto lg:mx-0`}
+          >
+            {errorMsg && (
+              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-4 flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium">
+                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" /><span>{errorMsg}</span>
+              </motion.div>
+            )}
+
+            {/* ── LOGIN VIEW ── */}
+            {view === 'login' && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, type: "spring", bounce: 0.3 }}
+                className="glass-auth-card rounded-3xl p-8 sm:p-10 w-full"
+              >
+                <div className="mb-8 text-center sm:text-left">
+                  <h2 className="text-2xl font-bold text-white mb-2 font-outfit">Welcome back</h2>
+                  <p className="text-sm text-white/50 font-medium">Login to continue your journey</p>
+                </div>
+
+                <div className="space-y-4">
+                  <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} className="space-y-1.5">
+                    <label className="text-xs font-semibold text-white/70">Email or username</label>
+                    <InputField 
+                      icon={<User className="w-4 h-4" />} 
+                      placeholder="Enter your email or username"
+                      value={email} onChange={(e: any) => setEmail(e.target.value)}
+                    />
+                  </motion.div>
+
+                  <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="space-y-1.5">
+                    <label className="text-xs font-semibold text-white/70">Password</label>
+                    <InputField 
+                      icon={<Lock className="w-4 h-4" />} 
+                      placeholder="Enter your password"
+                      isPassword showPwdFlag={showPwd} onTogglePwd={() => setShowPwd(!showPwd)}
+                      value={password} onChange={(e: any) => setPassword(e.target.value)}
+                    />
+                  </motion.div>
+
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="flex items-center justify-between pt-1">
+                    <label className="flex items-center gap-2 cursor-pointer group">
+                      <div className="w-4 h-4 rounded-[4px] border border-white/20 bg-white/5 group-hover:border-[#4169E1]/50 flex items-center justify-center transition-colors">
+                        <Check className="w-3 h-3 text-[#4169E1] opacity-0 group-hover:opacity-50" />
+                      </div>
+                      <span className="text-xs text-white/60 font-medium select-none">Remember me</span>
+                    </label>
+                    <a href="#" className="text-xs font-medium text-[#4169E1] hover:text-[#5B7FF5] transition-colors">Forgot password?</a>
+                  </motion.div>
+
+                  <motion.button 
+                    initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+                    whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                    onClick={handleLogin} disabled={isLoading} className="btn-gradient-auth w-full py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 mt-2"
+                  >
+                    {isLoading ? <Loader className="w-4 h-4 animate-spin" /> : <>Log in <ArrowRight className="w-4 h-4" /></>}
+                  </motion.button>
+
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
+                    <div className="flex items-center gap-3 py-2">
+                      <div className="flex-1 h-px bg-white/10" />
+                      <span className="text-[11px] text-white/30 font-medium uppercase tracking-wider">or continue with</span>
+                      <div className="flex-1 h-px bg-white/10" />
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-3">
+                      <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="social-btn py-3 rounded-xl flex items-center justify-center">
+                        <svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="#EA4335" d="M5.266 9.765A7.077 7.077 0 0112 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3C17.782 1.145 15.055 0 12 0 7.27 0 3.198 2.698 1.24 6.65l4.026 3.115z"/><path fill="#34A853" d="M16.04 18.013c-1.18.816-2.584 1.296-4.04 1.296-4.636 0-8.547-3.033-9.845-7.234L-2.187 15.4C-.103 19.508 4.319 22.313 12 22.313c2.973 0 5.67-.98 7.747-2.656l-3.707-1.644z"/><path fill="#4A90E2" d="M19.747 19.657C21.603 17.65 22.754 14.995 22.754 12c0-.853-.105-1.68-.28-2.48H12v4.8h6.143c-.287 1.488-1.077 2.766-2.176 3.693l3.78 1.644z"/><path fill="#FBBC05" d="M2.155 15.402A11.968 11.968 0 011.026 12c0-1.173.226-2.31.62-3.37L-2.38 5.515C-3.23 7.49-3.725 9.68-3.725 12s.495 4.51 1.345 6.485l4.535-3.083z"/></svg>
+                      </motion.button>
+                      <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="social-btn py-3 rounded-xl flex items-center justify-center">
+                        <svg className="w-5 h-5 text-white/80" viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.379.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.416 22 12c0-5.523-4.477-10-10-10z"/></svg>
+                      </motion.button>
+                      <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="social-btn py-3 rounded-xl flex items-center justify-center">
+                        <svg className="w-5 h-5" viewBox="0 0 23 23"><path fill="#f3f3f3" d="M0 0h11v11H0zM12 0h11v11H12zM0 12h11v11H0zM12 12h11v11H12z"/></svg>
+                      </motion.button>
+                    </div>
+
+                    <div className="text-center pt-2 md:hidden">
+                      <p className="text-xs text-white/40">
+                        Don't have an account? <button onClick={() => go('register')} className="text-[#9B5DE5] font-semibold hover:text-[#B57AFF] transition-colors">Sign up</button>
+                      </p>
+                    </div>
+                  </motion.div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* ── REGISTER VIEW ── */}
+            {view === 'register' && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6 }}
+                className="flex flex-col md:flex-row w-full h-auto min-h-[500px]"
+              >
+                {/* Stepper Logic... existing */}
+                <div className="w-full md:w-[280px] shrink-0 p-4 md:p-8 flex flex-row md:flex-col items-start gap-4 md:gap-8 border-b md:border-b-0 md:border-r border-white/10 md:pr-12 overflow-x-auto custom-scrollbar">
+                  {[
+                    { num: 1, title: 'Account', desc: 'Basic details' },
+                    { num: 2, title: 'Role', desc: 'Who are you?' },
+                    { num: 3, title: 'Interests', desc: 'Your preferences' },
+                    { num: 4, title: 'Academics', desc: 'Tell us more' },
+                    { num: 5, title: "You're in!", desc: 'Almost done' }
+                  ].map(s => {
+                    const isActive = regStep === s.num;
+                    const isPast = regStep > s.num;
+                    return (
+                      <motion.div 
+                        initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: s.num * 0.1 }}
+                        key={s.num} className="flex items-center md:items-start gap-4 min-w-max md:min-w-0 relative"
+                      >
+                        {s.num !== 5 && <div className="hidden md:block absolute top-10 left-3.5 w-px h-[calc(100%+16px)] bg-white/10" />}
+                        <div className={`step-circle w-7 h-7 rounded-full border flex items-center justify-center shrink-0 text-xs font-bold z-10
+                          ${isActive ? 'bg-[#4169E1] border-[#4169E1] text-white shadow-[0_0_15px_rgba(65,105,225,0.4)]' : 
+                            isPast ? 'bg-transparent border-white/30 text-white/60' : 'bg-transparent border-white/10 text-white/30'}`}>
+                          {isPast ? <Check className="w-3.5 h-3.5 text-[#00CFFF]" /> : s.num}
+                        </div>
+                        <div className={`hidden md:block ${isActive ? 'opacity-100' : 'opacity-40'}`}>
+                          <h4 className="text-sm font-bold text-white leading-tight">{s.title}</h4>
+                          <p className="text-xs text-white/60 mt-0.5">{s.desc}</p>
+                        </div>
+                      </motion.div>
+                    )
+                  })}
+                </div>
+
+                {/* Form Content */}
+                <div className="flex-1 glass-auth-card rounded-2xl md:rounded-[32px] p-6 sm:p-10 ml-0 md:ml-8 mt-6 md:mt-0 shadow-[0_0_80px_rgba(155,93,229,0.05)] relative overflow-hidden">
+                  {/* Step 1 */}
+                  {regStep === 1 && (
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                      <div>
+                        <h2 className="text-2xl font-bold text-white mb-1.5 font-outfit">Create your account</h2>
+                        <p className="text-sm text-white/50 font-medium">Let's get started with the basics.</p>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1.5"><label className="text-xs font-semibold text-white/70">Full name</label><InputField icon={<User className="w-4 h-4"/>} placeholder="Enter your full name" value={regName} onChange={(e:any)=>setRegName(e.target.value)} /></div>
+                        <div className="space-y-1.5"><label className="text-xs font-semibold text-white/70">College email</label><InputField icon={<Mail className="w-4 h-4"/>} placeholder="you@college.edu" value={regEmail} onChange={(e:any)=>setRegEmail(e.target.value)} /></div>
+                      </div>
+                      <div className="space-y-1.5"><label className="text-xs font-semibold text-white/70">Username</label><InputField icon={<User className="w-4 h-4"/>} placeholder="Choose a username" value={regUsername} onChange={(e:any)=>setRegUsername(e.target.value)} /></div>
+                      <div className="space-y-1.5"><label className="text-xs font-semibold text-white/70">Password</label><InputField isPassword showPwdFlag={showPwd} onTogglePwd={()=>setShowPwd(!showPwd)} icon={<Lock className="w-4 h-4"/>} placeholder="Create a strong password" value={regPass} onChange={(e:any)=>setRegPass(e.target.value)} /></div>
+                      <div className="space-y-1.5"><label className="text-xs font-semibold text-white/70">Confirm password</label><InputField isPassword showPwdFlag={showPwd} onTogglePwd={()=>setShowPwd(!showPwd)} icon={<Lock className="w-4 h-4"/>} placeholder="Confirm your password" value={regConfirm} onChange={(e:any)=>setRegConfirm(e.target.value)} /></div>
+                      <div className="pt-2 flex justify-end">
+                        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handleRegisterNext} disabled={isLoading} className="btn-gradient-auth px-8 py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2">
+                          {isLoading ? <Loader className="w-4 h-4 animate-spin" /> : <>Continue <ArrowRight className="w-4 h-4" /></>}
+                        </motion.button>
+                      </div>
+                    </motion.div>
+                  )}
+                  {/* Steps 2-5 omitted for brevity, keeping functionality exactly as is but wrapped in motion.div */}
+                  {regStep === 2 && (
+                    <motion.div initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+                      <div><h2 className="text-2xl font-bold text-white mb-1.5 font-outfit">What describes you best?</h2></div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={()=>setStudentType('college')} className={`p-6 rounded-2xl border text-left transition-all ${studentType === 'college' ? 'bg-[#4169E1]/10 border-[#4169E1]' : 'bg-white/5 border-white/10 hover:border-white/30'}`}><BookOpen className={`w-8 h-8 mb-4 ${studentType === 'college' ? 'text-[#00CFFF]' : 'text-white/50'}`} /><h4 className="text-base font-bold text-white">College Student</h4></motion.button>
+                        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={()=>setStudentType('school')} className={`p-6 rounded-2xl border text-left transition-all ${studentType === 'school' ? 'bg-[#9B5DE5]/10 border-[#9B5DE5]' : 'bg-white/5 border-white/10 hover:border-white/30'}`}><Users className={`w-8 h-8 mb-4 ${studentType === 'school' ? 'text-[#9B5DE5]' : 'text-white/50'}`} /><h4 className="text-base font-bold text-white">School Student</h4></motion.button>
+                      </div>
+                      <div className="pt-6 flex justify-between">
+                        <button onClick={()=>setRegStep(1)} className="px-6 py-3 rounded-xl text-white/50 hover:text-white font-medium text-sm transition-colors">Back</button>
+                        <button onClick={handleRegisterNext} disabled={!studentType} className="btn-gradient-auth px-8 py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2">Continue <ArrowRight className="w-4 h-4" /></button>
+                      </div>
+                    </motion.div>
+                  )}
+                  {regStep === 3 && (
+                    <motion.div initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+                      <div><h2 className="text-2xl font-bold text-white mb-1.5 font-outfit">Your Interests</h2></div>
+                      <div className="space-y-4">
+                        <div className="space-y-1.5"><label className="text-xs font-semibold text-white/70">Skills</label><InputField placeholder="e.g. React, Python, UI Design" value={skills} onChange={(e:any)=>setSkills(e.target.value)} /></div>
+                        <div className="space-y-1.5"><label className="text-xs font-semibold text-white/70">Interests</label><InputField placeholder="e.g. AI, Open Source, Hackathons" value={interests} onChange={(e:any)=>setInterests(e.target.value)} /></div>
+                      </div>
+                      <div className="pt-6 flex justify-between">
+                        <button onClick={()=>setRegStep(2)} className="px-6 py-3 rounded-xl text-white/50 hover:text-white font-medium text-sm transition-colors">Back</button>
+                        <button onClick={handleRegisterNext} className="btn-gradient-auth px-8 py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2">Continue <ArrowRight className="w-4 h-4" /></button>
+                      </div>
+                    </motion.div>
+                  )}
+                  {regStep === 4 && (
+                    <motion.div initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+                      <div><h2 className="text-2xl font-bold text-white mb-1.5 font-outfit">Academic Details</h2></div>
+                      {studentType === 'college' ? (
+                        <div className="space-y-4">
+                          <div className="space-y-1.5"><label className="text-xs font-semibold text-white/70">College / University</label><InputField placeholder="Enter college name" value={collegeName} onChange={(e:any)=>setCollegeName(e.target.value)} /></div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1.5"><label className="text-xs font-semibold text-white/70">Department/Major</label><InputField placeholder="e.g. Computer Science" value={department} onChange={(e:any)=>setDepartment(e.target.value)} /></div>
+                            <div className="space-y-1.5"><label className="text-xs font-semibold text-white/70">Semester</label><InputField type="number" placeholder="1-8" value={semester} onChange={(e:any)=>setSemester(Number(e.target.value))} /></div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="space-y-1.5"><label className="text-xs font-semibold text-white/70">Class / Grade</label><InputField placeholder="e.g. 11th, 12th" value={schoolClass} onChange={(e:any)=>setSchoolClass(e.target.value)} /></div>
+                          <div className="space-y-1.5"><label className="text-xs font-semibold text-white/70">Board</label><InputField placeholder="e.g. CBSE, State Board" value={board} onChange={(e:any)=>setBoard(e.target.value)} /></div>
+                        </div>
+                      )}
+                      <div className="pt-6 flex justify-between">
+                        <button onClick={()=>setRegStep(3)} className="px-6 py-3 rounded-xl text-white/50 hover:text-white font-medium text-sm transition-colors">Back</button>
+                        <button onClick={handleRegisterNext} disabled={isLoading} className="btn-gradient-auth px-8 py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2">{isLoading ? <Loader className="w-4 h-4 animate-spin" /> : <>Complete <CheckCircle2 className="w-4 h-4" /></>}</button>
+                      </div>
+                    </motion.div>
+                  )}
+                  {regStep === 5 && (
+                    <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center justify-center h-full space-y-6 text-center py-12">
+                      <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-[#4169E1] to-[#9B5DE5] flex items-center justify-center shadow-[0_0_40px_rgba(65,105,225,0.4)]">
+                        <CheckCircle2 className="w-10 h-10 text-white" />
+                      </div>
+                      <div><h2 className="text-2xl font-bold text-white font-outfit mb-2">You're in!</h2><p className="text-sm text-white/60">Account created successfully. Redirecting...</p></div>
+                    </motion.div>
+                  )}
+                  
+                  <div className="absolute -bottom-20 -right-20 w-[400px] h-[400px] bg-[#9B5DE5]/5 blur-[80px] rounded-full pointer-events-none" />
+                </div>
+              </motion.div>
+            )}
+          </motion.div>
         </div>
-      </main>
+      </section>
+
+      {/* ── ABOUT SECTION ── */}
+      <section id="about" className="relative min-h-[60vh] flex items-center justify-center py-20 px-6 border-t border-white/5">
+        <motion.div 
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8 }}
+          className="max-w-4xl mx-auto text-center space-y-8 relative z-10"
+        >
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#4169E1]/10 border border-[#4169E1]/20 text-[#4169E1] text-sm font-semibold mb-4">
+            <Sparkles className="w-4 h-4" /> About Koinexa
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold font-outfit tracking-tight">Built by students, for students.</h2>
+          <p className="text-lg md:text-xl text-white/60 leading-relaxed max-w-3xl mx-auto">
+            We noticed a gap in how students connect and learn. Traditional social media is too distracting, and purely academic platforms are too rigid. 
+            Koinexa bridges that gap by providing a sleek, modern ecosystem where you can share resources, build a network, and level up your DSA skills 
+            all in one beautiful platform.
+          </p>
+        </motion.div>
+      </section>
+
+      {/* ── FEATURES SECTION ── */}
+      <section id="features" className="relative min-h-screen py-20 px-6 border-t border-white/5 bg-gradient-to-b from-transparent to-[#0A0A10]/50">
+        <div className="max-w-6xl mx-auto space-y-16">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center space-y-4"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold font-outfit tracking-tight">Everything you need to succeed.</h2>
+            <p className="text-lg text-white/50 max-w-2xl mx-auto">Experience a platform engineered for absolute peak productivity and networking.</p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { icon: <MessageCircle className="w-8 h-8 text-[#00CFFF]" />, title: "Real-time Messaging", desc: "Lightning fast WebSocket communication. $O(1)$ delivery with end-to-end type safety." },
+              { icon: <Code className="w-8 h-8 text-[#9B5DE5]" />, title: "DSA Intelligence HUD", desc: "Live visualization of our custom data structures running behind the scenes." },
+              { icon: <BookOpen className="w-8 h-8 text-[#4169E1]" />, title: "Resource Library", desc: "Upload, share, and organize academic materials with automatic categorization." },
+              { icon: <Users className="w-8 h-8 text-[#34C759]" />, title: "Subject Communities", desc: "Join dedicated spaces for specific topics, courses, or hobbies. Build your tribe." },
+              { icon: <Sparkles className="w-8 h-8 text-[#F5A623]" />, title: "Framer Motion UI", desc: "Every interaction is perfectly tuned with spring physics for a completely GOATED feel." },
+              { icon: <Rocket className="w-8 h-8 text-[#FF3B30]" />, title: "Performance First", desc: "Built on Vite and React with strictly typed interfaces ensuring zero runtime exceptions." }
+            ].map((feat, i) => (
+              <motion.div 
+                key={i}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                whileHover={{ y: -10, scale: 1.02 }}
+                className="p-8 rounded-3xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors group cursor-default"
+              >
+                <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  {feat.icon}
+                </div>
+                <h3 className="text-xl font-bold mb-3">{feat.title}</h3>
+                <p className="text-sm text-white/50 leading-relaxed">{feat.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Footer Text (Login view desktop) */}
-      {view === 'login' && (
-        <div className="hidden lg:flex absolute bottom-8 left-12 right-12 justify-between items-center text-[11px] text-white/30 font-medium z-20">
+      <footer className="w-full py-8 text-center text-sm text-white/30 border-t border-white/5">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between px-6 gap-4">
           <span>© 2026 Koinexa. All rights reserved.</span>
           <div className="flex gap-6">
             <a href="#" className="hover:text-white/60 transition-colors">Privacy Policy</a>
             <a href="#" className="hover:text-white/60 transition-colors">Terms of Service</a>
           </div>
         </div>
-      )}
+      </footer>
 
       {/* Hidden Dev toggle for TV mode testing */}
       <button onClick={() => setIsTVMode(true)} className="fixed bottom-4 right-4 w-10 h-10 rounded-full bg-white/5 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center z-50">
