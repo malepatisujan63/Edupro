@@ -14,6 +14,26 @@ import { KoinexaLogo } from '../common/KoinexaLogo';
 interface LandingPageProps { onLoginSuccess: (user: any) => void; }
 type AuthView = 'login' | 'register';
 
+const InputField = ({ icon, type = "text", placeholder, value, onChange, isPassword = false, onTogglePwd, showPwdFlag }: any) => (
+  <motion.div whileTap={{ scale: 0.99 }} className="relative group">
+    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-[#00CFFF] transition-colors">
+      {icon}
+    </div>
+    <input
+      type={isPassword ? (showPwdFlag ? 'text' : 'password') : type}
+      placeholder={placeholder}
+      value={value}
+      onChange={onChange}
+      className="w-full bg-[#111116]/80 border border-white/[0.06] rounded-xl py-3.5 pl-11 pr-12 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#4169E1]/50 focus:bg-[#151520] focus:ring-1 focus:ring-[#4169E1]/50 transition-all shadow-inner"
+    />
+    {isPassword && (
+      <button type="button" onClick={onTogglePwd} className="absolute inset-y-0 right-0 pr-4 flex items-center text-white/30 hover:text-white/60 transition-colors">
+        {showPwdFlag ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+      </button>
+    )}
+  </motion.div>
+);
+
 export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
   const [view, setView] = useState<AuthView>('login');
   const [isLoading, setIsLoading] = useState(false);
@@ -203,28 +223,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
     );
   }
 
-  const InputField = ({ icon, type = "text", placeholder, value, onChange, isPassword = false, onTogglePwd, showPwdFlag }: any) => (
-    <motion.div whileTap={{ scale: 0.99 }} className="relative group">
-      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-[#00CFFF] transition-colors">
-        {icon}
-      </div>
-      <input
-        type={isPassword ? (showPwdFlag ? 'text' : 'password') : type}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        className="w-full bg-[#111116]/80 border border-white/[0.06] rounded-xl py-3.5 pl-11 pr-12 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#4169E1]/50 focus:bg-[#151520] focus:ring-1 focus:ring-[#4169E1]/50 transition-all shadow-inner"
-      />
-      {isPassword && (
-        <button type="button" onClick={onTogglePwd} className="absolute inset-y-0 right-0 pr-4 flex items-center text-white/30 hover:text-white/60 transition-colors">
-          {showPwdFlag ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-        </button>
-      )}
-    </motion.div>
-  );
+  }
 
   return (
-    <div className="min-h-screen w-full bg-transparent text-white font-sans selection:bg-[#4169E1]/30 selection:text-white overflow-x-hidden relative">
+    <div className="min-h-screen w-full bg-[#030305] text-white font-sans selection:bg-[#4169E1]/30 selection:text-white overflow-x-hidden relative">
       
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap');
@@ -277,6 +279,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
           }
         }
       `}</style>
+
+      {/* Background Ambient Glows */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        {/* Subtle noise texture */}
+        <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }} />
+        {/* Gradients */}
+        <div className="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] rounded-full bg-[#4169E1]/10 blur-[120px]" />
+        <div className="absolute top-[20%] -right-[10%] w-[50%] h-[50%] rounded-full bg-[#9B5DE5]/10 blur-[140px]" />
+        <div className="absolute -bottom-[20%] left-[20%] w-[60%] h-[60%] rounded-full bg-[#00CFFF]/5 blur-[150px]" />
+      </div>
 
       {/* ── HEADER NAVIGATION ── */}
       <motion.header 
