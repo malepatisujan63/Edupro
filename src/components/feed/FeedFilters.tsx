@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Sparkles, Flame, Clock, BookOpen, Star } from 'lucide-react';
 import styles from './FeedFilters.module.css';
 

@@ -14,13 +14,12 @@ import { QnAPlatform } from './pages/QnAPlatform';
 import { RealtimeMessaging } from './pages/RealtimeMessaging';
 import { StudentProfile } from './pages/StudentProfile';
 import { preloadPlatformData } from './dsa-engine';
-import { createPost, backgroundUploadAndAttach, populateTrieWithAllUsers } from './lib/supabaseService';
+import { populateTrieWithAllUsers } from './lib/supabaseService';
 import { AppleTimerExtension } from './components/extensions/AppleTimerExtension';
-import { checkRateLimit } from './utils/rateLimiter';
-import { validateContentSafety, verifyFileMagicBytes } from './utils/safetyFilter';
+import { verifyFileMagicBytes } from './utils/safetyFilter';
 import { accountManager } from './models/AccountManager';
 import { type StudentAccount } from './models/StudentAccount';
-import { CheckCircle2, Bell, Plus, X, Image as ImageIcon, FileText, Send, Video, Trash2, Loader } from 'lucide-react';
+import { CheckCircle2, Loader } from 'lucide-react';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<NavTab>('home');
@@ -30,11 +29,7 @@ export const App: React.FC = () => {
   const [isTimerOpen, setIsTimerOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
-  const [postContent, setPostContent] = useState('');
-  const [attachedFile, setAttachedFile] = useState<File | null>(null);
-  const [attachedMediaUrl, setAttachedMediaUrl] = useState<string | null>(null);
-  const [attachedMediaType, setAttachedMediaType] = useState<'image' | 'video' | 'pdf' | null>(null);
-  const isPosting = false;
+  const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<{ fileName: string; progress: number; status: 'uploading' | 'completed' } | null>(null);
 
   const [currentUser,    setCurrentUser]    = useState<any>(null);
@@ -42,42 +37,6 @@ export const App: React.FC = () => {
   const [activeDm,       setActiveDm]       = useState<{id: string, name: string} | null>(null);
   const [initialChannel, setInitialChannel] = useState<string | undefined>();
   const [isInitialized,  setIsInitialized]  = useState(false);
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, type: 'image' | 'video' | 'pdf') => {
-    const files = e.target.files;
-    if (files && files[0]) {
-      const file = files[0];
-
-      // Safety Layer: Magic Bytes verification to block renamed executables/malware
-      try {
-        const safetyCheck = await verifyFileMagicBytes(file);
-        if (!safetyCheck.isValid) {
-          alert('Security Alert: The attached file has a mismatched or invalid binary signature. Upload blocked.');
-          e.target.value = '';
-          return;
-        }
-      } catch (err) {
-        alert('Security check failed to read file headers.');
-        e.target.value = '';
-        return;
-      }
-
-      setAttachedFile(file);
-      setAttachedMediaType(type);
-      if (type === 'image' || type === 'video') {
-        // Convert to universal Data URL so every student across all devices can see the photo or video instantly
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          if (event.target?.result) {
-            setAttachedMediaUrl(event.target.result as string);
-          }
-        };
-        reader.readAsDataURL(file);
-      } else {
-        setAttachedMediaUrl(file.name);
-      }
-    }
-  };
 
   useEffect(() => {
     if (!isInitialized) {
