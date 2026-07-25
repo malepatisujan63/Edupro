@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import styles from './BackgroundAmbient.module.css';
+import { InteractiveParticles } from './InteractiveParticles';
 
 export const BackgroundAmbient: React.FC = () => {
   return (
@@ -10,6 +11,9 @@ export const BackgroundAmbient: React.FC = () => {
       
       {/* Noise Texture for premium feel */}
       <div className={styles.noise} />
+      
+      {/* Interactive Anti-Gravity Particles */}
+      <InteractiveParticles />
       
       {/* Floating Animated Orbs */}
       <motion.div 
@@ -43,3 +47,4 @@ export const BackgroundAmbient: React.FC = () => {
     </div>
   );
 };
+

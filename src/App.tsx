@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { IOSFloatingNav, type NavTab } from './components/layout/IOSFloatingNav';
 import { BackgroundAmbient } from './components/layout/BackgroundAmbient';
+import { CustomCursor } from './components/layout/CustomCursor';
+import { IOSFloatingNav, type NavTab } from './components/layout/IOSFloatingNav';
 import { NotificationPanel } from './components/layout/NotificationPanel';
 import { CreatePostModal } from './components/post/CreatePostModal';
 import { AuthModal } from './components/auth/AuthModal';
@@ -94,6 +95,9 @@ export const App: React.FC = () => {
     <div className="min-h-screen font-sans selection:bg-[#4169E1]/40 selection:text-white relative overflow-x-hidden" style={{background: 'var(--bg-canvas)', color: 'var(--text-primary)', transition: 'background 0.3s ease, color 0.3s ease'}}>
       
       <BackgroundAmbient />
+      <CustomCursor />
+      
+
 
       <IOSFloatingNav
         activeTab={activeTab}
@@ -239,3 +243,6 @@ export const App: React.FC = () => {
   );
 };
 export default App;
+
+
+
