@@ -140,7 +140,7 @@
       linear-gradient(var(--bg-modal), var(--bg-modal)) padding-box,
       linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
     background-size: 200% 100%;
-    animation: panFlow 3.5s linear infinite;
+    animation: panFlow 8s linear infinite;
     box-shadow:
       0 0 18px rgba(0,207,255,0.22),
       0 0 42px rgba(65,105,225,0.14),
@@ -170,7 +170,7 @@
       linear-gradient(var(--bg-modal), var(--bg-modal)) padding-box,
       linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
     background-size: 200% 100%;
-    animation: panFlow 3.5s linear infinite;
+    animation: panFlow 8s linear infinite;
     box-shadow:
       0 0 18px rgba(0,207,255,0.22),
       0 0 42px rgba(65,105,225,0.14),
@@ -439,7 +439,7 @@
     linear-gradient(var(--bg-input), var(--bg-input)) padding-box,
     linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
   background-size: 200% 100%;
-  animation: panFlow 2.5s linear infinite;
+  animation: panFlow 8s linear infinite;
 }
 
 /* ── KX INPUT (direct on the <input> element) ────────────────────────────── */
@@ -465,7 +465,7 @@
     linear-gradient(var(--bg-input), var(--bg-input)) padding-box,
     linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
   background-size: 200% 100%;
-  animation: panFlow 2.5s linear infinite;
+  animation: panFlow 8s linear infinite;
 }
 
 /* ── KX PILL (pill-shaped flowing border — nav/buttons) ──────────────────── */
@@ -485,7 +485,7 @@
     linear-gradient(var(--bg-canvas), var(--bg-canvas)) padding-box,
     linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
   background-size: 200% 100%;
-  animation: panFlow 2s linear infinite;
+  animation: panFlow 8s linear infinite;
 }
 
 /* ── KX NAV DOCK (bottom navigation bar container) ───────────────────────── */
@@ -499,7 +499,7 @@
     linear-gradient(var(--bg-modal), var(--bg-modal)) padding-box,
     linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
   background-size: 200% 100%;
-  animation: panFlow 3.5s linear infinite;
+  animation: panFlow 8s linear infinite;
   box-shadow:
     0 0 16px rgba(0, 207, 255, 0.25),
     0 0 36px rgba(65, 105, 225, 0.15);
@@ -513,7 +513,7 @@
     linear-gradient(var(--bg-modal), var(--bg-modal)) padding-box,
     linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
   background-size: 200% 100%;
-  animation: panFlow 4s linear infinite;
+  animation: panFlow 8s linear infinite;
   box-shadow:
     0 0 16px rgba(0, 207, 255, 0.2),
     0 0 40px rgba(65, 105, 225, 0.15);
@@ -537,7 +537,7 @@
     linear-gradient(var(--bg-modal), var(--bg-modal)) padding-box,
     linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
   background-size: 200% 100%;
-  animation: panFlow 3.5s linear infinite;
+  animation: panFlow 8s linear infinite;
   box-shadow:
     0 0 18px rgba(0, 207, 255, 0.22),
     0 0 42px rgba(65, 105, 225, 0.14),
@@ -563,7 +563,7 @@
     linear-gradient(var(--bg-modal), var(--bg-modal)) padding-box,
     linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
   background-size: 200% 100%;
-  animation: panFlow 3.5s linear infinite;
+  animation: panFlow 8s linear infinite;
   box-shadow:
     0 0 14px rgba(0,207,255,0.16),
     0 0 32px rgba(65,105,225,0.10);
@@ -579,7 +579,7 @@
     linear-gradient(#000, #000) padding-box,
     linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
   background-size: 200% 100%;
-  animation: panFlow 3.5s linear infinite;
+  animation: panFlow 8s linear infinite;
   box-shadow:
     0 0 14px rgba(0,207,255,0.16),
     0 8px 24px rgba(0,0,0,0.4);
@@ -601,7 +601,7 @@
     linear-gradient(var(--bg-input), var(--bg-input)) padding-box,
     linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
   background-size: 200% 100%;
-  animation: panFlow 2.5s linear infinite;
+  animation: panFlow 8s linear infinite;
   box-shadow:
     0 0 12px rgba(0, 207, 255, 0.35),
     0 0 28px rgba(65, 105, 225, 0.25),
@@ -639,7 +639,7 @@
     linear-gradient(var(--bg-canvas), var(--bg-canvas)) padding-box,
     linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
   background-size: 200% 100%;
-  animation: panFlow 2.5s linear infinite;
+  animation: panFlow 8s linear infinite;
   box-shadow:
     0 0 16px rgba(0, 207, 255, 0.3),
     0 0 40px rgba(65, 105, 225, 0.2),
@@ -793,15 +793,8 @@
 }
 
 
-/* -- MOBILE TOUCH FIX: Force FlowGlow on small screens -- */
-@media (max-width: 768px) {
-  .kx-feed-card, .kx-resource-card, .kx-card, .glass-card {
-    border: 1.5px solid transparent !important;
-    background:
-      linear-gradient(var(--bg-modal), var(--bg-modal)) padding-box,
-      linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box !important;
-    background-size: 200% 100% !important;
-    animation: panFlow 3.5s linear infinite !important;
-  }
-}
+
+
+
+
 

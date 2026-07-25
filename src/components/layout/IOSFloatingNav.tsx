@@ -41,11 +41,13 @@ export const IOSFloatingNav: React.FC<IOSFloatingNavProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<{ results: TrieItem[]; latencyMs: number; pathString: string } | null>(null);
   const [isVisible, setIsVisible] = useState(true);
+  const [isScrolledToTop, setIsScrolledToTop] = useState(true);
   const lastScrollY = React.useRef(0);
 
   React.useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
+      setIsScrolledToTop(currentScrollY < 20);
       if (currentScrollY > lastScrollY.current + 8) setIsVisible(false);
       else if (currentScrollY < lastScrollY.current - 8) setIsVisible(true);
       lastScrollY.current = currentScrollY;
@@ -76,14 +78,23 @@ export const IOSFloatingNav: React.FC<IOSFloatingNavProps> = ({
 
   return (
     <>
-      {/* Koinexa Logo — top-left */}
-      <div className="fixed top-3 left-4 sm:left-6 z-40 pointer-events-auto flex items-center">
-        <img
-          src="/koinexa-banner.png"
-          alt="Koinexa"
-          className="h-10 sm:h-12 md:h-14 w-auto object-contain transition-transform hover:scale-105 drop-shadow-[0_4px_16px_rgba(0,0,0,0.85)]"
-        />
-      </div>
+      {/* Koinexa Logo - top-left */}
+      <AnimatePresence>
+        {activeTab === 'home' && isScrolledToTop && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed top-3 left-4 sm:left-6 z-40 pointer-events-auto flex items-center"
+          >
+            <img
+              src="/koinexa-banner.png"
+              alt="Koinexa"
+              className="h-10 sm:h-12 md:h-14 w-auto object-contain transition-transform hover:scale-105 drop-shadow-[0_4px_16px_rgba(0,0,0,0.85)]"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Unified pill — bottom-center, hides on scroll-down */}
       {/* Outer div handles true centering; inner motion.div handles y scroll-slide only */}
@@ -298,3 +309,4 @@ export const IOSFloatingNav: React.FC<IOSFloatingNavProps> = ({
     </>
   );
 };
+
