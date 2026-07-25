@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { IOSFloatingNav, type NavTab } from './components/layout/IOSFloatingNav';
 import { BackgroundAmbient } from './components/layout/BackgroundAmbient';
-import { TopNavigation } from './components/layout/TopNavigation';
 import { NotificationPanel } from './components/layout/NotificationPanel';
 import { CreatePostModal } from './components/post/CreatePostModal';
 import { AuthModal } from './components/auth/AuthModal';
@@ -96,11 +95,19 @@ export const App: React.FC = () => {
       
       <BackgroundAmbient />
 
-      <TopNavigation 
+      <IOSFloatingNav
+        activeTab={activeTab}
+        onSelectTab={(tab, profileId = null) => {
+          setActiveTab(tab);
+          if (tab === 'profile') setViewProfileId(profileId);
+        }}
+        onOpenAuth={() => setIsAuthOpen(true)}
+        onOpenDSAHUD={() => setIsDSAHUDOpen(true)}
+        onOpenTimer={() => setIsTimerOpen(true)}
         currentUser={currentUser}
         isNotificationsOpen={isNotificationsOpen}
-        setIsNotificationsOpen={setIsNotificationsOpen}
-        setIsCreatePostOpen={setIsCreatePostOpen}
+        setIsNotificationsOpen={currentUser ? setIsNotificationsOpen : undefined}
+        setIsCreatePostOpen={currentUser ? setIsCreatePostOpen : undefined}
       />
 
       {/* GOATED LANDING PAGE — Full split-screen, auth form embedded inline on right */}
@@ -114,21 +121,8 @@ export const App: React.FC = () => {
 
       ) : (
         <>
-          {/* iOS / visionOS Floating Transparent Pill Dock */}
-          <IOSFloatingNav
-            activeTab={activeTab}
-            onSelectTab={(tab, profileId = null) => {
-              setActiveTab(tab);
-              if (tab === 'profile') setViewProfileId(profileId);
-            }}
-            onOpenAuth={() => setIsAuthOpen(true)}
-            onOpenDSAHUD={() => setIsDSAHUDOpen(true)}
-            onOpenTimer={() => setIsTimerOpen(true)}
-            currentUser={currentUser}
-          />
-
           {/* Main Content View Switcher */}
-          <main className="transition-all duration-300 relative z-10 pt-16">
+          <main className="transition-all duration-300 relative z-10 pt-4">
             {activeTab === 'home' && <HomeFeed currentUser={currentUser} account={currentAccount} />}
             {activeTab === 'resources' && <ResourceLibrary currentUser={currentUser} account={currentAccount} />}
             {activeTab === 'communities' && (
@@ -169,6 +163,7 @@ export const App: React.FC = () => {
           </main>
         </>
       )}
+
 
       {/* Slide-Over Notification Panel ($O(1)$ Queue Feed) */}
       {isNotificationsOpen && (

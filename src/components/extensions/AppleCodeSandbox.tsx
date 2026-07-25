@@ -158,7 +158,7 @@ function findTwoSum(nums: number[], target: number): number[] {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 min-h-0 flex-1 overflow-y-auto">
           
           {/* Code Textarea */}
-          <div className="flex flex-col rounded-2xl bg-black/60 border border-white/15 overflow-hidden shadow-inner">
+          <div className="flex flex-col rounded-2xl bg-black/60 kx-field overflow-hidden">
             <div className="px-4 py-2 bg-white/[0.05] border-b border-white/10 text-[11px] font-mono text-slate-300 flex items-center justify-between">
               <span>editor.{language === 'python' ? 'py' : language === 'cpp' ? 'cpp' : 'ts'}</span>
               <span className="text-cyan-300">UTF-8 / Strict Mode</span>

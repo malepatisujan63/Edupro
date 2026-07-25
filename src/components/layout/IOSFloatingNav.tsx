@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Home,
   Play,
@@ -7,7 +7,10 @@ import {
   User,
   MessageSquare,
   HelpCircle,
+  Bell,
+  Plus,
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { globalPlatformTrie, type TrieItem } from '../../dsa-engine';
 
 export type NavTab = 'home' | 'communities' | 'qna' | 'messaging' | 'resources' | 'profile';
@@ -21,35 +24,32 @@ interface IOSFloatingNavProps {
   onOpenCodeSandbox?: () => void;
   onOpenAIBuddy?: () => void;
   currentUser: { name: string; avatarUrl?: string } | null;
+  isNotificationsOpen?: boolean;
+  setIsNotificationsOpen?: (val: boolean) => void;
+  setIsCreatePostOpen?: (val: boolean) => void;
 }
 
 export const IOSFloatingNav: React.FC<IOSFloatingNavProps> = ({
   activeTab,
   onSelectTab,
   currentUser,
+  isNotificationsOpen = false,
+  setIsNotificationsOpen,
+  setIsCreatePostOpen,
 }) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<{ results: TrieItem[]; latencyMs: number; pathString: string } | null>(null);
-
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollY = React.useRef(0);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
-      if (currentScrollY > lastScrollY.current + 10) {
-        // Scrolling down -> hide
-        setIsVisible(false);
-      } else if (currentScrollY < lastScrollY.current - 10) {
-        // Scrolling up -> show
-        setIsVisible(true);
-      }
-      
+      if (currentScrollY > lastScrollY.current + 8) setIsVisible(false);
+      else if (currentScrollY < lastScrollY.current - 8) setIsVisible(true);
       lastScrollY.current = currentScrollY;
     };
-
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -65,6 +65,7 @@ export const IOSFloatingNav: React.FC<IOSFloatingNavProps> = ({
     }
   };
 
+
   const tabs: Array<{ id: NavTab; label: string; icon: React.ReactNode; badge?: boolean }> = [
     { id: 'home', label: 'Home Feed', icon: <Home className="w-5 h-5" /> },
     { id: 'resources', label: 'Notes & Videos', icon: <Play className="w-5 h-5 fill-current" /> },
@@ -75,7 +76,7 @@ export const IOSFloatingNav: React.FC<IOSFloatingNavProps> = ({
 
   return (
     <>
-      {/* Top App Brand Floating Badge (Koinexa Banner Picture) */}
+      {/* Koinexa Logo — top-left */}
       <div className="fixed top-3 left-4 sm:left-6 z-40 pointer-events-auto flex items-center">
         <img
           src="/koinexa-banner.png"
@@ -84,11 +85,17 @@ export const IOSFloatingNav: React.FC<IOSFloatingNavProps> = ({
         />
       </div>
 
-      {/* iOS 18 Floating Liquid Glass Pill Navigation Dock (No Scroll Bar, Minimal Icons Only, High Transparency) */}
-      <div className={`fixed bottom-5 left-1/2 -translate-x-1/2 z-50 w-auto max-w-[96%] pointer-events-none transition-transform duration-500 ease-in-out ${isVisible ? 'translate-y-0' : 'translate-y-32'}`}>
-        <div className="pointer-events-auto mx-auto kx-nav-dock p-1.5 sm:p-2 flex items-center justify-center gap-1 sm:gap-1.5 transition-all duration-300 shadow-2xl overflow-visible">
-          
-          {/* Main Pill Tabs: Icon only for sleek minimal fit */}
+      {/* Unified pill — bottom-center, hides on scroll-down */}
+      {/* Outer div handles true centering; inner motion.div handles y scroll-slide only */}
+      <div className="fixed bottom-0 left-1/2 z-50 pointer-events-none" style={{ transform: 'translateX(-50%)' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 80 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+        >
+        <div className="pointer-events-auto kx-nav-dock p-1.5 flex items-center gap-1 transition-all duration-300 shadow-2xl overflow-visible">
+
+          {/* Main Tab Icons */}
           <div className="flex items-center gap-1 shrink-0">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
@@ -103,9 +110,7 @@ export const IOSFloatingNav: React.FC<IOSFloatingNavProps> = ({
                       : 'text-white/75 hover:text-white hover:bg-white/15'
                   }`}
                 >
-                  <span className="shrink-0">
-                    {tab.icon}
-                  </span>
+                  <span className="shrink-0">{tab.icon}</span>
                   {tab.badge && !isActive && (
                     <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#9B5DE5] animate-ping" />
                   )}
@@ -114,44 +119,87 @@ export const IOSFloatingNav: React.FC<IOSFloatingNavProps> = ({
             })}
           </div>
 
-          {/* Search trigger — kx-pill-flow glow on hover */}
-          <div className="flex items-center gap-1 pl-1 shrink-0">
-            <button
-              onClick={() => setIsSearchOpen(true)}
-              title="Search students"
-              className="kx-pill-flow w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center text-white transition-all shrink-0 active:scale-95"
-            >
-              <Search className="w-4 h-4 text-[#00CFFF]" />
-            </button>
-          </div>
-
-          {/* Profile Button */}
-          <div className="flex items-center pl-1 shrink-0">
-            <button
-              onClick={() => onSelectTab('profile')}
-              title={`Profile: ${currentUser?.name || 'Student'}`}
-              className={`kx-pill-flow relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 transition-all ${
-                activeTab === 'profile' ? 'active' : ''
+          {/* Bell — icon only */}
+          {setIsNotificationsOpen && (
+            <motion.button
+              onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+              title="Notifications"
+              className={`relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full transition-all ${
+                isNotificationsOpen ? 'bg-[#9B5DE5]/20 border border-[#9B5DE5]/40' : 'hover:bg-white/10'
               }`}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              {currentUser?.avatarUrl ? (
-                <img src={currentUser.avatarUrl} alt="avatar" className="w-full h-full rounded-full object-cover border-2 border-white/30 shadow-sm" />
-              ) : (
-                <User className="w-5 h-5 text-[#00CFFF]" />
-              )}
-              <span className="w-2.5 h-2.5 rounded-full bg-[#34C759] border-2 border-[#05050A] absolute -top-0.5 -right-0.5" />
-            </button>
-          </div>
+              <Bell className="w-4 h-4 text-[#9B5DE5]" />
+              <AnimatePresence>
+                {!isNotificationsOpen && (
+                  <motion.span
+                    className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#00CFFF] shadow-[0_0_8px_rgba(0,207,255,0.8)]"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 10 }}
+                  />
+                )}
+              </AnimatePresence>
+            </motion.button>
+          )}
+
+          {/* Search */}
+          <button
+            onClick={() => setIsSearchOpen(true)}
+            title="Search students"
+            className="kx-pill-flow w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center text-white transition-all shrink-0 active:scale-95"
+          >
+            <Search className="w-4 h-4 text-[#00CFFF]" />
+          </button>
+
+          {/* + Post — icon only */}
+          {setIsCreatePostOpen && (
+            <motion.button
+              onClick={() => setIsCreatePostOpen(true)}
+              title="Create Post"
+              className="relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full text-white overflow-hidden"
+              style={{ background: 'linear-gradient(135deg, #00CFFF 0%, #4169E1 50%, #9B5DE5 100%)', boxShadow: '0 4px 14px rgba(65,105,225,0.4)' }}
+              whileHover={{ scale: 1.1, filter: 'brightness(1.1)' }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Plus className="w-5 h-5" strokeWidth={3} />
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent)',
+                  animation: 'shine 3s infinite',
+                }}
+              />
+            </motion.button>
+          )}
+
+          {/* Profile */}
+          <button
+            onClick={() => onSelectTab('profile')}
+            title={`Profile: ${currentUser?.name || 'Student'}`}
+            className={`kx-pill-flow relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 transition-all ${
+              activeTab === 'profile' ? 'active' : ''
+            }`}
+          >
+            {currentUser?.avatarUrl ? (
+              <img src={currentUser.avatarUrl} alt="avatar" className="w-full h-full rounded-full object-cover border-2 border-white/30 shadow-sm" />
+            ) : (
+              <User className="w-5 h-5 text-[#00CFFF]" />
+            )}
+            <span className="w-2.5 h-2.5 rounded-full bg-[#34C759] border-2 border-[#05050A] absolute -top-0.5 -right-0.5" />
+          </button>
 
         </div>
+        </motion.div>
       </div>
 
-      {/* Interactive Profile & Student Trie Search Modal ($O(L)$) */}
+      {/* Search Modal */}
       {isSearchOpen && (
         <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 px-4 bg-black/80 backdrop-blur-2xl animate-fadeIn">
           <div className="w-full max-w-xl rounded-[28px] overflow-hidden animate-scaleUp kx-card">
 
-            {/* Flowing gradient border search header */}
             <div className="kx-search-header p-4 flex items-center gap-3">
               <Search className="w-5 h-5 text-[#00CFFF] shrink-0" />
               <input
@@ -170,7 +218,6 @@ export const IOSFloatingNav: React.FC<IOSFloatingNavProps> = ({
               </button>
             </div>
 
-            {/* Trie Execution Metrics HUD */}
             {searchResults && (
               <div className="px-4 py-2 bg-[#0D0D0D] border-b border-white/20 text-xs flex flex-wrap items-center justify-between gap-2 text-white">
                 <div>
@@ -251,4 +298,3 @@ export const IOSFloatingNav: React.FC<IOSFloatingNavProps> = ({
     </>
   );
 };
-

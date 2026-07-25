@@ -119,7 +119,7 @@ export const QnAPlatform: React.FC<{ currentUser?: any; account?: any }> = ({ cu
   };
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-2xl mx-auto px-4 py-4 space-y-8 pb-36">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full max-w-2xl mx-auto px-4 py-4 space-y-8 pb-36">
       <div className="flex items-center justify-between px-2">
         <h1 className="text-xl sm:text-2xl font-extrabold text-white flex items-center gap-2">
           <HelpCircle className="w-6 h-6 text-[#00CFFF]" />
@@ -162,7 +162,7 @@ export const QnAPlatform: React.FC<{ currentUser?: any; account?: any }> = ({ cu
                   placeholder="Doubt Title..."
                   value={newDoubtTitle}
                   onChange={(e) => setNewDoubtTitle(e.target.value)}
-                  className="w-full bg-white/5 px-4 py-3 rounded-2xl border border-white/10 text-sm text-white outline-none focus:border-[#00CFFF]"
+                  className="kx-input-flow"
                 />
               </div>
               <div>
@@ -171,7 +171,7 @@ export const QnAPlatform: React.FC<{ currentUser?: any; account?: any }> = ({ cu
                   placeholder="Provide context..."
                   value={newDoubtContent}
                   onChange={(e) => setNewDoubtContent(e.target.value)}
-                  className="w-full bg-white/5 px-4 py-3 rounded-2xl border border-white/10 text-sm text-white outline-none focus:border-[#00CFFF] resize-none"
+                  className="kx-input-flow min-h-[120px] resize-y"
                 />
               </div>
               <div className="flex justify-end gap-3 pt-2">

@@ -4,7 +4,7 @@ import { Megaphone, Calendar } from 'lucide-react';
 export const CampusFeed: React.FC = () => {
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6 space-y-8 pb-32">
+    <div className="w-full max-w-7xl mx-auto px-4 py-6 space-y-8 pb-32">
       
       {/* Header */}
       <div className="p-8 rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/30 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
@@ -36,3 +36,4 @@ export const CampusFeed: React.FC = () => {
     </div>
   );
 };
+

@@ -26,7 +26,7 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({ resource, handleInte
       transition={{ delay: index * 0.1, type: "spring", stiffness: 300, damping: 25 }}
       onMouseEnter={() => handleInteraction(category, 1)}
       onClick={() => handleInteraction(category, 3)}
-      className={styles.card}
+      className="kx-resource-card"
     >
       <div className={styles.header}>
         <div className={styles.authorGroup}>
@@ -57,7 +57,7 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({ resource, handleInte
         <p className={styles.title}>{resource.title}</p>
         
         {resource.mediaUrl && (
-          <div className={styles.mediaPreview}>
+          <div className="kx-media-preview">
             {resource.mediaType === 'video' || format === 'Video Lecture' ? (
               <video src={resource.mediaUrl} controls className={styles.mediaElement} />
             ) : (

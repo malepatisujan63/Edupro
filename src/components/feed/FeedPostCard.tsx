@@ -73,7 +73,7 @@ export const FeedPostCard: React.FC<FeedPostCardProps> = ({
       transition={{ type: "spring", stiffness: 300, damping: 25 }}
       onMouseEnter={() => recordDwell(post.category, 1)}
       onClick={() => recordDwell(post.category, 2)}
-      className={styles.card}
+      className="kx-feed-card"
     >
       {/* Header */}
       <div className={styles.header}>

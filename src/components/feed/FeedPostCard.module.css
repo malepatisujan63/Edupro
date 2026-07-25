@@ -1,19 +1,4 @@
-.card {
-  background: rgba(14, 14, 20, 0.4);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 24px;
-  overflow: hidden;
-  margin-bottom: 24px;
-  transition: all 0.3s ease;
-}
 
-.card:hover {
-  background: rgba(20, 20, 30, 0.6);
-  border-color: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-  transform: translateY(-2px);
-}
 
 .header {
   display: flex;

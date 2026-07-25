@@ -1,10 +1,25 @@
 .rootThread {
   background: rgba(10, 10, 15, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
   border-radius: 24px;
   padding: 20px;
   margin-bottom: 24px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
+  position: relative;
+}
+
+.rootThread:hover {
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(var(--bg-modal), var(--bg-modal)) padding-box,
+    linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
+  background-size: 200% 100%;
+  animation: panFlow 3.5s linear infinite;
+  box-shadow:
+    0 0 18px rgba(0,207,255,0.20),
+    0 0 42px rgba(65,105,225,0.13),
+    0 12px 40px rgba(0,0,0,0.45);
 }
 
 .nestedThread {
@@ -189,11 +204,21 @@
 
 .replyBox {
   margin-top: 16px;
-  background: rgba(255, 255, 255, 0.03);
   border-radius: 20px;
   padding: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
   overflow: hidden;
+  border: 1.5px solid rgba(65,105,225,0.20);
+  background: rgba(255, 255, 255, 0.03);
+  transition: box-shadow 0.2s;
+}
+
+.replyBox:focus-within {
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(rgba(255,255,255,0.04), rgba(255,255,255,0.04)) padding-box,
+    linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
+  background-size: 200% 100%;
+  animation: panFlow 2.5s linear infinite;
 }
 
 .replyInput {

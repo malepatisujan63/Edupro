@@ -126,41 +126,26 @@
      Canvas fill, 1px gradient border (Cyan→Blue→Purple), subtle glow   */
   .kx-card {
     position: relative;
+    backdrop-filter: blur(24px) saturate(180%);
     background: var(--bg-canvas);
     border-radius: var(--r-md);
+    border: 1.5px solid rgba(255,255,255,0.06);
     color: var(--text-primary);
-    transition:
-      transform  240ms var(--ease-snappy),
-      box-shadow 240ms var(--ease-snappy),
-      background 0.3s ease;
+    transition: transform 240ms var(--ease-snappy), box-shadow 240ms var(--ease-snappy);
     z-index: 0;
   }
-  .kx-card::before {
-    content: '';
-    position: absolute;
-    inset: -1px;
-    border-radius: calc(var(--r-md) + 1px);
-    background: linear-gradient(135deg, #00CFFF 0%, #4169E1 50%, #9B5DE5 100%);
-    z-index: -1;
-    opacity: 0.45;
-    transition: opacity 240ms var(--ease-snappy);
-  }
-  .kx-card::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: var(--r-md);
-    background: var(--bg-canvas);
-    z-index: -1;
-  }
-  .kx-card:hover::before { opacity: 1; }
   .kx-card:hover {
-    transform: translateY(-3px);
+    border: 1.5px solid transparent;
+    background:
+      linear-gradient(var(--bg-modal), var(--bg-modal)) padding-box,
+      linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
+    background-size: 200% 100%;
+    animation: panFlow 3.5s linear infinite;
     box-shadow:
-      0 0 0 0 transparent,
-      0 12px 40px rgba(0,0,0,0.7),
-      0 0 32px rgba(0,207,255,0.10),
-      0 0 64px rgba(155,93,229,0.07);
+      0 0 18px rgba(0,207,255,0.22),
+      0 0 42px rgba(65,105,225,0.14),
+      0 12px 40px rgba(0,0,0,0.45);
+    transform: translateY(-3px);
   }
   .kx-card:active {
     transform: scale(0.993) translateY(0);
@@ -170,36 +155,27 @@
   /* ── GLASS CARD (glassmorphism with Koinexa gradient border) ── */
   .glass-card, .glass-panel {
     position: relative;
-    background: var(--bg-modal);
     backdrop-filter: blur(40px) saturate(180%);
     -webkit-backdrop-filter: blur(40px) saturate(180%);
     border-radius: var(--r-lg);
+    border: 1.5px solid rgba(255,255,255,0.06);
+    background: var(--bg-modal);
     color: var(--text-primary);
-    transition:
-      transform  240ms var(--ease-snappy),
-      box-shadow 240ms var(--ease-snappy),
-      background 0.3s ease;
+    transition: transform 240ms var(--ease-snappy), box-shadow 240ms var(--ease-snappy);
     z-index: 0;
-    border: 1px solid transparent;
-    background-clip: padding-box;
-    box-shadow:
-      0 0 0 1px rgba(65,105,225,0.18),
-      0 2px 4px rgba(0,0,0,0.4),
-      0 8px 24px rgba(0,0,0,0.65),
-      0 24px 48px rgba(0,0,0,0.8),
-      inset 0 1px 0 var(--border-subtle),
-      inset 0 -1px 0 rgba(0,0,0,0.2);
   }
   .glass-card:hover, .glass-panel:hover {
-    transform: translateY(-3px);
+    border: 1.5px solid transparent;
+    background:
+      linear-gradient(var(--bg-modal), var(--bg-modal)) padding-box,
+      linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
+    background-size: 200% 100%;
+    animation: panFlow 3.5s linear infinite;
     box-shadow:
-      0 0 0 1px rgba(0,207,255,0.3),
-      0 2px 4px rgba(0,0,0,0.4),
-      0 12px 32px rgba(0,0,0,0.75),
-      0 32px 64px rgba(0,0,0,0.9),
-      0 0 24px rgba(65,105,225,0.08),
-      inset 0 1px 0 var(--border-mid),
-      inset 0 -1px 0 rgba(0,0,0,0.2);
+      0 0 18px rgba(0,207,255,0.22),
+      0 0 42px rgba(65,105,225,0.14),
+      0 16px 48px rgba(0,0,0,0.5);
+    transform: translateY(-3px);
   }
   .glass-card:active, .glass-panel:active {
     transform: scale(0.994) translateY(0);
@@ -451,13 +427,10 @@
 /* ── KX FIELD (wrapper div — activates on focus-within) ─────────────────── */
 .kx-field {
   position: relative;
-  border: 1.5px solid rgba(65, 105, 225, 0.16);
+  border: 1.5px solid rgba(65, 105, 225, 0.18);
   border-radius: var(--r-sm);
   background: var(--bg-input);
-  transition:
-    border-color 200ms var(--ease-snappy),
-    box-shadow   200ms var(--ease-snappy),
-    background   200ms var(--ease-snappy);
+  transition: box-shadow 200ms var(--ease-snappy);
 }
 
 .kx-field:focus-within {
@@ -467,28 +440,22 @@
     linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
   background-size: 200% 100%;
   animation: panFlow 2.5s linear infinite;
-  box-shadow:
-    0 0 0 3px rgba(65, 105, 225, 0.12),
-    0 0 12px rgba(0, 207, 255, 0.25),
-    0 0 28px rgba(65, 105, 225, 0.18);
 }
 
 /* ── KX INPUT (direct on the <input> element) ────────────────────────────── */
 .kx-input-flow {
   background: var(--bg-input);
-  border: 1.5px solid rgba(65, 105, 225, 0.16);
+  border: 1.5px solid rgba(65, 105, 225, 0.18);
   border-radius: var(--r-sm);
   color: var(--text-primary);
   padding: 13px 16px;
   width: 100%;
   font-size: 15px;
+  font-family: inherit;
+  line-height: 1.5;
   letter-spacing: var(--tracking-body);
   outline: none;
-  transition:
-    border-color 200ms var(--ease-snappy),
-    box-shadow   200ms var(--ease-snappy),
-    background   200ms var(--ease-snappy),
-    color        0.3s ease;
+  transition: box-shadow 200ms var(--ease-snappy);
 }
 .kx-input-flow::placeholder { color: var(--input-placeholder); }
 
@@ -499,10 +466,6 @@
     linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
   background-size: 200% 100%;
   animation: panFlow 2.5s linear infinite;
-  box-shadow:
-    0 0 0 3px rgba(65, 105, 225, 0.1),
-    0 0 10px rgba(0, 207, 255, 0.22),
-    0 0 22px rgba(65, 105, 225, 0.15);
 }
 
 /* ── KX PILL (pill-shaped flowing border — nav/buttons) ──────────────────── */
@@ -523,9 +486,6 @@
     linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
   background-size: 200% 100%;
   animation: panFlow 2s linear infinite;
-  box-shadow:
-    0 0 14px rgba(0, 207, 255, 0.35),
-    0 0 32px rgba(65, 105, 225, 0.25);
 }
 
 /* ── KX NAV DOCK (bottom navigation bar container) ───────────────────────── */
@@ -557,6 +517,72 @@
   box-shadow:
     0 0 16px rgba(0, 207, 255, 0.2),
     0 0 40px rgba(65, 105, 225, 0.15);
+}
+
+/* ── KX FEED CARD (home feed post cards — flowing border + glow on hover) ── */
+.kx-feed-card {
+  position: relative;
+  background: rgba(14, 14, 20, 0.4);
+  backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(255, 255, 255, 0.06);
+  border-radius: 24px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.kx-feed-card:hover {
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(var(--bg-modal), var(--bg-modal)) padding-box,
+    linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
+  background-size: 200% 100%;
+  animation: panFlow 3.5s linear infinite;
+  box-shadow:
+    0 0 18px rgba(0, 207, 255, 0.22),
+    0 0 42px rgba(65, 105, 225, 0.14),
+    0 12px 40px rgba(0, 0, 0, 0.45);
+  transform: translateY(-2px);
+}
+
+
+/* ── KX RESOURCE CARD ── */
+.kx-resource-card {
+  padding-bottom: 32px;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 32px;
+  border-radius: 24px;
+  padding: 20px 0 32px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  position: relative;
+}
+
+.kx-resource-card:hover {
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(var(--bg-modal), var(--bg-modal)) padding-box,
+    linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
+  background-size: 200% 100%;
+  animation: panFlow 3.5s linear infinite;
+  box-shadow:
+    0 0 14px rgba(0,207,255,0.16),
+    0 0 32px rgba(65,105,225,0.10);
+}
+
+/* ── KX MEDIA PREVIEW ── */
+.kx-media-preview {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(#000, #000) padding-box,
+    linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
+  background-size: 200% 100%;
+  animation: panFlow 3.5s linear infinite;
+  box-shadow:
+    0 0 14px rgba(0,207,255,0.16),
+    0 8px 24px rgba(0,0,0,0.4);
 }
 
 /* ── KX FIELD PILL (fully rounded search bar wrapper) ────────────────────── */
@@ -764,5 +790,18 @@
 @layer utilities {
   /* Remove any accidental left-over white/slate borders */
   .no-border { border: none !important; }
+}
+
+
+/* -- MOBILE TOUCH FIX: Force FlowGlow on small screens -- */
+@media (max-width: 768px) {
+  .kx-feed-card, .kx-resource-card, .kx-card, .glass-card {
+    border: 1.5px solid transparent !important;
+    background:
+      linear-gradient(var(--bg-modal), var(--bg-modal)) padding-box,
+      linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box !important;
+    background-size: 200% 100% !important;
+    animation: panFlow 3.5s linear infinite !important;
+  }
 }
 

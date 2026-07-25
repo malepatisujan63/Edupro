@@ -239,7 +239,7 @@ export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({
   const filteredMessages = messages; // Already filtered by activeChannel via DB subscription
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6 pb-32 grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <div className="w-full max-w-7xl mx-auto px-4 py-6 pb-32 grid grid-cols-1 lg:grid-cols-4 gap-6">
       
       {/* Left Sidebar: Active Channels */}
       <div className="lg:col-span-1 space-y-6">
@@ -470,7 +470,7 @@ export const RealtimeMessaging: React.FC<RealtimeMessagingProps> = ({
             <Mic className="w-5 h-5" />
           </button>
 
-          <div className={`flex-1 rounded-2xl bg-white/[0.03] border flex items-center px-4 py-1.5 focus-within:bg-white/[0.06] transition-all relative ${liveWarning ? 'border-[#FF3B30]' : 'border-white/10 focus-within:border-[#00CFFF]/50'}`}>
+          <div className={`flex-1 kx-field flex items-center px-4 py-1.5 relative ${liveWarning ? '!border-[#FF3B30]' : ''}`}>
               <input
                 type="text"
                 placeholder={isModerating ? "AI Context Engine analyzing..." : "Type a message..."}

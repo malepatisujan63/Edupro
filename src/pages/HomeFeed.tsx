@@ -8,7 +8,6 @@ import {
 import { checkRateLimit } from '../utils/rateLimiter';
 import { type StudentAccount } from '../models/StudentAccount';
 import { FeedPostCard } from '../components/feed/FeedPostCard';
-import { FeedFilters } from '../components/feed/FeedFilters';
 import { PostCommentsModal } from '../components/feed/PostCommentsModal';
 
 interface HomeFeedProps {
@@ -25,7 +24,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ currentUser, account }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [visibleCount, setVisibleCount] = useState(8);
   const [activeCommentPost, setActiveCommentPost] = useState<FirestorePost | null>(null);
-  const [activeFilter, setActiveFilter] = useState('foryou');
+  const [activeFilter] = useState('foryou');
   
   const loaderRef = useRef<HTMLDivElement>(null);
 
@@ -145,7 +144,7 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ currentUser, account }) => {
   }, [account, bookmarkedIds]);
 
   if (isLoading) return (
-    <div className="max-w-[600px] mx-auto px-4 py-4 space-y-8 pb-36">
+    <div className="w-full max-w-[600px] mx-auto px-4 py-4 space-y-8 pb-36">
       {[1, 2, 3].map(i => (
         <div key={i} className="p-4 mb-6 space-y-4 bg-white/5 rounded-[24px] animate-pulse">
           <div className="flex gap-3"><div className="w-11 h-11 rounded-full bg-white/10" /><div className="h-3 w-32 bg-white/10 rounded" /></div>
@@ -161,9 +160,9 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({ currentUser, account }) => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.4 }}
-      className="max-w-[600px] mx-auto px-0 sm:px-4 py-4 pb-36"
+      className="w-full max-w-[600px] mx-auto px-0 sm:px-4 py-4 pb-36"
     >
-      <FeedFilters onFilterChange={setActiveFilter} />
+
 
       <AnimatePresence mode="popLayout">
         {visiblePosts.length === 0 ? (

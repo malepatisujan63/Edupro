@@ -179,7 +179,7 @@ export const AppleAIBuddy: React.FC<{ isOpen: boolean; onClose: () => void; onNa
         </div>
 
         {/* Input Bar */}
-        <div className="pt-3 border-t border-white/10 flex items-center gap-2 shrink-0">
+        <div className="pt-3 border-t border-white/10 flex items-center gap-2 shrink-0 kx-field">
           <input
             type="text"
             placeholder="Ask AI anything about algorithm proofs, notes, or platform queries..."

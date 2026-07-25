@@ -24,7 +24,8 @@ const InputField = ({ icon, type = "text", placeholder, value, onChange, isPassw
       placeholder={placeholder}
       value={value}
       onChange={onChange}
-      className="w-full bg-[#111116]/80 border border-white/[0.06] rounded-xl py-3.5 pl-11 pr-12 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#4169E1]/50 focus:bg-[#151520] focus:ring-1 focus:ring-[#4169E1]/50 transition-all shadow-inner"
+      className="kx-input-flow w-full pl-11 pr-12 bg-[#0D0D14]"
+
     />
     {isPassword && (
       <button type="button" onClick={onTogglePwd} className="absolute inset-y-0 right-0 pr-4 flex items-center text-white/30 hover:text-white/60 transition-colors">
@@ -177,7 +178,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#9B5DE5]/10 blur-[120px] rounded-full pointer-events-none" />
         </div>
 
-        <div className="relative z-10 w-full max-w-6xl mx-auto grid grid-cols-2 items-center gap-16">
+        <div className="relative z-10 w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 items-center gap-10 lg:gap-16 px-4 sm:px-8">
           <motion.div initial={{ opacity: 0, x: -50 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
             <KoinexaLogo size="xl" className="mb-12" />
             <h1 className="text-5xl font-bold tracking-tight">Scan to login</h1>

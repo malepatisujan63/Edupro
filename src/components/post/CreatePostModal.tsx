@@ -140,7 +140,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
                 placeholder="What's on your mind? Share notes or doubts..."
                 value={postContent}
                 onChange={(e) => setPostContent(e.target.value)}
-                className={styles.textarea}
+                className="kx-input-flow min-h-[120px]"
                 rows={4}
               />
 

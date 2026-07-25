@@ -86,7 +86,7 @@ const ResourceUploadModal: React.FC<{ isOpen: boolean; onClose: () => void; curr
             <div className="p-5 space-y-4">
               <div>
                 <label className="block text-xs font-bold text-white/70 mb-1.5">Note Title</label>
-                <input type="text" placeholder="e.g. Operating Systems Notes" value={title} onChange={e => setTitle(e.target.value)} className="w-full py-3 px-4 rounded-2xl bg-white/5 border border-white/10 text-xs text-white outline-none focus:border-[#00CFFF]" />
+                <input type="text" placeholder="e.g. Operating Systems Notes" value={title} onChange={e => setTitle(e.target.value)} className="kx-input-flow" />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -164,9 +164,9 @@ export const ResourceLibrary: React.FC<ResourceLibraryProps> = ({ currentUser, a
     });
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="max-w-2xl mx-auto px-4 py-4 space-y-8 pb-36">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full max-w-2xl mx-auto px-4 py-4 space-y-8 pb-36">
       <div className="flex items-center gap-3">
-        <div className="flex-1 bg-[rgba(14,14,20,0.6)] backdrop-blur-xl border border-[rgba(255,255,255,0.05)] rounded-full overflow-hidden shadow-lg relative flex items-center">
+        <div className="flex-1 kx-field-pill flex items-center">
           <Search className="w-4 h-4 text-[#4169E1] absolute left-4" />
           <input
             type="text"

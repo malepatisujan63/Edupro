@@ -1,8 +1,23 @@
 .card {
   padding-bottom: 32px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.08);
   margin-bottom: 32px;
-  transition: all 0.3s ease;
+  border-radius: 24px;
+  padding: 20px 0 32px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  position: relative;
+}
+
+.card:hover {
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(rgba(10,10,15,0.0), rgba(10,10,15,0.0)) padding-box,
+    linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
+  background-size: 200% 100%;
+  animation: panFlow 3.5s linear infinite;
+  box-shadow:
+    0 0 14px rgba(0,207,255,0.16),
+    0 0 32px rgba(65,105,225,0.10);
 }
 
 .header {
@@ -115,9 +130,15 @@
   position: relative;
   border-radius: 24px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: #000;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(#000, #000) padding-box,
+    linear-gradient(90deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF, #4169E1) border-box;
+  background-size: 200% 100%;
+  animation: panFlow 3.5s linear infinite;
+  box-shadow:
+    0 0 14px rgba(0,207,255,0.16),
+    0 8px 24px rgba(0,0,0,0.4);
 }
 
 .mediaElement {
