@@ -22,10 +22,11 @@
 
 .header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 16px;
+  flex-wrap: wrap;
 }
 
 .authorGroup {
@@ -77,6 +78,7 @@
 }
 
 .collegeBadge {
+  white-space: nowrap;
   font-size: 10px;
   padding: 2px 8px;
   border-radius: 999px;
@@ -87,6 +89,7 @@
 }
 
 .metaRow {
+  flex-wrap: wrap;
   font-size: 12px;
   color: rgba(255, 255, 255, 0.6);
   font-weight: 500;
@@ -97,11 +100,13 @@
 }
 
 .categoryBadge {
+  white-space: nowrap;
   color: #00CFFF;
   font-weight: 700;
 }
 
 .formatBadge {
+  white-space: nowrap;
   padding: 4px 12px;
   border-radius: 999px;
   background: #0D0D0D;
@@ -237,3 +242,5 @@
 .simpleIconBtn:hover {
   color: #00CFFF;
 }
+
+

@@ -2,9 +2,11 @@
 
 .header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   padding: 16px 20px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .authorInfo {
@@ -114,6 +116,7 @@
 }
 
 .typeBadge {
+  white-space: nowrap;
   padding: 4px 10px;
   border-radius: 999px;
   border-width: 1px;
@@ -265,3 +268,5 @@
   opacity: 0.5;
   pointer-events: none;
 }
+
+

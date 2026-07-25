@@ -104,7 +104,7 @@ export const IOSFloatingNav: React.FC<IOSFloatingNavProps> = ({
           animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 80 }}
           transition={{ type: 'spring', stiffness: 300, damping: 28 }}
         >
-        <div className="pointer-events-auto kx-nav-dock p-1.5 flex items-center gap-1 transition-all duration-300 shadow-2xl overflow-visible">
+        <div className="pointer-events-auto kx-nav-dock p-1 sm:p-1.5 flex items-center gap-0.5 sm:gap-1 transition-all duration-300 shadow-2xl overflow-visible max-w-[calc(100vw-1rem)]">
 
           {/* Main Tab Icons */}
           <div className="flex items-center gap-1 shrink-0">
@@ -115,7 +115,7 @@ export const IOSFloatingNav: React.FC<IOSFloatingNavProps> = ({
                   key={tab.id}
                   onClick={() => onSelectTab(tab.id)}
                   title={tab.label}
-                  className={`relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full transition-all duration-300 ${
+                  className={`relative flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 rounded-full transition-all duration-300 ${
                     isActive
                       ? 'bg-gradient-to-br from-[#00CFFF] via-[#4169E1] to-[#9B5DE5] shadow-[0_0_20px_rgba(65,105,225,0.5)] text-white scale-110 font-bold'
                       : 'text-white/75 hover:text-white hover:bg-white/15'
@@ -135,7 +135,7 @@ export const IOSFloatingNav: React.FC<IOSFloatingNavProps> = ({
             <motion.button
               onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
               title="Notifications"
-              className={`relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full transition-all ${
+              className={`relative flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 rounded-full transition-all ${
                 isNotificationsOpen ? 'bg-[#9B5DE5]/20 border border-[#9B5DE5]/40' : 'hover:bg-white/10'
               }`}
               whileHover={{ scale: 1.05 }}
@@ -160,7 +160,7 @@ export const IOSFloatingNav: React.FC<IOSFloatingNavProps> = ({
           <button
             onClick={() => setIsSearchOpen(true)}
             title="Search students"
-            className="kx-pill-flow w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center text-white transition-all shrink-0 active:scale-95"
+            className="kx-pill-flow w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center text-white transition-all shrink-0 active:scale-95"
           >
             <Search className="w-4 h-4 text-[#00CFFF]" />
           </button>
@@ -170,7 +170,7 @@ export const IOSFloatingNav: React.FC<IOSFloatingNavProps> = ({
             <motion.button
               onClick={() => setIsCreatePostOpen(true)}
               title="Create Post"
-              className="relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full text-white overflow-hidden"
+              className="relative flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 rounded-full text-white overflow-hidden"
               style={{ background: 'linear-gradient(135deg, #00CFFF 0%, #4169E1 50%, #9B5DE5 100%)', boxShadow: '0 4px 14px rgba(65,105,225,0.4)' }}
               whileHover={{ scale: 1.1, filter: 'brightness(1.1)' }}
               whileTap={{ scale: 0.95 }}
@@ -190,7 +190,7 @@ export const IOSFloatingNav: React.FC<IOSFloatingNavProps> = ({
           <button
             onClick={() => onSelectTab('profile')}
             title={`Profile: ${currentUser?.name || 'Student'}`}
-            className={`kx-pill-flow relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 transition-all ${
+            className={`kx-pill-flow relative flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 transition-all ${
               activeTab === 'profile' ? 'active' : ''
             }`}
           >
@@ -309,4 +309,5 @@ export const IOSFloatingNav: React.FC<IOSFloatingNavProps> = ({
     </>
   );
 };
+
 
