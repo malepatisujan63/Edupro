@@ -99,20 +99,22 @@ export const App: React.FC = () => {
       
 
 
-      <IOSFloatingNav
-        activeTab={activeTab}
-        onSelectTab={(tab, profileId = null) => {
-          setActiveTab(tab);
-          if (tab === 'profile') setViewProfileId(profileId);
-        }}
-        onOpenAuth={() => setIsAuthOpen(true)}
-        onOpenDSAHUD={() => setIsDSAHUDOpen(true)}
-        onOpenTimer={() => setIsTimerOpen(true)}
-        currentUser={currentUser}
-        isNotificationsOpen={isNotificationsOpen}
-        setIsNotificationsOpen={currentUser ? setIsNotificationsOpen : undefined}
-        setIsCreatePostOpen={currentUser ? setIsCreatePostOpen : undefined}
-      />
+      {currentUser && (
+        <IOSFloatingNav
+          activeTab={activeTab}
+          onSelectTab={(tab, profileId = null) => {
+            setActiveTab(tab);
+            if (tab === 'profile') setViewProfileId(profileId);
+          }}
+          onOpenAuth={() => setIsAuthOpen(true)}
+          onOpenDSAHUD={() => setIsDSAHUDOpen(true)}
+          onOpenTimer={() => setIsTimerOpen(true)}
+          currentUser={currentUser}
+          isNotificationsOpen={isNotificationsOpen}
+          setIsNotificationsOpen={currentUser ? setIsNotificationsOpen : undefined}
+          setIsCreatePostOpen={currentUser ? setIsCreatePostOpen : undefined}
+        />
+      )}
 
       {/* GOATED LANDING PAGE — Full split-screen, auth form embedded inline on right */}
       {!currentUser ? (

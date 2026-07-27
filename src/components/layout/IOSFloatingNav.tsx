@@ -88,7 +88,7 @@ export const IOSFloatingNav: React.FC<IOSFloatingNavProps> = ({
             className="fixed top-3 left-4 sm:left-6 z-40 pointer-events-auto flex items-center"
           >
             <img
-              src="/koinexa-banner.png"
+              src="/koinexa-logo1.png"
               alt="Koinexa"
               className="h-10 sm:h-12 md:h-14 w-auto object-contain transition-transform hover:scale-105 drop-shadow-[0_4px_16px_rgba(0,0,0,0.85)]"
             />

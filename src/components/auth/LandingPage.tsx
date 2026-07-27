@@ -228,8 +228,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
     <div className="min-h-screen w-full bg-[#030305] text-white font-sans selection:bg-[#4169E1]/30 selection:text-white overflow-x-hidden relative">
       
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap');
-        .font-outfit { font-family: 'Outfit', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        .font-outfit { font-family: 'Space Grotesk', sans-serif; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .glass-auth-card {
           background: rgba(14, 14, 20, 0.45);
           backdrop-filter: blur(40px) saturate(200%);
@@ -294,14 +295,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className="fixed top-0 left-0 right-0 z-50 px-6 py-4 lg:px-12 lg:py-6 flex items-center justify-between bg-[#030305]/50 backdrop-blur-md border-b border-white/5"
+        className="fixed top-0 left-0 right-0 z-50 px-6 py-2 flex items-center justify-between bg-[#030305]/50 backdrop-blur-md border-b border-white/5"
       >
         {view === 'login' ? (
           <KoinexaLogo size="md" />
         ) : (
           <button onClick={() => go('login')} className="flex items-center gap-2 text-white/60 hover:text-white transition-colors group">
             <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-            <KoinexaLogo size="md" />
+            <span className="font-semibold text-sm">Back to Login</span>
           </button>
         )}
 
@@ -323,13 +324,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
           </div>
         )}
 
-        {/* Auth Nav for Register view */}
-        {view === 'register' && (
-          <div className="hidden md:flex items-center gap-4 text-sm">
-            <span className="text-white/40">Already have an account?</span>
-            <button onClick={() => go('login')} className="text-[#4169E1] font-semibold hover:text-white transition-colors">Log in</button>
-          </div>
-        )}
+
 
         {/* Mobile Hamburger */}
         <button className="md:hidden text-white/80" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
@@ -364,14 +359,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
               transition={{ duration: 1, type: "spring", bounce: 0.2 }}
               className="hidden lg:flex flex-col justify-center flex-1 max-w-xl mobile-bg-blur"
             >
-              <h1 className="text-[3.5rem] xl:text-[4.5rem] font-black leading-[1.05] tracking-tight mb-6 font-outfit">
-                Where students <br/>
-                connect, learn <br/>
-                and <span className="text-gradient-purple">grow together.</span>
-              </h1>
-              <p className="text-[1.1rem] text-white/60 mb-12 max-w-sm leading-relaxed font-medium">
-                Join a community built for learners, by learners. Share resources, solve DSA problems, and build your network.
-              </p>
+              <motion.h1 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="text-[3.5rem] xl:text-[4.5rem] font-black leading-[1.05] tracking-tight mb-6 font-outfit"
+              >
+                <span className="inline-block hover:scale-105 hover:text-[#4169E1] transition-all duration-300">Connect.</span>{' '}
+                <span className="inline-block hover:scale-105 hover:text-[#9B5DE5] transition-all duration-300">Learn.</span>{' '}
+                <span className="inline-block hover:scale-105 hover:text-[#00CFFF] transition-all duration-300">Build.</span>{' '}
+                <span className="text-gradient-purple inline-block hover:scale-110 transition-all duration-300">Thrive.</span>
+              </motion.h1>
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+                className="text-[1.1rem] text-white/60 mb-12 max-w-sm leading-relaxed font-medium"
+              >
+                Empowering students to grow beyond classrooms — share knowledge, solve problems, and shape your future.
+              </motion.p>
 
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
@@ -463,25 +469,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
                   </motion.button>
 
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
-                    <div className="flex items-center gap-3 py-2">
-                      <div className="flex-1 h-px bg-white/10" />
-                      <span className="text-[11px] text-white/30 font-medium uppercase tracking-wider">or continue with</span>
-                      <div className="flex-1 h-px bg-white/10" />
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-3">
-                      <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="social-btn py-3 rounded-xl flex items-center justify-center">
-                        <svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="#EA4335" d="M5.266 9.765A7.077 7.077 0 0112 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3C17.782 1.145 15.055 0 12 0 7.27 0 3.198 2.698 1.24 6.65l4.026 3.115z"/><path fill="#34A853" d="M16.04 18.013c-1.18.816-2.584 1.296-4.04 1.296-4.636 0-8.547-3.033-9.845-7.234L-2.187 15.4C-.103 19.508 4.319 22.313 12 22.313c2.973 0 5.67-.98 7.747-2.656l-3.707-1.644z"/><path fill="#4A90E2" d="M19.747 19.657C21.603 17.65 22.754 14.995 22.754 12c0-.853-.105-1.68-.28-2.48H12v4.8h6.143c-.287 1.488-1.077 2.766-2.176 3.693l3.78 1.644z"/><path fill="#FBBC05" d="M2.155 15.402A11.968 11.968 0 011.026 12c0-1.173.226-2.31.62-3.37L-2.38 5.515C-3.23 7.49-3.725 9.68-3.725 12s.495 4.51 1.345 6.485l4.535-3.083z"/></svg>
-                      </motion.button>
-                      <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="social-btn py-3 rounded-xl flex items-center justify-center">
-                        <svg className="w-5 h-5 text-white/80" viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.379.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.416 22 12c0-5.523-4.477-10-10-10z"/></svg>
-                      </motion.button>
-                      <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="social-btn py-3 rounded-xl flex items-center justify-center">
-                        <svg className="w-5 h-5" viewBox="0 0 23 23"><path fill="#f3f3f3" d="M0 0h11v11H0zM12 0h11v11H12zM0 12h11v11H0zM12 12h11v11H12z"/></svg>
-                      </motion.button>
-                    </div>
-
-                    <div className="text-center pt-2 md:hidden">
+                    <div className="text-center pt-6 md:hidden">
                       <p className="text-xs text-white/40">
                         Don't have an account? <button onClick={() => go('register')} className="text-[#9B5DE5] font-semibold hover:text-[#B57AFF] transition-colors">Sign up</button>
                       </p>
@@ -620,23 +608,23 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
         </div>
       </section>
 
-      {/* ── ABOUT SECTION ── */}
-      <section id="about" className="relative min-h-[60vh] flex items-center justify-center py-20 px-6 border-t border-white/5">
+      {view === 'login' && (
+        <>
+          {/* ── ABOUT SECTION ── */}
+          <section id="about" className="relative min-h-[60vh] flex items-center justify-center py-20 px-6 border-t border-white/5">
         <motion.div 
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
+          viewport={{ once: false, margin: "-100px" }}
           transition={{ duration: 0.8 }}
           className="max-w-4xl mx-auto text-center space-y-8 relative z-10"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#4169E1]/10 border border-[#4169E1]/20 text-[#4169E1] text-sm font-semibold mb-4">
             <Sparkles className="w-4 h-4" /> About Koinexa
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold font-outfit tracking-tight">Built by students, for students.</h2>
+          <h2 className="text-4xl md:text-5xl font-bold font-outfit tracking-tight">Where ambition meets community.</h2>
           <p className="text-lg md:text-xl text-white/60 leading-relaxed max-w-3xl mx-auto">
-            We noticed a gap in how students connect and learn. Traditional social media is too distracting, and purely academic platforms are too rigid. 
-            Koinexa bridges that gap by providing a sleek, modern ecosystem where you can share resources, build a network, and level up your DSA skills 
-            all in one beautiful platform.
+            We’re bridging the gap between learning and belonging. Koinexa is where students collaborate, exchange knowledge, and grow together — all in one inspiring space.
           </p>
         </motion.div>
       </section>
@@ -647,41 +635,45 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             className="text-center space-y-4"
           >
             <h2 className="text-4xl md:text-5xl font-bold font-outfit tracking-tight">Everything you need to succeed.</h2>
             <p className="text-lg text-white/50 max-w-2xl mx-auto">Experience a platform engineered for absolute peak productivity and networking.</p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="w-full max-w-4xl mx-auto flex flex-col gap-6">
             {[
-              { icon: <MessageCircle className="w-8 h-8 text-[#00CFFF]" />, title: "Real-time Messaging", desc: "Lightning fast WebSocket communication. $O(1)$ delivery with end-to-end type safety." },
-              { icon: <Code className="w-8 h-8 text-[#9B5DE5]" />, title: "DSA Intelligence HUD", desc: "Live visualization of our custom data structures running behind the scenes." },
-              { icon: <BookOpen className="w-8 h-8 text-[#4169E1]" />, title: "Resource Library", desc: "Upload, share, and organize academic materials with automatic categorization." },
-              { icon: <Users className="w-8 h-8 text-[#34C759]" />, title: "Subject Communities", desc: "Join dedicated spaces for specific topics, courses, or hobbies. Build your tribe." },
-              { icon: <Sparkles className="w-8 h-8 text-[#F5A623]" />, title: "Framer Motion UI", desc: "Every interaction is perfectly tuned with spring physics for a completely GOATED feel." },
-              { icon: <Rocket className="w-8 h-8 text-[#FF3B30]" />, title: "Performance First", desc: "Built on Vite and React with strictly typed interfaces ensuring zero runtime exceptions." }
+              { title: "Secure Accounts", desc: "Role-based authentication ensures privacy and safe interactions.", icon: <Lock className="w-7 h-7 text-[#4169E1]" /> },
+              { title: "Resource Library", desc: "Upload, organize, and retrieve study materials with intelligent categorization.", icon: <BookOpen className="w-7 h-7 text-[#9B5DE5]" /> },
+              { title: "Subject Communities", desc: "Join topic-based groups for discussions, Q&A, and collaboration.", icon: <Users className="w-7 h-7 text-[#00CFFF]" /> },
+              { title: "Real-Time Messaging", desc: "Lightning-fast communication powered by Supabase Realtime and WebSocket technology.", icon: <MessageCircle className="w-7 h-7 text-[#34C759]" /> },
+              { title: "AI Moderation", desc: "Smart filters and neural networks keep conversations relevant and respectful.", icon: <Sparkles className="w-7 h-7 text-[#F5A623]" /> },
+              { title: "DSA-Optimized Search", desc: "Graph-based algorithms deliver precise, context-aware results.", icon: <Code className="w-7 h-7 text-[#FF3B30]" /> }
             ].map((feat, i) => (
               <motion.div 
                 key={i}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                whileHover={{ y: -10, scale: 1.02 }}
-                className="p-8 rounded-3xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors group cursor-default"
+                initial={{ opacity: 0, y: 50, scale: 0.95 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: false, margin: "-50px" }}
+                transition={{ duration: 0.5, delay: i * 0.1, type: "spring", bounce: 0.4 }}
+                whileHover={{ scale: 1.02, y: -5, boxShadow: "0 20px 40px rgba(0,0,0,0.4)" }}
+                className="flex flex-col md:flex-row md:items-center gap-6 p-8 rounded-[32px] bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] hover:border-white/20 transition-all cursor-default shadow-xl backdrop-blur-md"
               >
-                <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <div className="w-16 h-16 rounded-[20px] bg-white/5 flex items-center justify-center shrink-0 shadow-inner border border-white/10">
                   {feat.icon}
                 </div>
-                <h3 className="text-xl font-bold mb-3">{feat.title}</h3>
-                <p className="text-sm text-white/50 leading-relaxed">{feat.desc}</p>
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-white mb-2 font-outfit tracking-wide">{feat.title}</h3>
+                  <p className="text-white/60 text-[15px] leading-relaxed">{feat.desc}</p>
+                </div>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
+      </>
+      )}
 
       {/* Footer Text (Login view desktop) */}
       <footer className="w-full py-8 text-center text-sm text-white/30 border-t border-white/5">

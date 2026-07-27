@@ -7,10 +7,10 @@ interface KoinexaLogoProps {
 
 export const KoinexaLogo: React.FC<KoinexaLogoProps> = ({ className = '', size = 'md' }) => {
   const sizes = {
-    sm: 'h-6',
-    md: 'h-8',
-    lg: 'h-10',
-    xl: 'h-14',
+    sm: 'h-14 md:h-16', // significantly scaled up
+    md: 'h-16 md:h-20',
+    lg: 'h-24 md:h-32',
+    xl: 'h-36 md:h-44',
   };
 
   return (
