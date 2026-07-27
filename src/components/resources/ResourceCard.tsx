@@ -10,7 +10,7 @@ interface ResourceCardProps {
   index: number;
 }
 
-export const ResourceCard: React.FC<ResourceCardProps> = ({ resource, handleInteraction, index }) => {
+export const ResourceCard: React.FC<ResourceCardProps> = ({ resource, handleInteraction }) => {
   const authorName = resource.authorName || 'Student Contributor';
   const authorCollege = resource.authorCollege || 'Koinexa Campus';
   const category = resource.category || 'General';

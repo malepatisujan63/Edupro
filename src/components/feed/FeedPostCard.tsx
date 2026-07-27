@@ -1,4 +1,4 @@
-import React from 'react';
+ï»¿import React from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring, useMotionTemplate } from 'framer-motion';
 import { Heart, MessageCircle, Share2, Bookmark, BookmarkCheck, FileText, Code, Zap, Play, UserPlus, ExternalLink } from 'lucide-react';
 import { type FirestorePost } from '../../lib/supabaseService';
@@ -167,7 +167,7 @@ export const FeedPostCard: React.FC<FeedPostCardProps> = ({
             <div className={styles.metaRow}>
               <p className={styles.metaText}>
                 <span className={styles.category}>#{post.category}</span>
-                <span>·</span>
+                <span>Â·</span>
                 <span>{getRelativeTime(post.createdAt)}</span>
               </p>
               <span className={styles.priorityBadge}>
@@ -229,7 +229,7 @@ export const FeedPostCard: React.FC<FeedPostCardProps> = ({
             <div className={styles.pdfIcon}><FileText className="w-5 h-5 text-[#00CFFF]" /></div>
             <div>
               <h4 className="text-xs font-bold text-white">PDF Note</h4>
-              <p className="text-[10px] text-[#4169E1] font-mono">Firebase Storage · Secure</p>
+              <p className="text-[10px] text-[#4169E1] font-mono">Firebase Storage Â· Secure</p>
             </div>
           </div>
           <a href={post.mediaUrl} target="_blank" rel="noopener noreferrer" className={styles.pdfLink}>
