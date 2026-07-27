@@ -46,7 +46,7 @@ export const DSALaboratory: React.FC = () => {
             <Cpu className="w-4 h-4 text-cyan-400 animate-spin" style={{ animationDuration: '6s' }} />
             <span>Interactive Computer Science Playground</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
+          <h1 className="text-2xl sm:text-3xl font-extrabold kx-text-glow">
             🧠 DSA & Compression Intelligence Laboratory
           </h1>
           <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">

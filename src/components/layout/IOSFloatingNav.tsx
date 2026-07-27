@@ -98,7 +98,7 @@ export const IOSFloatingNav: React.FC<IOSFloatingNavProps> = ({
 
       {/* Unified pill — bottom-center, hides on scroll-down */}
       {/* Outer div handles true centering; inner motion.div handles y scroll-slide only */}
-      <div className="fixed bottom-0 left-1/2 z-50 pointer-events-none" style={{ transform: 'translateX(-50%)' }}>
+      <div className="fixed bottom-1 left-1/2 z-50 pointer-events-none" style={{ transform: 'translateX(-50%)' }}>
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 80 }}

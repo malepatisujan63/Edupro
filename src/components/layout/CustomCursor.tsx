@@ -19,7 +19,6 @@ export const CustomCursor: React.FC = () => {
   return (
     <div ref={cursorRef} className={styles.cursorWrapper}>
       <div className={styles.cursorCore} />
-      <div className={styles.cursorGlow} />
     </div>
   );
 };

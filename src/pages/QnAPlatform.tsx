@@ -121,7 +121,7 @@ export const QnAPlatform: React.FC<{ currentUser?: any; account?: any }> = ({ cu
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full max-w-2xl mx-auto px-4 py-4 space-y-8 pb-36">
       <div className="flex items-center justify-between px-2">
-        <h1 className="text-xl sm:text-2xl font-extrabold text-white flex items-center gap-2">
+        <h1 className="text-xl sm:text-2xl font-extrabold kx-text-glow flex items-center gap-2">
           <HelpCircle className="w-6 h-6 text-[#00CFFF]" />
           <span>Doubts</span>
         </h1>

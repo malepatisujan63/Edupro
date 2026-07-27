@@ -21,9 +21,10 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({ resource, handleInte
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1, type: "spring", stiffness: 300, damping: 25 }}
+      initial={{ opacity: 0, y: 30, scale: 0.95 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.4, type: "spring", stiffness: 300, damping: 25 }}
       onMouseEnter={() => handleInteraction(category, 1)}
       onClick={() => handleInteraction(category, 3)}
       className="kx-resource-card"

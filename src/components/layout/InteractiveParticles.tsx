@@ -1,70 +1,66 @@
 import React, { useEffect, useRef } from 'react';
 
-// Koinexa gradient colors
-const COLORS = ['#00CFFF', '#4169E1', '#9B5DE5'];
+// Premium Koinexa Glow Colors
+const COLORS = ['#00CFFF', '#4169E1', '#9B5DE5', '#F91880', '#00F0FF'];
 
-class Particle {
+class NodeParticle {
   x: number;
   y: number;
   vx: number;
   vy: number;
   size: number;
   color: string;
-  life: number;
-  maxLife: number;
 
-  constructor(x: number, y: number, vx: number, vy: number) {
-    this.x = x;
-    this.y = y;
-    
-    // Spread velocity to create a "cone" effect
-    const spread = 1.5;
-    this.vx = vx + (Math.random() - 0.5) * spread;
-    this.vy = vy + (Math.random() - 0.5) * spread;
-    
-    this.size = Math.random() * 3 + 1.5;
+  constructor(width: number, height: number) {
+    this.x = Math.random() * width;
+    this.y = Math.random() * height;
+    this.vx = (Math.random() - 0.5) * 0.5;
+    this.vy = (Math.random() - 0.5) * 0.5;
+    this.size = Math.random() * 2 + 0.5;
     this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
-    
-    this.maxLife = Math.random() * 60 + 60; // 60-120 frames
-    this.life = this.maxLife;
   }
 
-  update() {
-    // Smooth curve math (slight constant force simulating anti-gravity/wind)
-    // Friction (slow down initial burst)
-    this.vx *= 0.92;
-    this.vy *= 0.92;
-    
-    // Anti-gravity (float up)
-    this.vy -= 0.03;
+  update(width: number, height: number, mouse: any) {
+    // Mouse Interaction: Subtle repel
+    if (mouse.isActive) {
+      const dx = mouse.x - this.x;
+      const dy = mouse.y - this.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      
+      if (dist < 120) {
+        const force = (120 - dist) / 120;
+        this.vx -= (dx / dist) * force * 0.02;
+        this.vy -= (dy / dist) * force * 0.02;
+      }
+    }
 
-    // Add some organic wave motion
-    this.x += Math.sin(this.life * 0.1) * 1.0;
-
+    // Apply velocity
     this.x += this.vx;
     this.y += this.vy;
-    this.life--;
+
+    // Bounce off edges gently
+    if (this.x < 0) { this.x = 0; this.vx *= -1; }
+    if (this.x > width) { this.x = width; this.vx *= -1; }
+    if (this.y < 0) { this.y = 0; this.vy *= -1; }
+    if (this.y > height) { this.y = height; this.vy *= -1; }
+    
+    // Friction to stabilize speed after mouse interaction
+    const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+    if (speed > 1) {
+      this.vx *= 0.95;
+      this.vy *= 0.95;
+    } else if (speed < 0.1) {
+      this.vx *= 1.05;
+      this.vy *= 1.05;
+    }
   }
 
   draw(ctx: CanvasRenderingContext2D) {
-    const progress = this.life / this.maxLife;
-    const currentSize = Math.max(0, this.size * progress);
-    if (currentSize <= 0) return;
-    const opacity = progress * 0.8; // Max opacity 0.8 for glow effect
-
     ctx.save();
-    ctx.globalAlpha = opacity;
+    ctx.globalAlpha = 0.8;
     ctx.fillStyle = this.color;
-    
-    // Add glow
-    ctx.globalAlpha = opacity * 0.2;
     ctx.beginPath();
-    ctx.arc(this.x, this.y, currentSize * 3, 0, Math.PI * 2);
-    ctx.fill();
-    
-    ctx.globalAlpha = opacity;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, currentSize, 0, Math.PI * 2);
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
   }
@@ -80,94 +76,109 @@ export const InteractiveParticles: React.FC = () => {
     if (!ctx) return;
 
     let animationFrameId: number;
-    let particles: Particle[] = [];
+    let particles: NodeParticle[] = [];
     
-    // Track mouse
-    let mouse = {
-      x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0,
-      y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0,
-      isActive: false,
-      lastX: 0,
-      lastY: 0,
-      vx: 0,
-      vy: 0
-    };
+    let mouse = { x: -1000, y: -1000, isActive: false };
 
     const handleResize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+      
+      // Calculate density for constellation network
+      const targetCount = Math.min(Math.floor((canvas.width * canvas.height) / 15000), 100);
+      
+      particles = [];
+      for (let i = 0; i < targetCount; i++) {
+        particles.push(new NodeParticle(canvas.width, canvas.height));
+      }
     };
 
     const handleMouseMove = (e: MouseEvent) => {
-      mouse.lastX = mouse.x;
-      mouse.lastY = mouse.y;
       mouse.x = e.clientX;
       mouse.y = e.clientY;
-      mouse.isActive = true;
-      
-      // Calculate mouse velocity for emission direction
-      mouse.vx = mouse.x - mouse.lastX;
-      mouse.vy = mouse.y - mouse.lastY;
+      const target = e.target as HTMLElement;
+      const isUI = target.closest('.kx-feed-card, .kx-resource-card, .kx-dsa-hud, .card, nav, header, button, a, input, textarea, .modal, .glass-panel');
+      mouse.isActive = !isUI;
     };
 
     const handleMouseLeave = () => {
       mouse.isActive = false;
+      mouse.x = -1000;
+      mouse.y = -1000;
     };
 
-    // Initialize
     handleResize();
     window.addEventListener('resize', handleResize);
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseleave', handleMouseLeave);
 
-    // Animation Loop
     const render = () => {
-      // Clear with slight trailing effect (optional, full clear is cleaner for these particles)
+      // Clear canvas each frame for clean animation
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw dark background directly on canvas to ensure smooth transitions
+      ctx.fillStyle = '#030305';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      ctx.globalCompositeOperation = 'screen';
 
-      // Emit particles if mouse is moving
-      if (mouse.isActive && (Math.abs(mouse.vx) > 1 || Math.abs(mouse.vy) > 1)) {
-        // Base emission opposite to mouse movement (cone shape backwards)
-        // Normalize velocity
-        const speed = Math.sqrt(mouse.vx * mouse.vx + mouse.vy * mouse.vy);
-        const dirX = speed > 0 ? (mouse.vx / speed) : 0;
-        const dirY = speed > 0 ? (mouse.vy / speed) : 0;
-        
-        // Emit multiple particles per frame
-        for (let i = 0; i < 3; i++) {
-          particles.push(new Particle(
-            mouse.x, 
-            mouse.y, 
-            -dirX * (Math.random() * 2 + 1), // burst backwards
-            -dirY * (Math.random() * 2 + 1)
-          ));
-        }
-      } else if (mouse.isActive) {
-        // Emit gently drifting particles if mouse is still but active (hovering)
-        for (let i = 0; i < 1; i++) {
-          particles.push(new Particle(
-            mouse.x, 
-            mouse.y, 
-            (Math.random() - 0.5) * 0.5,
-            (Math.random() - 0.5) * 0.5 - 1 // drift up slightly
-          ));
+      // Draw connections
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 150) {
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(155, 93, 229, ${0.2 * (1 - dist / 150)})`;
+            ctx.lineWidth = 1;
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
         }
       }
 
-      // Update and draw
-      for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.update();
+      // Draw connection to mouse
+      if (mouse.isActive) {
+        for (let i = 0; i < particles.length; i++) {
+          const dx = particles[i].x - mouse.x;
+          const dy = particles[i].y - mouse.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 200) {
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(0, 207, 255, ${0.3 * (1 - dist / 200)})`;
+            ctx.lineWidth = 1;
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(mouse.x, mouse.y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Update and draw particles
+      particles.forEach(p => {
+        p.update(canvas.width, canvas.height, mouse);
         p.draw(ctx);
-        if (p.life <= 0) {
-          particles.splice(i, 1);
-        }
+      });
+
+      // Draw subtle ambient glow under the mouse
+      if (mouse.isActive) {
+        const coreGrad = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 250);
+        coreGrad.addColorStop(0, 'rgba(0, 207, 255, 0.08)');
+        coreGrad.addColorStop(0.5, 'rgba(155, 93, 229, 0.03)');
+        coreGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = 1;
+        ctx.beginPath();
+        ctx.arc(mouse.x, mouse.y, 250, 0, Math.PI * 2);
+        ctx.fillStyle = coreGrad;
+        ctx.fill();
       }
-
-      // Decay mouse velocity so it doesn't emit indefinitely if mouse stops firing events
-      mouse.vx *= 0.9;
-      mouse.vy *= 0.9;
-
+      
       animationFrameId = requestAnimationFrame(render);
     };
 
@@ -182,20 +193,10 @@ export const InteractiveParticles: React.FC = () => {
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100vw',
-        height: '100vh',
-        pointerEvents: 'none',
-        zIndex: 1 // Above deep space background, below UI
-      }}
+    <canvas 
+      ref={canvasRef} 
+      className="absolute inset-0 pointer-events-none z-0" 
+      style={{ opacity: 1 }}
     />
   );
 };
-
-
-

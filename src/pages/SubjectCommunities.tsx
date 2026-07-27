@@ -57,7 +57,7 @@ export const SubjectCommunities: React.FC<{ currentUser?: any; account?: any; on
       {/* Subject Communities Head & Search Bar */}
       <div className="space-y-4">
         <div className="flex items-center justify-between px-2">
-          <h1 className="text-xl sm:text-2xl font-extrabold text-white flex items-center gap-2">
+          <h1 className="text-xl sm:text-2xl font-extrabold kx-text-glow flex items-center gap-2">
             <Users className="w-6 h-6 text-[#00CFFF]" />
             <span>Subject Communities</span>
           </h1>

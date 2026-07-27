@@ -13,7 +13,7 @@ export const CampusFeed: React.FC = () => {
             <Megaphone className="w-4 h-4 text-indigo-400" />
             <span>Campus Feed & Placement Opportunities</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
+          <h1 className="text-2xl sm:text-3xl font-extrabold kx-text-glow">
             Hackathons, Workshops & Career Drive
           </h1>
           <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">

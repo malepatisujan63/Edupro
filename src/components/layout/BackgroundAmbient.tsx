@@ -11,6 +11,8 @@ export const BackgroundAmbient: React.FC = () => {
       
       {/* Noise Texture for premium feel */}
       <div className={styles.noise} />
+
+      
       
       {/* Interactive Anti-Gravity Particles */}
       <InteractiveParticles />
@@ -47,4 +49,6 @@ export const BackgroundAmbient: React.FC = () => {
     </div>
   );
 };
+
+
 

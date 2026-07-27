@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring, useMotionTemplate } from 'framer-motion';
 import { Heart, MessageCircle, Share2, Bookmark, BookmarkCheck, FileText, Code, Zap, Play, UserPlus, ExternalLink } from 'lucide-react';
 import { type FirestorePost } from '../../lib/supabaseService';
 import styles from './FeedPostCard.module.css';
@@ -38,7 +38,30 @@ const getRelativeTime = (createdAt: any): string => {
   return `${Math.floor(hrs / 24)}d`;
 };
 
-// ── Lazy image with fade-in
+// ?? Lazy image with fade-in
+const HeartParticleBurst = () => {
+  return (
+    <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+      {[...Array(6)].map((_, i) => (
+        <motion.div
+          key={i}
+          initial={{ opacity: 1, scale: 0, x: 0, y: 0 }}
+          animate={{
+            opacity: 0,
+            scale: Math.random() * 0.5 + 0.5,
+            x: (Math.random() - 0.5) * 60,
+            y: (Math.random() - 0.5) * 60 - 20
+          }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="absolute"
+        >
+          <Heart className="w-3 h-3 text-[#F91880] fill-[#F91880]" />
+        </motion.div>
+      ))}
+    </div>
+  );
+};
+
 const LazyImage: React.FC<{ src: string; alt: string; className?: string }> = ({ src, alt, className }) => {
   const [loaded, setLoaded] = React.useState(false);
   const [error, setError] = React.useState(false);
@@ -65,17 +88,68 @@ export const FeedPostCard: React.FC<FeedPostCardProps> = ({
 }) => {
   const badge = typeBadge[post.type] || typeBadge.post;
 
+  // 3D Tilt Logic
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const mouseXSpring = useSpring(x, { stiffness: 300, damping: 30 });
+  const mouseYSpring = useSpring(y, { stiffness: 300, damping: 30 });
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["7.5deg", "-7.5deg"]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-7.5deg", "7.5deg"]);
+
+  const xPct = useTransform(x, v => (v + 0.5) * 100);
+  const yPct = useTransform(y, v => (v + 0.5) * 100);
+  const glareBackground = useMotionTemplate`radial-gradient(circle at ${xPct}% ${yPct}%, rgba(255,255,255,0.08) 0%, transparent 60%)`;
+
+  const [showMicroBurst, setShowMicroBurst] = React.useState(false);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    const posX = mouseX / width - 0.5;
+    const posY = mouseY / height - 0.5;
+    x.set(posX);
+    y.set(posY);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  const handleLikeClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isLiked) {
+      setShowMicroBurst(true);
+      setTimeout(() => setShowMicroBurst(false), 1000);
+    }
+    handleLikeToggle(post);
+  };
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 30, scale: 0.95 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ type: "spring", stiffness: 300, damping: 25 }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
       onMouseEnter={() => recordDwell(post.category, 1)}
       onClick={() => recordDwell(post.category, 2)}
-      className="kx-feed-card"
+      style={{
+        rotateX,
+        rotateY,
+        transformStyle: "preserve-3d",
+        perspective: "1000px"
+      }}
+      className="kx-feed-card relative group"
     >
-      {/* Header */}
+      <motion.div
+        className="pointer-events-none absolute inset-0 z-50 rounded-[20px] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        style={{ background: glareBackground }}
+      />
       <div className={styles.header}>
         <div className={styles.authorInfo}>
           <div className={styles.avatarWrapper}>
@@ -93,11 +167,11 @@ export const FeedPostCard: React.FC<FeedPostCardProps> = ({
             <div className={styles.metaRow}>
               <p className={styles.metaText}>
                 <span className={styles.category}>#{post.category}</span>
-                <span>·</span>
+                <span>�</span>
                 <span>{getRelativeTime(post.createdAt)}</span>
               </p>
               <span className={styles.priorityBadge}>
-                ⚡ Priority: {totalPriorityScore} {dwellPts > 0 && `(+${dwellPts} Dwell)`}
+                ? Priority: {totalPriorityScore} {dwellPts > 0 && `(+${dwellPts} Dwell)`}
               </span>
             </div>
           </div>
@@ -115,10 +189,8 @@ export const FeedPostCard: React.FC<FeedPostCardProps> = ({
         </div>
       </div>
 
-      {/* Content */}
       <p className={styles.content}>{post.title}</p>
 
-      {/* Media */}
       {post.mediaUrl && post.mediaType === 'image' && (
         <div className={styles.mediaContainer} onDoubleClick={(e) => { e.preventDefault(); if (!isLiked) handleLikeToggle(post); }}>
           <AnimatePresence>
@@ -157,7 +229,7 @@ export const FeedPostCard: React.FC<FeedPostCardProps> = ({
             <div className={styles.pdfIcon}><FileText className="w-5 h-5 text-[#00CFFF]" /></div>
             <div>
               <h4 className="text-xs font-bold text-white">PDF Note</h4>
-              <p className="text-[10px] text-[#4169E1] font-mono">Firebase Storage · Secure</p>
+              <p className="text-[10px] text-[#4169E1] font-mono">Firebase Storage � Secure</p>
             </div>
           </div>
           <a href={post.mediaUrl} target="_blank" rel="noopener noreferrer" className={styles.pdfLink}>
@@ -166,17 +238,17 @@ export const FeedPostCard: React.FC<FeedPostCardProps> = ({
         </div>
       )}
 
-      {/* Actions */}
       <div className={styles.footer}>
         <div className={styles.actionGroup}>
           <motion.button
             whileTap={{ scale: 0.8 }}
-            onClick={(e) => { e.stopPropagation(); handleLikeToggle(post); }}
+            onClick={handleLikeClick}
             disabled={isLiking}
-            className={`${styles.actionBtn} ${isLiked ? styles.liked : ''} ${isLiking ? styles.disabled : ''}`}
+            className={`${styles.actionBtn} ${isLiked ? styles.liked : ''} ${isLiking ? styles.disabled : ''} relative`}
           >
             <Heart className={`w-6 h-6 ${isLiked ? 'fill-current' : ''}`} />
             <span>{post.upvotes}</span>
+            {showMicroBurst && <HeartParticleBurst />}
           </motion.button>
 
           <motion.button

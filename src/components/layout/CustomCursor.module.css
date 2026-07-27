@@ -44,3 +44,28 @@
 :global(input), :global(textarea) {
   cursor: text !important;
 }
+
+
+.ambientFlowGlow {
+  position: absolute;
+  top: -100px;
+  left: -100px;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00CFFF, #4169E1, #9B5DE5, #00CFFF);
+  background-size: 300% 300%;
+  animation: flowGlow 6s linear infinite;
+  filter: blur(40px);
+  opacity: 0.25;
+  z-index: -1;
+  transition: opacity 0.3s ease;
+}
+
+@keyframes flowGlow {
+  0% { background-position: 0% 50%; transform: scale(1) rotate(0deg); }
+  50% { background-position: 100% 50%; transform: scale(1.1) rotate(180deg); }
+  100% { background-position: 0% 50%; transform: scale(1) rotate(360deg); }
+}
+
+
