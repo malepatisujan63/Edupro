@@ -21,3 +21,7 @@ services:
         value: koinexa63@gmail.com
       - key: FROM_NAME
         value: KOINEXA
+      - key: BREVO_API_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
