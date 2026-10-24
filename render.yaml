@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: koinexa
+    runtime: docker
+    plan: free
+    region: oregon
+    envVars:
+      - key: PORT
+        value: 5001
+      - key: FLASK_DEBUG
+        value: 0

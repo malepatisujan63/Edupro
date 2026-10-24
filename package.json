@@ -1,0 +1,12 @@
+{
+  "name": "edupro-koinexa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Koinexa — Educational Intelligence Platform",
+  "scripts": {
+    "install:all": "npm --prefix frontend install && pip install -r backend/requirements.txt",
+    "postinstall": "npm --prefix frontend install",
+    "build": "npm --prefix frontend run build",
+    "start": "python3 backend/app.py"
+  }
+}
