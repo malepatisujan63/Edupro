@@ -16,6 +16,12 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from pathlib import Path
 
+import json
+import re
+import urllib.request
+import urllib.error
+from email.utils import formatdate, make_msgid
+
 # Safe import of database connection
 try:
     from backend.database import get_db_connection
@@ -64,15 +70,121 @@ def get_smtp_config():
     return config
 
 
+def _dispatch_https_api(to_email: str, subject: str, body_html: str, from_name: str, from_email: str) -> bool:
+    """
+    Delivers email over outbound HTTPS (Port 443), which is never blocked by cloud providers (such as Render free tier).
+    Supports Brevo (Sendinblue), Resend, and generic HTTP Webhooks.
+    """
+    # 1. Resend API
+    resend_key = os.environ.get("RESEND_API_KEY")
+    if resend_key:
+        try:
+            req_data = json.dumps({
+                "from": f"{from_name} <{from_email}>",
+                "to": [to_email],
+                "subject": subject,
+                "html": body_html
+            }).encode("utf-8")
+            req = urllib.request.Request(
+                "https://api.resend.com/emails",
+                data=req_data,
+                headers={
+                    "Authorization": f"Bearer {resend_key}",
+                    "Content-Type": "application/json",
+                    "User-Agent": "KOINEXA-Mailer/2.0"
+                },
+                method="POST"
+            )
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                if resp.status in (200, 201, 202):
+                    print(f"[EmailService] HTTPS delivery via Resend API succeeded for {to_email}")
+                    return True
+        except Exception as e:
+            print(f"[EmailService] Resend API delivery attempt error: {e}")
+
+    # 2. Brevo (Sendinblue) API
+    brevo_key = os.environ.get("BREVO_API_KEY") or os.environ.get("SENDINBLUE_API_KEY")
+    if brevo_key:
+        try:
+            req_data = json.dumps({
+                "sender": {"name": from_name, "email": from_email},
+                "to": [{"email": to_email}],
+                "subject": subject,
+                "htmlContent": body_html
+            }).encode("utf-8")
+            req = urllib.request.Request(
+                "https://api.brevo.com/v3/smtp/email",
+                data=req_data,
+                headers={
+                    "api-key": brevo_key,
+                    "Content-Type": "application/json",
+                    "User-Agent": "KOINEXA-Mailer/2.0"
+                },
+                method="POST"
+            )
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                if resp.status in (200, 201, 202):
+                    print(f"[EmailService] HTTPS delivery via Brevo API succeeded for {to_email}")
+                    return True
+        except Exception as e:
+            print(f"[EmailService] Brevo API delivery attempt error: {e}")
+
+    # 3. Generic Webhook Relay (e.g. Zapier / Make / custom mail relay)
+    webhook_url = os.environ.get("EMAIL_WEBHOOK_URL")
+    if webhook_url:
+        try:
+            req_data = json.dumps({
+                "to": to_email,
+                "from_name": from_name,
+                "from_email": from_email,
+                "subject": subject,
+                "html": body_html
+            }).encode("utf-8")
+            req = urllib.request.Request(
+                webhook_url,
+                data=req_data,
+                headers={
+                    "Content-Type": "application/json",
+                    "User-Agent": "KOINEXA-Mailer/2.0"
+                },
+                method="POST"
+            )
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                if resp.status in (200, 201, 202):
+                    print(f"[EmailService] HTTPS delivery via Webhook succeeded for {to_email}")
+                    return True
+        except Exception as e:
+            print(f"[EmailService] Webhook delivery attempt error: {e}")
+
+    return False
+
+
 def _dispatch_smtp_sync(to_email: str, subject: str, body_html: str, from_name: str, from_email: str, smtp_host: str, smtp_port: int, smtp_user: str, smtp_pass: str) -> bool:
-    """Synchronous network worker executing real SMTP delivery across port 587 and port 465."""
+    """Synchronous network worker executing RFC-compliant email delivery across HTTPS APIs and dual-port SMTP."""
+    # First, if any HTTPS API is configured, try it (it bypasses cloud port blocks like Render free tier)
+    if _dispatch_https_api(to_email, subject, body_html, from_name, from_email):
+        return True
+
     try:
+        # Generate clean plain text fallback for anti-spam filters
+        plain_text = re.sub(r'<[^>]+>', ' ', body_html)
+        plain_text = re.sub(r'\s+', ' ', plain_text).strip()
+
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
         msg["From"] = f"{from_name} <{from_email}>"
         msg["To"] = to_email
-        part = MIMEText(body_html, "html")
-        msg.attach(part)
+        msg["Date"] = formatdate(localtime=True)
+        msg["Message-ID"] = make_msgid(domain="koinexa.com")
+        msg["Reply-To"] = from_email
+        msg["X-Priority"] = "1"
+        msg["X-MSMail-Priority"] = "High"
+        msg["Importance"] = "High"
+        msg["MIME-Version"] = "1.0"
+
+        # RFC 2046 standard: plain text part first, HTML part second
+        msg.attach(MIMEText(plain_text, "plain", "utf-8"))
+        msg.attach(MIMEText(body_html, "html", "utf-8"))
         msg_str = msg.as_string()
 
         # Try designated port first, then fallback to alternate port (587 STARTTLS <-> 465 SSL)

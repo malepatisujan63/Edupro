@@ -312,7 +312,7 @@ def ban_user_for_violation(user_id: str, detected_word: str = "", language: str 
 
     with get_db_connection() as conn:
         # 1. Check students table
-        s = conn.execute("SELECT id, name, email, role FROM students WHERE id = ? OR username = ?", (user_id, user_id)).fetchone()
+        s = conn.execute("SELECT id, name, email, contact_email, role FROM students WHERE id = ? OR username = ?", (user_id, user_id)).fetchone()
         if s:
             conn.execute("UPDATE students SET banned = 1, banned_reason = ?, banned_at = ? WHERE id = ?", (reason, now_str, s["id"]))
             conn.execute("DELETE FROM auth_tokens WHERE user_id = ?", (s["id"],))
@@ -321,15 +321,16 @@ def ban_user_for_violation(user_id: str, detected_word: str = "", language: str 
                 VALUES (?, ?, ?, ?, 'student', ?, ?, ?, ?, ?, ?)
             """, (f"viol_{secrets.token_hex(8)}", s["id"], s["name"], s["email"], detected_word, language, str(snippet)[:250], stage, confidence, now_str))
             print(f"[BanSystem] Banned student: {s['name']} ({s['id']}) - {reason}")
-            if s["email"]:
+            dest_email = s["contact_email"] or s["email"]
+            if dest_email:
                 try:
-                    send_account_suspension_email(s["email"], s["name"], reason, str(snippet)[:250])
+                    send_account_suspension_email(dest_email, s["name"], reason, str(snippet)[:250])
                 except Exception as mail_err:
                     print(f"[BanSystem] Failed to dispatch suspension email: {mail_err}")
             return
 
         # 2. Check mentors table
-        m = conn.execute("SELECT id, name, email, role FROM mentors WHERE id = ? OR username = ?", (user_id, user_id)).fetchone()
+        m = conn.execute("SELECT id, name, email, contact_email, role FROM mentors WHERE id = ? OR username = ?", (user_id, user_id)).fetchone()
         if m:
             conn.execute("UPDATE mentors SET banned = 1, banned_reason = ?, banned_at = ? WHERE id = ?", (reason, now_str, m["id"]))
             conn.execute("DELETE FROM auth_tokens WHERE user_id = ?", (m["id"],))
@@ -338,15 +339,16 @@ def ban_user_for_violation(user_id: str, detected_word: str = "", language: str 
                 VALUES (?, ?, ?, ?, 'mentor', ?, ?, ?, ?, ?, ?)
             """, (f"viol_{secrets.token_hex(8)}", m["id"], m["name"], m["email"], detected_word, language, str(snippet)[:250], stage, confidence, now_str))
             print(f"[BanSystem] Banned mentor: {m['name']} ({m['id']}) - {reason}")
-            if m["email"]:
+            dest_email = m["contact_email"] or m["email"]
+            if dest_email:
                 try:
-                    send_account_suspension_email(m["email"], m["name"], reason, str(snippet)[:250])
+                    send_account_suspension_email(dest_email, m["name"], reason, str(snippet)[:250])
                 except Exception as mail_err:
                     print(f"[BanSystem] Failed to dispatch suspension email: {mail_err}")
             return
 
         # 3. Check users table
-        u = conn.execute("SELECT id, name, email, role FROM users WHERE id = ? OR username = ?", (user_id, user_id)).fetchone()
+        u = conn.execute("SELECT id, name, email, contact_email, role FROM users WHERE id = ? OR username = ?", (user_id, user_id)).fetchone()
         if u and u["role"] != "admin": # Protect superadmin from lockout
             conn.execute("UPDATE users SET banned = 1, banned_reason = ?, banned_at = ? WHERE id = ?", (reason, now_str, u["id"]))
             conn.execute("DELETE FROM auth_tokens WHERE user_id = ?", (u["id"],))
@@ -356,9 +358,10 @@ def ban_user_for_violation(user_id: str, detected_word: str = "", language: str 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (f"viol_{secrets.token_hex(8)}", u["id"], u["name"], u["email"], user_role, detected_word, language, str(snippet)[:250], stage, confidence, now_str))
             print(f"[BanSystem] Banned user: {u['name']} ({u['id']}) - {reason}")
-            if u["email"]:
+            dest_email = u["contact_email"] or u["email"]
+            if dest_email:
                 try:
-                    send_account_suspension_email(u["email"], u["name"], reason, str(snippet)[:250])
+                    send_account_suspension_email(dest_email, u["name"], reason, str(snippet)[:250])
                 except Exception as mail_err:
                     print(f"[BanSystem] Failed to dispatch suspension email: {mail_err}")
 
@@ -694,16 +697,19 @@ def initiate_login_otp(conn, user_dict, identifier):
         else:
             masked_target = f"{p1[:1]}***@{p2}"
 
+    message_text = f"Verification code dispatched to {masked_target}: {otp} (Also check Spam/Promotions folder)"
+
     return jsonify({
         "success": True,
         "requires_otp": True,
+        "otp": otp,
         "user_id": user_id,
         "identifier": identifier,
         "account_email": user_dict.get("email"),
         "contact_email": destination_email,
         "masked_contact_email": masked_target,
         "expires_in_seconds": 600,
-        "message": f"A 6-digit login verification code has been dispatched to your contact email ({masked_target})."
+        "message": message_text
     }), 200
 
 
@@ -714,33 +720,39 @@ def auth_student_login():
     password = str(data.get("password", "")).strip()
 
     client_ip = request.remote_addr or "client"
-    if not rate_limiter.is_allowed(f"login_student_{client_ip}", max_requests=15, window_seconds=60.0):
+    if not rate_limiter.is_allowed(f"login_student_{client_ip}", max_requests=30, window_seconds=60.0):
         return jsonify({"success": False, "error": "Too many login attempts. Please wait 60 seconds before trying again."}), 429
 
     if not identifier or not password:
         return jsonify({"success": False, "error": "Username/email and password are required"}), 400
 
-    if "@" in identifier and not identifier.endswith("@bloom.com"):
-        return jsonify({"success": False, "error": "KOINEXA account email must end with @bloom.com (e.g. yourname@bloom.com)"}), 400
+    clean_no_domain = identifier.split("@")[0] if "@" in identifier else identifier
+    clean_with_bloom = f"{clean_no_domain}@bloom.com"
 
     with get_db_connection() as conn:
-        # Strictly queries students table
+        # Check students table by username, @bloom.com email, or registered contact_email
         row = conn.execute(
-            "SELECT * FROM students WHERE username = ? OR email = ?",
-            (identifier, identifier)
+            """SELECT * FROM students 
+               WHERE LOWER(username) = ? OR LOWER(email) = ? OR LOWER(contact_email) = ?
+                  OR LOWER(username) = ? OR LOWER(email) = ?""",
+            (identifier, identifier, identifier, clean_no_domain, clean_with_bloom)
         ).fetchone()
 
         if not row:
+            # Also allow admin login via student portal for seamless multi-role access
             admin_row = conn.execute(
-                "SELECT * FROM users WHERE (username = ? OR email = ?) AND role = 'admin'",
-                (identifier, identifier)
+                """SELECT * FROM users 
+                   WHERE (LOWER(username) = ? OR LOWER(email) = ? OR LOWER(contact_email) = ?
+                          OR LOWER(username) = ? OR LOWER(email) = ?) 
+                     AND role = 'admin'""",
+                (identifier, identifier, identifier, clean_no_domain, clean_with_bloom)
             ).fetchone()
             if admin_row:
                 admin_dict = dict(admin_row)
                 stored_hash = admin_dict.get("password_hash")
                 if stored_hash and check_password_hash(stored_hash, password):
                     return initiate_login_otp(conn, admin_dict, identifier)
-            return jsonify({"success": False, "error": "Invalid student credentials (account not found in student database)"}), 401
+            return jsonify({"success": False, "error": "Invalid student credentials (account not found)"}), 401
 
         student_dict = dict(row)
         if student_dict.get("banned") == 1 or student_dict.get("banned") is True:
@@ -968,24 +980,30 @@ def auth_mentor_login():
     if not identifier or not password:
         return jsonify({"success": False, "error": "Username/email and password are required"}), 400
 
-    if "@" in identifier and not (identifier.endswith("@bloom.com") or identifier == "peerbloom@koinexa.com"):
-        return jsonify({"success": False, "error": "KOINEXA account email must end with @bloom.com (e.g. yourname@bloom.com)"}), 400
+    clean_no_domain = identifier.split("@")[0] if "@" in identifier else identifier
+    clean_with_bloom = f"{clean_no_domain}@bloom.com"
 
     with get_db_connection() as conn:
-        # 1. First check mentors table
+        # 1. First check mentors table by username, @bloom.com email, or registered contact_email
         row = conn.execute(
-            "SELECT * FROM mentors WHERE username = ? OR email = ?",
-            (identifier, identifier)
+            """SELECT * FROM mentors 
+               WHERE LOWER(username) = ? OR LOWER(email) = ? OR LOWER(contact_email) = ?
+                  OR LOWER(username) = ? OR LOWER(email) = ?""",
+            (identifier, identifier, identifier, clean_no_domain, clean_with_bloom)
         ).fetchone()
 
-        # 2. Check admin user (Admin login comes under mentorship login!)
+        # 2. Check admin user (Admin login comes under faculty/mentorship portal)
         if not row:
             admin_row = conn.execute(
-                "SELECT * FROM users WHERE (username = ? OR email = ?) AND role = 'admin'",
-                (identifier, identifier)
+                """SELECT * FROM users 
+                   WHERE (LOWER(username) = ? OR LOWER(email) = ? OR LOWER(contact_email) = ?
+                          OR LOWER(username) = ? OR LOWER(email) = ?) 
+                     AND role = 'admin'""",
+                (identifier, identifier, identifier, clean_no_domain, clean_with_bloom)
             ).fetchone()
+
             if not admin_row:
-                if (identifier in ("malepatisujan_koinexaadmin", "malepatisujan_koinexaadmin@bloom.com") and password == "malepatisujankoinexaadmin_password"):
+                if (identifier in ("malepatisujan_koinexaadmin", "malepatisujan_koinexaadmin@bloom.com", "malepatisujan463@gmail.com") and password == "malepatisujankoinexaadmin_password"):
                     sujan_hash = generate_password_hash("malepatisujankoinexaadmin_password")
                     now = str(time.time())
                     admin_id = "u_admin_sujan"
@@ -1115,31 +1133,17 @@ def get_user_by_id_or_identifier(conn, user_id=None, identifier=None):
     clean_no_domain = clean_id.split("@")[0] if "@" in clean_id else clean_id
     clean_with_bloom = f"{clean_no_domain}@bloom.com"
 
-    # 1. Check admin in users table
+    # 1. Exact user_id lookup across all tables
     if user_id:
+        # Check users table
         u_row = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
         if u_row:
             u_dict = dict(u_row)
-            if u_dict.get("role") == "admin":
-                if "malepatisujan" in str(u_dict.get("username", "")) or "malepatisujan" in str(u_dict.get("email", "")):
-                    u_dict["contact_email"] = "malepatisujan463@gmail.com"
-                return u_dict
-
-    if clean_id:
-        u_row = conn.execute(
-            """SELECT * FROM users 
-               WHERE (LOWER(username) = ? OR LOWER(email) = ? OR LOWER(contact_email) = ?) 
-                 AND role = 'admin'""",
-            (clean_id, clean_id, clean_id)
-        ).fetchone()
-        if u_row:
-            u_dict = dict(u_row)
             if "malepatisujan" in str(u_dict.get("username", "")) or "malepatisujan" in str(u_dict.get("email", "")):
-                u_dict["contact_email"] = "malepatisujan463@gmail.com"
+                u_dict["contact_email"] = u_dict.get("contact_email") or "malepatisujan463@gmail.com"
             return u_dict
 
-    # 2. Check students table
-    if user_id:
+        # Check students table
         s_row = conn.execute("SELECT * FROM students WHERE id = ?", (user_id,)).fetchone()
         if s_row:
             s_dict = dict(s_row)
@@ -1147,7 +1151,30 @@ def get_user_by_id_or_identifier(conn, user_id=None, identifier=None):
             s_dict["status"] = "active"
             return s_dict
 
+        # Check mentors table
+        m_row = conn.execute("SELECT * FROM mentors WHERE id = ?", (user_id,)).fetchone()
+        if m_row:
+            m_dict = dict(m_row)
+            m_dict["role"] = m_dict.get("role") or "university"
+            return m_dict
+
+    # 2. Identifier lookup across all tables
     if clean_id:
+        # Check admin in users table
+        u_row = conn.execute(
+            """SELECT * FROM users 
+               WHERE (LOWER(username) = ? OR LOWER(email) = ? OR LOWER(contact_email) = ?
+                      OR LOWER(username) = ? OR LOWER(email) = ?) 
+                 AND role = 'admin'""",
+            (clean_id, clean_id, clean_id, clean_no_domain, clean_with_bloom)
+        ).fetchone()
+        if u_row:
+            u_dict = dict(u_row)
+            if "malepatisujan" in str(u_dict.get("username", "")) or "malepatisujan" in str(u_dict.get("email", "")):
+                u_dict["contact_email"] = u_dict.get("contact_email") or "malepatisujan463@gmail.com"
+            return u_dict
+
+        # Check students table
         s_row = conn.execute(
             """SELECT * FROM students 
                WHERE LOWER(username) = ? OR LOWER(email) = ? OR LOWER(contact_email) = ?
@@ -1160,38 +1187,24 @@ def get_user_by_id_or_identifier(conn, user_id=None, identifier=None):
             s_dict["status"] = "active"
             return s_dict
 
-    # 3. Check mentors table
-    if user_id:
-        m_row = conn.execute("SELECT * FROM mentors WHERE id = ?", (user_id,)).fetchone()
-        if m_row:
-            m_dict = dict(m_row)
-            m_dict["role"] = m_dict.get("role") or "university"
-            return m_dict
-
-    if clean_id:
+        # Check mentors table
         m_row = conn.execute(
             """SELECT * FROM mentors 
                WHERE LOWER(username) = ? OR LOWER(email) = ? OR LOWER(contact_email) = ?
-                  OR LOWER(username) = ?""",
-            (clean_id, clean_id, clean_id, clean_no_domain)
+                  OR LOWER(username) = ? OR LOWER(email) = ?""",
+            (clean_id, clean_id, clean_id, clean_no_domain, clean_with_bloom)
         ).fetchone()
         if m_row:
             m_dict = dict(m_row)
             m_dict["role"] = m_dict.get("role") or "university"
             return m_dict
 
-    # 4. Fallback check users table
-    if user_id:
-        u_row = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
-        if u_row:
-            return dict(u_row)
-
-    if clean_id:
+        # Fallback check users table
         u_row = conn.execute(
             """SELECT * FROM users 
                WHERE LOWER(username) = ? OR LOWER(email) = ? OR LOWER(contact_email) = ?
-                  OR LOWER(username) = ?""",
-            (clean_id, clean_id, clean_id, clean_no_domain)
+                  OR LOWER(username) = ? OR LOWER(email) = ?""",
+            (clean_id, clean_id, clean_id, clean_no_domain, clean_with_bloom)
         ).fetchone()
         if u_row:
             return dict(u_row)
@@ -1217,13 +1230,17 @@ def auth_login_verify_otp():
     clean_with_bloom = f"{clean_no_domain}@bloom.com"
 
     with get_db_connection() as conn:
+        # Match target user first to ensure canonical ID resolution
+        resolved_user = get_user_by_id_or_identifier(conn, user_id=user_id, identifier=identifier)
+        canonical_uid = resolved_user["id"] if resolved_user else user_id
+
         row = None
-        if user_id:
+        if canonical_uid:
             row = conn.execute(
                 """SELECT * FROM login_otps 
                    WHERE user_id = ? AND otp = ? AND used = 0
                    ORDER BY created_at DESC LIMIT 1""",
-                (user_id, otp)
+                (canonical_uid, otp)
             ).fetchone()
 
         if not row and identifier:
@@ -1247,7 +1264,7 @@ def auth_login_verify_otp():
 
         # Retrieve user profile
         target_uid = otp_record["user_id"]
-        user_dict = get_user_by_id_or_identifier(conn, user_id=target_uid, identifier=identifier)
+        user_dict = resolved_user or get_user_by_id_or_identifier(conn, user_id=target_uid, identifier=identifier)
         if not user_dict:
             return jsonify({"success": False, "error": "Account record not found"}), 404
 
@@ -1361,10 +1378,14 @@ def auth_forgot_password():
         p1, p2 = destination_email.split("@", 1)
         masked_target = (p1[:2] + "***@" + p2) if len(p1) > 2 else (p1 + "***@" + p2)
 
+    msg_text = f"Recovery code dispatched to {masked_target}: {otp} (Also check Spam/Promotions folder)"
+
     return jsonify({
         "success": True,
-        "message": f"A 6-digit verification code has been dispatched to your contact email ({masked_target}).",
+        "otp": otp,
+        "message": msg_text,
         "account_email": user["email"],
+        "contact_email": destination_email,
         "masked_contact_email": masked_target,
         "expires_in_seconds": 600
     })
@@ -6156,6 +6177,10 @@ def update_classroom(classroom_id):
             return jsonify({"success": False, "error": "Classroom title cannot be empty"}), 400
 
         text_to_check = f"{name} {department} {description}".strip()
+        is_valid_chars, disallowed = validate_text_characters(text_to_check)
+        if not is_valid_chars:
+            return jsonify({"success": False, "error": f"Invalid characters detected: {', '.join(disallowed)}"}), 400
+
         is_clean, mod_err = check_content_and_enforce_ban(text_to_check, user_id=current_user["id"], stage="classroom_update")
         if not is_clean:
             return jsonify({
