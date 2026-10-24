@@ -700,12 +700,11 @@ def initiate_login_otp(conn, user_dict, identifier):
         else:
             masked_target = f"{p1[:1]}***@{p2}"
 
-    message_text = f"Verification code dispatched to {masked_target}: {otp} (Also check Spam/Promotions folder)"
+    message_text = f"A 6-digit verification code has been dispatched to your contact email ({masked_target})."
 
     return jsonify({
         "success": True,
         "requires_otp": True,
-        "otp": otp,
         "user_id": user_id,
         "identifier": identifier,
         "account_email": user_dict.get("email"),
@@ -1381,11 +1380,10 @@ def auth_forgot_password():
         p1, p2 = destination_email.split("@", 1)
         masked_target = (p1[:2] + "***@" + p2) if len(p1) > 2 else (p1 + "***@" + p2)
 
-    msg_text = f"Recovery code dispatched to {masked_target}: {otp} (Also check Spam/Promotions folder)"
+    msg_text = f"A 6-digit recovery code has been dispatched to your contact email ({masked_target})."
 
     return jsonify({
         "success": True,
-        "otp": otp,
         "message": msg_text,
         "account_email": user["email"],
         "contact_email": destination_email,
