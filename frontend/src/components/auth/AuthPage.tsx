@@ -15,7 +15,8 @@ import {
   KeyRound,
   RefreshCw,
   Sun,
-  Moon
+  Moon,
+  ShieldCheck
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -27,14 +28,14 @@ interface AuthPageProps {
 }
 
 export const AuthPage: React.FC<AuthPageProps> = ({ onBackToHome, onSuccessRedirect }) => {
-  const { login, commitUser, register, registerMentor, forgotPassword, verifyOtp, resetPassword } = useAuth();
+  const { login, verifyLoginOtp, resendLoginOtp, commitUser, register, registerMentor, forgotPassword, verifyOtp, resetPassword } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
   // Role toggle: 'faculty' (Mentor & Faculty) | 'student' (Student)
   const [roleTab, setRoleTab] = useState<'faculty' | 'student'>('faculty');
 
-  // Mode: 'login' | 'register' | 'forgot_password'
-  const [mode, setMode] = useState<'login' | 'register' | 'forgot_password'>('login');
+  // Mode: 'login' | 'register' | 'forgot_password' | 'login_otp'
+  const [mode, setMode] = useState<'login' | 'register' | 'forgot_password' | 'login_otp'>('login');
 
   // Password visibility
   const [showPassword, setShowPassword] = useState(false);
@@ -51,6 +52,22 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToHome, onSuccessRedir
   // ─── LOGIN STATE (Email / Admin identifier & Password) ───
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+
+  // ─── LOGIN OTP STATE (MANDATORY 2-STEP VERIFICATION) ───
+  const [otpIdentifier, setOtpIdentifier] = useState('');
+  const [maskedContactEmail, setMaskedContactEmail] = useState('');
+  const [loginOtpCode, setLoginOtpCode] = useState('');
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [isResending, setIsResending] = useState(false);
+
+  // Cooldown countdown timer
+  React.useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
 
   // ─── REGISTER STATE ───
   const [regFullName, setRegFullName] = useState('');
@@ -71,7 +88,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToHome, onSuccessRedir
   const [fpNewPassword, setFpNewPassword] = useState('');
   const [fpStep, setFpStep] = useState<'email' | 'otp' | 'done'>('email');
 
-  // ─── SUBMIT HANDLER: LOGIN (WITH 5-SECOND FLOWING KOINEXA COLOR QUEUE GLOW) ───
+  // ─── SUBMIT HANDLER: LOGIN (DISPATCHES OTP TO CONTACT EMAIL) ───
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isAuthenticatingGlow || isLoading) return;
@@ -102,7 +119,6 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToHome, onSuccessRedir
 
     setIsLoading(true);
     try {
-      // Pass deferCommit = true so auth state does not immediately unmount this view
       const res = await login(
         {
           username: emailClean,
@@ -113,16 +129,62 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToHome, onSuccessRedir
         true
       );
 
+      setIsLoading(false);
+
+      if (res.success && res.requires_otp) {
+        setOtpIdentifier(res.identifier || emailClean);
+        setMaskedContactEmail(res.masked_contact_email || 'your registered contact email');
+        setLoginOtpCode('');
+        setResendCooldown(60);
+        setMode('login_otp');
+        setSuccessMessage(res.message || 'Verification code sent to your contact email.');
+        return;
+      }
+
+      if (res.success && res.user && res.token) {
+        setIsAuthenticatingGlow(true);
+        setTimeout(() => {
+          setIsExiting(true);
+        }, 4700);
+        setTimeout(() => {
+          commitUser(res.user!, res.token!);
+          if (onSuccessRedirect) {
+            onSuccessRedirect();
+          }
+        }, 5200);
+      } else {
+        setErrorMessage(res.error || 'Invalid credentials or account not found.');
+      }
+    } catch {
+      setIsLoading(false);
+      setErrorMessage('Unable to reach server. Please check backend connection.');
+    }
+  };
+
+  // ─── SUBMIT HANDLER: TWO-FACTOR LOGIN OTP VERIFICATION ───
+  const handleLoginOtpSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isAuthenticatingGlow || isLoading) return;
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    const cleanCode = loginOtpCode.trim();
+    if (!cleanCode || cleanCode.length < 6) {
+      setErrorMessage('Please enter the 6-digit verification code sent to your contact email.');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const res = await verifyLoginOtp(otpIdentifier || loginEmail.trim().toLowerCase(), cleanCode, true);
       if (res.success && res.user && res.token) {
         setIsLoading(false);
         setIsAuthenticatingGlow(true);
 
-        // Smooth blur & scale transition begins at 4.7s
         setTimeout(() => {
           setIsExiting(true);
         }, 4700);
 
-        // Transition completes at 5.2s (> 5 seconds flowing glow around 1px border)
         setTimeout(() => {
           commitUser(res.user!, res.token!);
           if (onSuccessRedirect) {
@@ -131,11 +193,35 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToHome, onSuccessRedir
         }, 5200);
       } else {
         setIsLoading(false);
-        setErrorMessage(res.error || 'Invalid credentials or account not found.');
+        setErrorMessage(res.error || 'Invalid verification code. Please check and try again.');
       }
     } catch {
       setIsLoading(false);
-      setErrorMessage('Unable to reach server. Please check backend connection.');
+      setErrorMessage('Unable to reach server. Please check your connection.');
+    }
+  };
+
+  // ─── RESEND LOGIN OTP ───
+  const handleResendLoginOtp = async () => {
+    if (isResending || resendCooldown > 0) return;
+    setIsResending(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+    try {
+      const res = await resendLoginOtp(otpIdentifier || loginEmail.trim().toLowerCase());
+      if (res.success) {
+        setSuccessMessage('A fresh 6-digit verification code has been dispatched to your contact email.');
+        if (res.masked_contact_email) {
+          setMaskedContactEmail(res.masked_contact_email);
+        }
+        setResendCooldown(60);
+      } else {
+        setErrorMessage(res.error || 'Failed to resend verification code');
+      }
+    } catch {
+      setErrorMessage('Network error while requesting code.');
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -453,54 +539,64 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToHome, onSuccessRedir
             transition={{ duration: isExiting ? 0.6 : 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="relative z-10 overflow-hidden w-full p-7 sm:p-9 rounded-[32px] bg-white/95 dark:bg-[#16181c]/95 backdrop-blur-xl border border-neutral-200/90 dark:border-neutral-800 shadow-[0_20px_50px_rgba(0,0,0,0.08)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.6)] transition-all duration-200"
           >
-            {/* Role Toggle: Mentor & Faculty Portal vs Student Portal */}
-            <div className="relative p-1 rounded-2xl bg-neutral-100 dark:bg-white/[0.05] border border-neutral-200 dark:border-neutral-800 flex items-center gap-1 mb-2">
-              <button
-                type="button"
-                disabled={isAuthenticatingGlow}
-                onClick={() => {
-                  setRoleTab('faculty');
-                  setErrorMessage(null);
-                  setSuccessMessage(null);
-                }}
-                className={`relative z-10 flex-1 py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 text-xs font-semibold transition-all duration-200 select-none ${
-                  isAuthenticatingGlow ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
-                } ${roleTab === 'faculty' ? 'text-neutral-900 dark:text-white font-bold' : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'}`}
-              >
-                {roleTab === 'faculty' && (
-                  <motion.div
-                    layoutId="activeRolePill"
-                    className="absolute inset-0 rounded-xl bg-white dark:bg-[#1f2228] border border-neutral-200/80 dark:border-neutral-700/60 shadow-sm -z-10"
-                    transition={{ type: 'spring', stiffness: 440, damping: 32, mass: 0.8 }}
-                  />
-                )}
-                <GraduationCap className="w-4 h-4 text-[#12BEF9]" />
-                <span>Mentor</span>
-              </button>
+            {/* Role Toggle: Mentor & Faculty Portal vs Student Portal (or 2FA banner if verifying login) */}
+            {mode === 'login_otp' ? (
+              <div className="flex items-center gap-2.5 mb-3 px-4 py-3 rounded-2xl bg-[#12BEF9]/10 border border-[#12BEF9]/25 text-[#12BEF9]">
+                <ShieldCheck className="w-5 h-5 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs font-bold tracking-wide text-neutral-900 dark:text-white">Security Check</div>
+                  <div className="text-[11px] text-neutral-500 dark:text-neutral-400">Two-Factor OTP Verification</div>
+                </div>
+              </div>
+            ) : (
+              <div className="relative p-1 rounded-2xl bg-neutral-100 dark:bg-white/[0.05] border border-neutral-200 dark:border-neutral-800 flex items-center gap-1 mb-2">
+                <button
+                  type="button"
+                  disabled={isAuthenticatingGlow}
+                  onClick={() => {
+                    setRoleTab('faculty');
+                    setErrorMessage(null);
+                    setSuccessMessage(null);
+                  }}
+                  className={`relative z-10 flex-1 py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 text-xs font-semibold transition-all duration-200 select-none ${
+                    isAuthenticatingGlow ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
+                  } ${roleTab === 'faculty' ? 'text-neutral-900 dark:text-white font-bold' : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'}`}
+                >
+                  {roleTab === 'faculty' && (
+                    <motion.div
+                      layoutId="activeRolePill"
+                      className="absolute inset-0 rounded-xl bg-white dark:bg-[#1f2228] border border-neutral-200/80 dark:border-neutral-700/60 shadow-sm -z-10"
+                      transition={{ type: 'spring', stiffness: 440, damping: 32, mass: 0.8 }}
+                    />
+                  )}
+                  <GraduationCap className="w-4 h-4 text-[#12BEF9]" />
+                  <span>Mentor</span>
+                </button>
 
-              <button
-                type="button"
-                disabled={isAuthenticatingGlow}
-                onClick={() => {
-                  setRoleTab('student');
-                  setErrorMessage(null);
-                  setSuccessMessage(null);
-                }}
-                className={`relative z-10 flex-1 py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 text-xs font-semibold transition-all duration-200 select-none ${
-                  isAuthenticatingGlow ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
-                } ${roleTab === 'student' ? 'text-neutral-900 dark:text-white font-bold' : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'}`}
-              >
-                {roleTab === 'student' && (
-                  <motion.div
-                    layoutId="activeRolePill"
-                    className="absolute inset-0 rounded-xl bg-white dark:bg-[#1f2228] border border-neutral-200/80 dark:border-neutral-700/60 shadow-sm -z-10"
-                    transition={{ type: 'spring', stiffness: 440, damping: 32, mass: 0.8 }}
-                  />
-                )}
-                <UserIcon className="w-4 h-4 text-[#BC5AFC]" />
-                <span>Student</span>
-              </button>
-            </div>
+                <button
+                  type="button"
+                  disabled={isAuthenticatingGlow}
+                  onClick={() => {
+                    setRoleTab('student');
+                    setErrorMessage(null);
+                    setSuccessMessage(null);
+                  }}
+                  className={`relative z-10 flex-1 py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 text-xs font-semibold transition-all duration-200 select-none ${
+                    isAuthenticatingGlow ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
+                  } ${roleTab === 'student' ? 'text-neutral-900 dark:text-white font-bold' : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'}`}
+                >
+                  {roleTab === 'student' && (
+                    <motion.div
+                      layoutId="activeRolePill"
+                      className="absolute inset-0 rounded-xl bg-white dark:bg-[#1f2228] border border-neutral-200/80 dark:border-neutral-700/60 shadow-sm -z-10"
+                      transition={{ type: 'spring', stiffness: 440, damping: 32, mass: 0.8 }}
+                    />
+                  )}
+                  <UserIcon className="w-4 h-4 text-[#BC5AFC]" />
+                  <span>Student</span>
+                </button>
+              </div>
+            )}
 
             <div className="mb-4" />
 
@@ -529,7 +625,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToHome, onSuccessRedir
                     disabled={isLoading || isAuthenticatingGlow}
                     placeholder={
                       roleTab === 'faculty'
-                        ? 'Account Email (@bloom.com) or Admin Identifier'
+                        ? 'Faculty Account Email (@bloom.com)'
                         : 'Student Account Email (@bloom.com)'
                     }
                     value={loginEmail}
@@ -579,16 +675,16 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToHome, onSuccessRedir
                   disabled={isLoading || isAuthenticatingGlow}
                   whileHover={!isAuthenticatingGlow ? { scale: 1.01 } : {}}
                   whileTap={!isAuthenticatingGlow ? { scale: 0.985 } : {}}
-                  className="relative group overflow-hidden w-full py-3.5 rounded-full bg-neutral-900 hover:bg-black text-white dark:bg-white dark:hover:bg-neutral-200 dark:text-neutral-900 text-sm font-bold tracking-wide flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all duration-150 cursor-pointer disabled:opacity-50 select-none btn-keep-white"
+                  className="relative group overflow-hidden w-full py-3.5 rounded-full bg-neutral-900 hover:bg-black text-white dark:bg-black dark:hover:bg-neutral-950 dark:text-white dark:border dark:border-white/20 text-sm font-bold tracking-wide flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all duration-150 cursor-pointer disabled:opacity-50 select-none btn-keep-white"
                 >
                   {isLoading || isAuthenticatingGlow ? (
                     <div className="relative z-10 flex items-center justify-center gap-2">
-                      <RefreshCw className="w-4 h-4 animate-spin text-white dark:text-neutral-900" />
-                      <span className="font-bold text-white dark:text-neutral-900">Signing in...</span>
+                      <RefreshCw className="w-4 h-4 animate-spin text-white" />
+                      <span className="font-bold text-white">Signing in...</span>
                     </div>
                   ) : (
-                    <span className="relative z-10 font-bold flex items-center gap-2 text-white dark:text-neutral-900">
-                      Login
+                    <span className="relative z-10 font-bold flex items-center gap-2 text-white">
+                      Login <ArrowRight className="w-4 h-4" />
                     </span>
                   )}
                 </motion.button>
@@ -839,15 +935,15 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToHome, onSuccessRedir
                   disabled={isLoading}
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.985 }}
-                  className="relative group overflow-hidden w-full py-3.5 rounded-full bg-neutral-900 hover:bg-black text-white dark:bg-white dark:hover:bg-neutral-200 dark:text-neutral-900 text-sm font-bold tracking-wide flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all duration-150 cursor-pointer disabled:opacity-50 mt-2 select-none btn-keep-white"
+                  className="relative group overflow-hidden w-full py-3.5 rounded-full bg-neutral-900 hover:bg-black text-white dark:bg-black dark:hover:bg-neutral-950 dark:text-white dark:border dark:border-white/20 text-sm font-bold tracking-wide flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all duration-150 cursor-pointer disabled:opacity-50 mt-2 select-none btn-keep-white"
                 >
                   {isLoading ? (
                     <div className="relative z-10 flex items-center justify-center gap-2">
-                      <RefreshCw className="w-4 h-4 animate-spin text-white dark:text-neutral-900" />
-                      <span className="font-bold text-white dark:text-neutral-900">Processing...</span>
+                      <RefreshCw className="w-4 h-4 animate-spin text-white" />
+                      <span className="font-bold text-white">Processing...</span>
                     </div>
                   ) : (
-                    <span className="relative z-10 font-bold flex items-center gap-2 text-white dark:text-neutral-900">
+                    <span className="relative z-10 font-bold flex items-center gap-2 text-white">
                       Register
                     </span>
                   )}
@@ -871,6 +967,86 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToHome, onSuccessRedir
                 </div>
               </form>
             )}
+
+          {/* ── 2FA LOGIN OTP VERIFICATION FLOW ── */}
+          {mode === 'login_otp' && (
+            <form onSubmit={handleLoginOtpSubmit} className="space-y-4">
+              <div className="p-4 rounded-2xl bg-neutral-50 dark:bg-black/40 border border-neutral-200/80 dark:border-neutral-800">
+                <p className="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed mb-2">
+                  Enter the 6-digit security code sent to your registered contact email:
+                </p>
+                <div className="text-xs font-semibold text-neutral-900 dark:text-white font-mono break-all bg-neutral-100 dark:bg-neutral-900/80 px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-700/60 inline-flex items-center gap-2">
+                  <Mail className="w-3.5 h-3.5 text-[#12BEF9]" />
+                  <span>{maskedContactEmail}</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
+                  Verification Code (6 Digits)
+                </label>
+                <input
+                  type="text"
+                  required
+                  maxLength={6}
+                  autoFocus
+                  disabled={isLoading || isAuthenticatingGlow}
+                  placeholder="••••••"
+                  value={loginOtpCode}
+                  onChange={(e) => setLoginOtpCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+                  className="w-full px-4 py-3.5 rounded-2xl bg-neutral-50 dark:bg-black/60 border border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700 focus:border-[#0A84FF] focus:bg-white dark:focus:bg-black/80 text-center font-mono text-xl tracking-[0.5em] font-bold text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-600 focus:outline-none transition-all shadow-sm disabled:opacity-50"
+                />
+              </div>
+
+              <div className="flex items-center justify-between text-xs pt-1">
+                <button
+                  type="button"
+                  disabled={isLoading || isAuthenticatingGlow}
+                  onClick={() => {
+                    setMode('login');
+                    setLoginOtpCode('');
+                    setErrorMessage(null);
+                    setSuccessMessage(null);
+                  }}
+                  className="text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors cursor-pointer disabled:opacity-40"
+                >
+                  ← Back to Login
+                </button>
+
+                <button
+                  type="button"
+                  disabled={resendCooldown > 0 || isResending || isLoading || isAuthenticatingGlow}
+                  onClick={handleResendLoginOtp}
+                  className="text-[#0A84FF] hover:underline font-semibold disabled:opacity-40 disabled:no-underline cursor-pointer"
+                >
+                  {isResending
+                    ? 'Sending...'
+                    : resendCooldown > 0
+                    ? `Resend in ${resendCooldown}s`
+                    : 'Resend Code'}
+                </button>
+              </div>
+
+              <motion.button
+                type="submit"
+                disabled={isLoading || isAuthenticatingGlow || loginOtpCode.length < 6}
+                whileHover={!isAuthenticatingGlow ? { scale: 1.01 } : {}}
+                whileTap={!isAuthenticatingGlow ? { scale: 0.985 } : {}}
+                className="relative group overflow-hidden w-full py-3.5 rounded-full bg-neutral-900 hover:bg-black text-white dark:bg-black dark:hover:bg-neutral-950 dark:text-white dark:border dark:border-white/20 text-sm font-bold tracking-wide flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all duration-150 cursor-pointer disabled:opacity-50 select-none btn-keep-white mt-2"
+              >
+                {isLoading || isAuthenticatingGlow ? (
+                  <div className="relative z-10 flex items-center justify-center gap-2">
+                    <RefreshCw className="w-4 h-4 animate-spin text-white" />
+                    <span className="font-bold text-white">Verifying Code...</span>
+                  </div>
+                ) : (
+                  <span className="relative z-10 font-bold flex items-center gap-2 text-white">
+                    Verify & Sign In <ArrowRight className="w-4 h-4" />
+                  </span>
+                )}
+              </motion.button>
+            </form>
+          )}
 
           {/* ── 3. FORGOT PASSWORD FLOW (TRANSPARENT GLASS) ── */}
           {mode === 'forgot_password' && (

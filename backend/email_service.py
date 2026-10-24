@@ -4,7 +4,7 @@ Koinexa Email Dispatch & Outbox Service
 Supports:
 1. Real SMTP dispatch when environment variables (SMTP_HOST, SMTP_USER, etc.) are present.
 2. Local Development & Offline Mode: automatically persists all outgoing emails into the SQLite 'sent_emails' table.
-3. Templated HTML notifications for Password Reset OTP, Faculty Acceptance, Faculty Rejection, and Admin Alerts.
+3. Crisp, minimalist, professional HTML templates (Stripe / Linear inspired) for OTP, Faculty Approvals, and Alerts.
 """
 
 import os
@@ -28,8 +28,8 @@ def get_smtp_config():
         "smtp_port": int(os.environ.get("SMTP_PORT", "587")),
         "smtp_user": os.environ.get("SMTP_USER", ""),
         "smtp_pass": os.environ.get("SMTP_PASS", ""),
-        "from_email": os.environ.get("FROM_EMAIL", "veritas@koinexa.edu"),
-        "from_name": os.environ.get("FROM_NAME", "KOINEXA Veritas-AI"),
+        "from_email": os.environ.get("FROM_EMAIL", "koinexa63@gmail.com"),
+        "from_name": os.environ.get("FROM_NAME", "KOINEXA"),
     }
     try:
         with get_db_connection() as conn:
@@ -49,7 +49,7 @@ def get_smtp_config():
     return config
 
 
-def send_email(to_email: str, subject: str, body_html: str, email_type: str, recipient_name: str = "Educator") -> bool:
+def send_email(to_email: str, subject: str, body_html: str, email_type: str, recipient_name: str = "Member") -> bool:
     """
     Dispatches an email and stores an immutable record in the 'sent_emails' SQLite table.
     Attempts real SMTP delivery if configured.
@@ -74,8 +74,8 @@ def send_email(to_email: str, subject: str, body_html: str, email_type: str, rec
     smtp_port = cfg["smtp_port"]
     smtp_user = cfg["smtp_user"]
     smtp_pass = cfg["smtp_pass"]
-    from_email = cfg["from_email"] or smtp_user or "veritas@koinexa.edu"
-    from_name = cfg["from_name"] or "KOINEXA Veritas-AI"
+    from_email = cfg["from_email"] or smtp_user or "koinexa63@gmail.com"
+    from_name = cfg["from_name"] or "KOINEXA"
 
     if smtp_host and smtp_user and smtp_pass:
         try:
@@ -114,36 +114,68 @@ def send_email(to_email: str, subject: str, body_html: str, email_type: str, rec
 
 
 def send_test_email(to_email: str) -> tuple[bool, str]:
-    """Test SMTP dispatch with detailed diagnostic message."""
+    """Test SMTP dispatch with concise diagnostic details."""
     cfg = get_smtp_config()
     smtp_host = cfg["smtp_host"]
     smtp_port = cfg["smtp_port"]
     smtp_user = cfg["smtp_user"]
     smtp_pass = cfg["smtp_pass"]
-    from_email = cfg["from_email"] or smtp_user or "veritas@koinexa.edu"
-    from_name = cfg["from_name"] or "KOINEXA Veritas-AI"
+    from_email = cfg["from_email"] or smtp_user or "koinexa63@gmail.com"
+    from_name = cfg["from_name"] or "KOINEXA"
 
     if not (smtp_host and smtp_user and smtp_pass):
-        # Dispatch to outbox anyway
         send_otp_email(to_email, "KOINEXA Member", "733829")
-        return False, "SMTP credentials are not configured yet. The email has been recorded in the local SQLite Outbox (viewable in Admin Dashboard > Outbox History). To deliver directly to your actual Gmail inbox, enter your SMTP_USER and a 16-character Google App Password in the SMTP settings below."
+        return False, "SMTP credentials are not configured yet. The message was recorded in the SQLite Outbox."
 
-    subject = "⚡ KOINEXA Veritas-AI: Live Email System Test"
+    subject = "KOINEXA: Delivery Verification Test"
     html = f"""<!DOCTYPE html>
-<html>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #050505; color: #f1f5f9; padding: 24px;">
-  <div style="max-width: 520px; margin: 0 auto; background: #0f172a; border-radius: 18px; border: 1px solid #1e293b; padding: 32px;">
-    <div style="font-size: 20px; font-weight: 800; color: #38bdf8; margin-bottom: 16px;">⚡ KOINEXA Veritas-AI</div>
-    <div style="font-size: 22px; font-weight: 700; color: #ffffff; margin-bottom: 12px;">Live Email Dispatch Confirmed!</div>
-    <div style="font-size: 14px; line-height: 1.6; color: #94a3b8; margin-bottom: 20px;">
-      Hello! This email confirms that the KOINEXA Veritas-AI email delivery engine is successfully connected and delivering live messages to <strong>{to_email}</strong>.
-    </div>
-    <div style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); border-radius: 12px; padding: 16px; color: #34d399; font-size: 13px; font-family: monospace;">
-      STATUS: DELIVERED VIA {smtp_host}:{smtp_port}<br>
-      SENDER: {from_name} &lt;{from_email}&gt;<br>
-      TIMESTAMP: {time.strftime('%Y-%m-%d %H:%M:%S')}
-    </div>
-  </div>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KOINEXA Delivery Test</title>
+</head>
+<body style="margin: 0; padding: 40px 16px; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #334155;">
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 480px; margin: 0 auto;">
+    <tr>
+      <td>
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 36px 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+          <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 24px;">
+            <tr>
+              <td>
+                <span style="font-size: 15px; font-weight: 700; color: #0f172a; letter-spacing: -0.2px;">KOINEXA</span>
+              </td>
+              <td align="right">
+                <span style="display: inline-block; font-size: 11px; font-weight: 600; color: #059669; background: #ecfdf5; border: 1px solid #d1fae5; padding: 2px 9px; border-radius: 9999px;">
+                  Diagnostic
+                </span>
+              </td>
+            </tr>
+          </table>
+
+          <h1 style="margin: 0 0 12px 0; font-size: 20px; font-weight: 700; color: #0f172a; letter-spacing: -0.3px; line-height: 1.3;">
+            Delivery verified
+          </h1>
+          
+          <p style="margin: 0 0 20px 0; font-size: 14px; line-height: 1.55; color: #475569;">
+            Your SMTP gateway is active and successfully transmitting messages to <strong>{to_email}</strong>.
+          </p>
+
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; font-family: 'SF Mono', ui-monospace, Menlo, Monaco, Consolas, monospace; font-size: 12px; color: #0f172a; line-height: 1.6; margin: 0 0 24px 0;">
+            <div><span style="color: #64748b;">GATEWAY:</span> {smtp_host}:{smtp_port}</div>
+            <div><span style="color: #64748b;">SENDER:</span> {from_name} &lt;{from_email}&gt;</div>
+            <div><span style="color: #64748b;">TIME:</span> {time.strftime('%Y-%m-%d %H:%M:%S')}</div>
+          </div>
+
+          <div style="border-top: 1px solid #f1f5f9; padding-top: 18px;">
+            <p style="margin: 0; font-size: 11px; line-height: 1.5; color: #94a3b8;">
+              KOINEXA Infrastructure Operations &bull; Automated Diagnostic Test
+            </p>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>"""
 
@@ -165,111 +197,200 @@ def send_test_email(to_email: str) -> tuple[bool, str]:
                 server.sendmail(from_email, [to_email], msg.as_string())
         
         send_email(to_email, subject, html, "system_test", "KOINEXA Member")
-        return True, f"Email successfully dispatched across the internet to {to_email} via {smtp_host}:{smtp_port}!"
+        return True, f"Email successfully dispatched to {to_email} via {smtp_host}:{smtp_port}."
     except smtplib.SMTPAuthenticationError as auth_err:
-        return False, f"SMTP Authentication failed: {auth_err}. If using Gmail, make sure you are using a 16-character Google App Password (not your regular account password) with 2FA enabled."
+        return False, f"SMTP Authentication failed: {auth_err}. Please ensure 2FA and a 16-character App Password are configured."
     except Exception as e:
         return False, f"SMTP connection error: {str(e)}"
 
 
 def send_otp_email(to_email: str, recipient_name: str, otp_code: str) -> bool:
     """Send a secure 6-digit OTP email for password reset."""
-    subject = f"Your KOINEXA Password Reset Code: {otp_code}"
+    subject = f"Your KOINEXA password reset code: {otp_code}"
     html = f"""<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <style>
-    body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #050505; color: #f1f5f9; padding: 24px; margin: 0; }}
-    .container {{ max-width: 520px; margin: 0 auto; background: #0f172a; border-radius: 20px; border: 1px solid #1e293b; padding: 32px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }}
-    .logo {{ font-size: 20px; font-weight: 800; color: #38bdf8; display: flex; align-items: center; gap: 8px; margin-bottom: 24px; }}
-    .title {{ font-size: 22px; font-weight: 700; color: #ffffff; margin-bottom: 12px; }}
-    .text {{ font-size: 14px; line-height: 1.6; color: #94a3b8; margin-bottom: 24px; }}
-    .otp-box {{ background: #0284c7; background: linear-gradient(135deg, #0284c7, #2563eb); border-radius: 14px; padding: 20px; text-align: center; margin-bottom: 24px; box-shadow: 0 8px 24px rgba(37,99,235,0.3); }}
-    .otp-code {{ font-family: 'SF Mono', Consolas, Monaco, monospace; font-size: 36px; font-weight: 800; color: #ffffff; letter-spacing: 10px; margin: 0; }}
-    .footer {{ font-size: 12px; color: #64748b; border-top: 1px solid #1e293b; padding-top: 18px; margin-top: 24px; }}
-    .badge {{ display: inline-block; padding: 4px 10px; background: rgba(56,189,248,0.15); color: #38bdf8; font-size: 11px; font-weight: 600; border-radius: 9999px; margin-bottom: 16px; }}
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Password Reset Code</title>
 </head>
-<body>
-  <div class="container">
-    <div class="logo">⚡ KOINEXA Security</div>
-    <div class="badge">Password Reset Request</div>
-    <div class="title">Reset Your Account Password</div>
-    <div class="text">
-      Hello <strong>{recipient_name or 'there'}</strong>,<br><br>
-      We received a request to reset the password for your KOINEXA account associated with <strong>{to_email}</strong>. Use the verification code below to authorize this change:
-    </div>
-    
-    <div class="otp-box">
-      <div class="otp-code">{otp_code}</div>
-    </div>
-    
-    <div class="text" style="font-size: 13px;">
-      ⏳ This security code will expire in <strong>10 minutes</strong>.<br>
-      ⚠️ If you did not request a password reset, you can safely ignore this email. Your account remains completely secure.
-    </div>
-    
-    <div class="footer">
-      Sent automatically by KOINEXA Veritas-AI Security Engine • &copy; {time.strftime('%Y')} KOINEXA Inc.
-    </div>
-  </div>
+<body style="margin: 0; padding: 40px 16px; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #334155;">
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 480px; margin: 0 auto;">
+    <tr>
+      <td>
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 36px 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+          <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 24px;">
+            <tr>
+              <td>
+                <span style="font-size: 15px; font-weight: 700; color: #0f172a; letter-spacing: -0.2px;">KOINEXA</span>
+              </td>
+              <td align="right">
+                <span style="display: inline-block; font-size: 11px; font-weight: 600; color: #0284c7; background: #f0f9ff; border: 1px solid #e0f2fe; padding: 2px 9px; border-radius: 9999px;">
+                  Password Recovery
+                </span>
+              </td>
+            </tr>
+          </table>
+
+          <h1 style="margin: 0 0 12px 0; font-size: 20px; font-weight: 700; color: #0f172a; letter-spacing: -0.3px; line-height: 1.3;">
+            Reset your password
+          </h1>
+          
+          <p style="margin: 0 0 20px 0; font-size: 14px; line-height: 1.55; color: #475569;">
+            Hello {recipient_name or 'there'},<br><br>
+            Enter this single-use code to reset the password for your KOINEXA account:
+          </p>
+
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; text-align: center; margin: 0 0 20px 0;">
+            <div style="font-family: 'SF Mono', ui-monospace, Menlo, Monaco, Consolas, monospace; font-size: 32px; font-weight: 700; color: #0f172a; letter-spacing: 6px; margin: 0 0 4px 0;">
+              {otp_code}
+            </div>
+            <div style="font-size: 11px; color: #64748b;">
+              Valid for 10 minutes &bull; Do not share with anyone
+            </div>
+          </div>
+
+          <p style="margin: 0 0 24px 0; font-size: 13px; line-height: 1.55; color: #64748b;">
+            If you did not request a password reset, you can safely ignore this email. Your account remains secure.
+          </p>
+
+          <div style="border-top: 1px solid #f1f5f9; padding-top: 18px;">
+            <p style="margin: 0; font-size: 11px; line-height: 1.5; color: #94a3b8;">
+              KOINEXA Security &bull; &copy; {time.strftime('%Y')} KOINEXA
+            </p>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>"""
     return send_email(to_email, subject, html, "otp_verification", recipient_name)
 
 
-def send_faculty_acceptance_email(to_email: str, recipient_name: str, institution: str = "University") -> bool:
-    """Send official faculty approval and welcome email."""
-    subject = "🎉 Welcome to KOINEXA Faculty Network! Application Approved"
+def send_login_otp_email(to_email: str, recipient_name: str, otp_code: str) -> bool:
+    """Send a secure 6-digit OTP email for account login verification."""
+    subject = f"Your KOINEXA verification code: {otp_code}"
     html = f"""<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <style>
-    body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #050505; color: #f1f5f9; padding: 24px; margin: 0; }}
-    .container {{ max-width: 540px; margin: 0 auto; background: #0f172a; border-radius: 20px; border: 1px solid #1e293b; padding: 32px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }}
-    .logo {{ font-size: 20px; font-weight: 800; color: #38bdf8; margin-bottom: 20px; }}
-    .badge {{ display: inline-block; padding: 5px 12px; background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); font-size: 12px; font-weight: 700; border-radius: 9999px; margin-bottom: 16px; }}
-    .title {{ font-size: 24px; font-weight: 800; color: #ffffff; margin-bottom: 12px; }}
-    .text {{ font-size: 14px; line-height: 1.6; color: #94a3b8; margin-bottom: 20px; }}
-    .card {{ background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 18px; margin-bottom: 24px; }}
-    .card-item {{ font-size: 13px; color: #cbd5e1; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }}
-    .btn {{ display: inline-block; background: #2563eb; background: linear-gradient(135deg, #0284c7, #2563eb); color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 12px; font-weight: 700; font-size: 14px; box-shadow: 0 8px 20px rgba(37,99,235,0.35); text-align: center; }}
-    .footer {{ font-size: 12px; color: #64748b; border-top: 1px solid #1e293b; padding-top: 18px; margin-top: 24px; }}
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verification Code</title>
 </head>
-<body>
-  <div class="container">
-    <div class="logo">⚡ KOINEXA Academic Network</div>
-    <div class="badge">✓ Faculty Verified & Approved</div>
-    <div class="title">Welcome, Professor!</div>
-    
-    <div class="text">
-      Dear <strong>{recipient_name}</strong>,<br><br>
-      We are delighted to inform you that your Faculty Application for <strong>{institution}</strong> has been thoroughly reviewed and <strong>approved</strong> by Veritas-AI and the KOINEXA Academic Board.
-    </div>
-    
-    <div class="card">
-      <div style="font-weight: 700; font-size: 14px; color: #ffffff; margin-bottom: 12px;">Unlocked Faculty Privileges:</div>
-      <div class="card-item">🏛️ <strong>Create & Lead University Classrooms</strong> with custom syllabus</div>
-      <div class="card-item">📝 <strong>Host Full-Screen CBT Quizzes</strong> with automated evaluation</div>
-      <div class="card-item">💻 <strong>Publish Coding Challenges</strong> with 20+ automated test cases</div>
-      <div class="card-item">💬 <strong>Broadcast Announcements & Study Hubs</strong> to enrolled students</div>
-    </div>
-    
-    <div class="text">
-      You can now log in to KOINEXA using your registered email (<strong>{to_email}</strong>) and password to begin creating your subjects and inviting students.
-    </div>
-    
-    <div style="text-align: center; margin: 28px 0;">
-      <a href="http://localhost:5174/#/auth" class="btn">Log In to Faculty Portal →</a>
-    </div>
-    
-    <div class="footer">
-      Verified by Veritas-AI Academic Credential Engine • KOINEXA Platform
-    </div>
-  </div>
+<body style="margin: 0; padding: 40px 16px; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #334155;">
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 480px; margin: 0 auto;">
+    <tr>
+      <td>
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 36px 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+          <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 24px;">
+            <tr>
+              <td>
+                <span style="font-size: 15px; font-weight: 700; color: #0f172a; letter-spacing: -0.2px;">KOINEXA</span>
+              </td>
+              <td align="right">
+                <span style="display: inline-block; font-size: 11px; font-weight: 600; color: #0284c7; background: #f0f9ff; border: 1px solid #e0f2fe; padding: 2px 9px; border-radius: 9999px;">
+                  Verification
+                </span>
+              </td>
+            </tr>
+          </table>
+
+          <h1 style="margin: 0 0 12px 0; font-size: 20px; font-weight: 700; color: #0f172a; letter-spacing: -0.3px; line-height: 1.3;">
+            Verification code
+          </h1>
+          
+          <p style="margin: 0 0 20px 0; font-size: 14px; line-height: 1.55; color: #475569;">
+            Hello {recipient_name or 'there'},<br><br>
+            Enter this code to complete your KOINEXA sign-in:
+          </p>
+
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; text-align: center; margin: 0 0 20px 0;">
+            <div style="font-family: 'SF Mono', ui-monospace, Menlo, Monaco, Consolas, monospace; font-size: 32px; font-weight: 700; color: #0f172a; letter-spacing: 6px; margin: 0 0 4px 0;">
+              {otp_code}
+            </div>
+            <div style="font-size: 11px; color: #64748b;">
+              Valid for 10 minutes &bull; Do not share with anyone
+            </div>
+          </div>
+
+          <p style="margin: 0 0 24px 0; font-size: 13px; line-height: 1.55; color: #64748b;">
+            If you did not initiate this request, someone may be attempting to access your account. Please secure your password immediately.
+          </p>
+
+          <div style="border-top: 1px solid #f1f5f9; padding-top: 18px;">
+            <p style="margin: 0; font-size: 11px; line-height: 1.5; color: #94a3b8;">
+              KOINEXA Security &bull; &copy; {time.strftime('%Y')} KOINEXA
+            </p>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
+    return send_email(to_email, subject, html, "login_otp", recipient_name)
+
+
+def send_faculty_acceptance_email(to_email: str, recipient_name: str, institution: str = "University") -> bool:
+    """Send official faculty approval and welcome email."""
+    subject = "Your KOINEXA faculty application has been approved"
+    html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Faculty Application Approved</title>
+</head>
+<body style="margin: 0; padding: 40px 16px; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #334155;">
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 480px; margin: 0 auto;">
+    <tr>
+      <td>
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 36px 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+          <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 24px;">
+            <tr>
+              <td>
+                <span style="font-size: 15px; font-weight: 700; color: #0f172a; letter-spacing: -0.2px;">KOINEXA</span>
+              </td>
+              <td align="right">
+                <span style="display: inline-block; font-size: 11px; font-weight: 600; color: #059669; background: #ecfdf5; border: 1px solid #d1fae5; padding: 2px 9px; border-radius: 9999px;">
+                  Approved
+                </span>
+              </td>
+            </tr>
+          </table>
+
+          <h1 style="margin: 0 0 12px 0; font-size: 20px; font-weight: 700; color: #0f172a; letter-spacing: -0.3px; line-height: 1.3;">
+            Faculty application approved
+          </h1>
+          
+          <p style="margin: 0 0 20px 0; font-size: 14px; line-height: 1.55; color: #475569;">
+            Dear {recipient_name},<br><br>
+            Your faculty application for <strong>{institution}</strong> has been approved. Your educator workspace is now active.
+          </p>
+
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 0 0 24px 0;">
+            <div style="font-size: 12px; font-weight: 600; color: #0f172a; margin-bottom: 8px;">Your Educator Privileges:</div>
+            <div style="font-size: 13px; color: #475569; line-height: 1.6;">&bull; <strong>Classrooms:</strong> Manage syllabi and student rosters</div>
+            <div style="font-size: 13px; color: #475569; line-height: 1.6;">&bull; <strong>Assessments:</strong> Deploy proctored CBT quizzes and coding challenges</div>
+            <div style="font-size: 13px; color: #475569; line-height: 1.6;">&bull; <strong>Community:</strong> Broadcast academic updates to your students</div>
+          </div>
+
+          <div style="text-align: center; margin: 0 0 28px 0;">
+            <a href="http://localhost:5174/#/auth" style="display: inline-block; background: #0f172a; color: #ffffff; text-decoration: none; padding: 11px 26px; border-radius: 7px; font-size: 13px; font-weight: 600;">
+              Access Faculty Portal &rarr;
+            </a>
+          </div>
+
+          <div style="border-top: 1px solid #f1f5f9; padding-top: 18px;">
+            <p style="margin: 0; font-size: 11px; line-height: 1.5; color: #94a3b8;">
+              KOINEXA Academic Operations &bull; Verified Educator Network
+            </p>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>"""
     return send_email(to_email, subject, html, "faculty_accepted", recipient_name)
@@ -277,50 +398,199 @@ def send_faculty_acceptance_email(to_email: str, recipient_name: str, institutio
 
 def send_faculty_rejection_email(to_email: str, recipient_name: str, reason: str = "") -> bool:
     """Send respectful faculty rejection email with constructive feedback."""
-    subject = "Update regarding your KOINEXA Faculty Application"
-    feedback_text = reason or "Submitted credentials or verification links did not meet our verification integrity threshold."
+    subject = "KOINEXA faculty application update"
+    feedback_text = reason or "Submitted credentials or institutional links did not meet our verification criteria."
     html = f"""<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <style>
-    body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #050505; color: #f1f5f9; padding: 24px; margin: 0; }}
-    .container {{ max-width: 520px; margin: 0 auto; background: #0f172a; border-radius: 20px; border: 1px solid #1e293b; padding: 32px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }}
-    .logo {{ font-size: 20px; font-weight: 800; color: #38bdf8; margin-bottom: 20px; }}
-    .badge {{ display: inline-block; padding: 4px 12px; background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); font-size: 12px; font-weight: 600; border-radius: 9999px; margin-bottom: 16px; }}
-    .title {{ font-size: 22px; font-weight: 700; color: #ffffff; margin-bottom: 12px; }}
-    .text {{ font-size: 14px; line-height: 1.6; color: #94a3b8; margin-bottom: 20px; }}
-    .reason-box {{ background: rgba(239,68,68,0.08); border-left: 3px solid #ef4444; border-radius: 8px; padding: 14px 16px; margin-bottom: 20px; font-size: 13px; color: #fca5a5; }}
-    .footer {{ font-size: 12px; color: #64748b; border-top: 1px solid #1e293b; padding-top: 18px; margin-top: 24px; }}
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Application Update</title>
 </head>
-<body>
-  <div class="container">
-    <div class="logo">⚡ KOINEXA Academic Network</div>
-    <div class="badge">Application Review Update</div>
-    <div class="title">Faculty Application Status</div>
-    
-    <div class="text">
-      Dear <strong>{recipient_name}</strong>,<br><br>
-      Thank you for applying for a Faculty Account on KOINEXA. Following a review of your application, we regret to inform you that we are unable to verify your educator account at this time.
-    </div>
-    
-    <div class="reason-box">
-      <strong>Feedback from Review Board:</strong><br>
-      {feedback_text}
-    </div>
-    
-    <div class="text">
-      You are welcome to re-apply with updated institutional credentials, a valid LinkedIn profile, a clearer resume, or an official faculty ID card.
-    </div>
-    
-    <div class="footer">
-      KOINEXA Veritas Academic Verification Board
-    </div>
-  </div>
+<body style="margin: 0; padding: 40px 16px; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #334155;">
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 480px; margin: 0 auto;">
+    <tr>
+      <td>
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 36px 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+          <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 24px;">
+            <tr>
+              <td>
+                <span style="font-size: 15px; font-weight: 700; color: #0f172a; letter-spacing: -0.2px;">KOINEXA</span>
+              </td>
+              <td align="right">
+                <span style="display: inline-block; font-size: 11px; font-weight: 600; color: #475569; background: #f1f5f9; border: 1px solid #e2e8f0; padding: 2px 9px; border-radius: 9999px;">
+                  Status Update
+                </span>
+              </td>
+            </tr>
+          </table>
+
+          <h1 style="margin: 0 0 12px 0; font-size: 20px; font-weight: 700; color: #0f172a; letter-spacing: -0.3px; line-height: 1.3;">
+            Application update
+          </h1>
+          
+          <p style="margin: 0 0 20px 0; font-size: 14px; line-height: 1.55; color: #475569;">
+            Dear {recipient_name},<br><br>
+            Thank you for applying to the KOINEXA Faculty Network. After review, we are unable to approve your application at this time.
+          </p>
+
+          <div style="background: #f8fafc; border-left: 3px solid #94a3b8; border-radius: 6px; padding: 12px 14px; margin: 0 0 20px 0;">
+            <div style="font-size: 11px; font-weight: 600; color: #0f172a; margin-bottom: 2px;">Reviewer Notes:</div>
+            <div style="font-size: 13px; color: #475569; line-height: 1.5;">{feedback_text}</div>
+          </div>
+
+          <p style="margin: 0 0 24px 0; font-size: 13px; line-height: 1.55; color: #64748b;">
+            You may reapply in the future with updated institutional proof or active university directory links.
+          </p>
+
+          <div style="border-top: 1px solid #f1f5f9; padding-top: 18px;">
+            <p style="margin: 0; font-size: 11px; line-height: 1.5; color: #94a3b8;">
+              KOINEXA Academic Operations &bull; Verification Board
+            </p>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>"""
     return send_email(to_email, subject, html, "faculty_rejected", recipient_name)
+
+
+def send_account_suspension_email(to_email: str, recipient_name: str, violation_reason: str, content_snippet: str = "") -> bool:
+    """Send disciplinary suspension alert email explaining exact policy violation."""
+    subject = "Notice: KOINEXA account suspended"
+    snippet_display = f'<div style="background: #ffffff; border: 1px solid #fecaca; border-radius: 6px; padding: 8px 12px; font-family: \'SF Mono\', monospace; font-size: 11px; color: #991b1b; margin-top: 6px; word-break: break-word;">"{content_snippet}"</div>' if content_snippet else ""
+    
+    html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Suspended</title>
+</head>
+<body style="margin: 0; padding: 40px 16px; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #334155;">
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 480px; margin: 0 auto;">
+    <tr>
+      <td>
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 36px 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+          <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 24px;">
+            <tr>
+              <td>
+                <span style="font-size: 15px; font-weight: 700; color: #0f172a; letter-spacing: -0.2px;">KOINEXA</span>
+              </td>
+              <td align="right">
+                <span style="display: inline-block; font-size: 11px; font-weight: 600; color: #dc2626; background: #fef2f2; border: 1px solid #fee2e2; padding: 2px 9px; border-radius: 9999px;">
+                  Policy Notice
+                </span>
+              </td>
+            </tr>
+          </table>
+
+          <h1 style="margin: 0 0 12px 0; font-size: 20px; font-weight: 700; color: #0f172a; letter-spacing: -0.3px; line-height: 1.3;">
+            Account suspended
+          </h1>
+          
+          <p style="margin: 0 0 18px 0; font-size: 14px; line-height: 1.55; color: #475569;">
+            Hello {recipient_name},<br><br>
+            Your account associated with <strong>{to_email}</strong> has been suspended due to a violation of our community guidelines.
+          </p>
+
+          <div style="background: #fef2f2; border-left: 3px solid #dc2626; border-radius: 6px; padding: 12px 14px; margin: 0 0 18px 0;">
+            <div style="font-size: 11px; font-weight: 600; color: #991b1b; margin-bottom: 2px;">Violation Reason:</div>
+            <div style="font-size: 13px; color: #7f1d1d; line-height: 1.5;">{violation_reason}</div>
+            {snippet_display}
+          </div>
+
+          <p style="margin: 0 0 24px 0; font-size: 13px; line-height: 1.55; color: #64748b;">
+            To appeal this decision, reply directly to <strong>koinexa63@gmail.com</strong> for review by the moderation board.
+          </p>
+
+          <div style="border-top: 1px solid #f1f5f9; padding-top: 18px;">
+            <p style="margin: 0; font-size: 11px; line-height: 1.5; color: #94a3b8;">
+              KOINEXA Trust &amp; Safety &bull; Policy Enforcement
+            </p>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
+    return send_email(to_email, subject, html, "account_suspended", recipient_name)
+
+
+def send_faculty_registration_acknowledgement_email(to_email: str, recipient_name: str, institution: str = "University", designation: str = "Faculty", app_id: str = "") -> bool:
+    """Send official faculty registration acknowledgement."""
+    subject = "KOINEXA faculty application received"
+    html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Application Received</title>
+</head>
+<body style="margin: 0; padding: 40px 16px; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #334155;">
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 480px; margin: 0 auto;">
+    <tr>
+      <td>
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 36px 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+          <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 24px;">
+            <tr>
+              <td>
+                <span style="font-size: 15px; font-weight: 700; color: #0f172a; letter-spacing: -0.2px;">KOINEXA</span>
+              </td>
+              <td align="right">
+                <span style="display: inline-block; font-size: 11px; font-weight: 600; color: #0284c7; background: #f0f9ff; border: 1px solid #e0f2fe; padding: 2px 9px; border-radius: 9999px;">
+                  Received
+                </span>
+              </td>
+            </tr>
+          </table>
+
+          <h1 style="margin: 0 0 12px 0; font-size: 20px; font-weight: 700; color: #0f172a; letter-spacing: -0.3px; line-height: 1.3;">
+            Application received
+          </h1>
+          
+          <p style="margin: 0 0 18px 0; font-size: 14px; line-height: 1.55; color: #475569;">
+            Dear {recipient_name},<br><br>
+            We have received your faculty application for <strong>{institution}</strong>. Our review board is verifying your credentials.
+          </p>
+
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; margin: 0 0 20px 0;">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td style="font-size: 12px; color: #64748b; padding: 4px 0; width: 110px;">Applicant:</td>
+                <td style="font-size: 12px; font-weight: 600; color: #0f172a; padding: 4px 0;">{recipient_name}</td>
+              </tr>
+              <tr>
+                <td style="font-size: 12px; color: #64748b; padding: 4px 0;">Institution:</td>
+                <td style="font-size: 12px; font-weight: 600; color: #0f172a; padding: 4px 0;">{institution}</td>
+              </tr>
+              <tr>
+                <td style="font-size: 12px; color: #64748b; padding: 4px 0;">Role:</td>
+                <td style="font-size: 12px; font-weight: 600; color: #0f172a; padding: 4px 0;">{designation}</td>
+              </tr>
+              {f'<tr><td style="font-size: 12px; color: #64748b; padding: 4px 0;">Reference ID:</td><td style="font-size: 12px; font-family: monospace; font-weight: 600; color: #0f172a; padding: 4px 0;">{app_id}</td></tr>' if app_id else ''}
+            </table>
+          </div>
+
+          <p style="margin: 0 0 24px 0; font-size: 13px; line-height: 1.55; color: #64748b;">
+            Reviews typically complete within 24–48 hours. You will receive an update once processing is complete.
+          </p>
+
+          <div style="border-top: 1px solid #f1f5f9; padding-top: 18px;">
+            <p style="margin: 0; font-size: 11px; line-height: 1.5; color: #94a3b8;">
+              KOINEXA Academic Operations &bull; Verification Queue
+            </p>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
+    return send_email(to_email, subject, html, "faculty_registration_ack", recipient_name)
 
 
 def get_sent_emails(limit: int = 50):

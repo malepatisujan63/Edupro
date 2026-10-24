@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  koinexa:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: koinexa:latest
+    container_name: koinexa_app
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    environment:
+      - PORT=5001
+      - FLASK_DEBUG=0
+      - SMTP_SERVER=${SMTP_SERVER:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USERNAME=${SMTP_USERNAME:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+    volumes:
+      # Persist SQLite database and logs
+      - ./backend/koinexa.db:/app/backend/koinexa.db
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

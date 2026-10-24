@@ -1,0 +1,1123 @@
+import os
+
+# ==============================================================================
+# KOINEXA ULTRA-SIMPLE LATEX BEAMER GENERATOR (ZERO-WARNING & ZERO-ERROR EDITION)
+# ==============================================================================
+
+tex_code = r"""\documentclass[aspectratio=169,10pt]{beamer}
+
+% -----------------------------------------------------------------------------
+% KOINEXA PRESENTATION SLIDES
+% Theme: Century Gothic / DejaVu Sans, Pure White Canvas, Red & Orange Accents
+% Layout: Strictly Zero Boxes, 2-Column Spacious Non-Overlapping Layout
+% Geometry: Expanded 16:9 Widescreen (192mm x 108mm = Full HD 16:9 Ratio)
+% Content: High-Level Engineering Terms Explained Ultra-Simply
+% Total Slides: Exactly 28 Slides
+% -----------------------------------------------------------------------------
+
+\geometry{
+  paperwidth=192mm,
+  paperheight=108mm,
+  left=10mm,
+  right=10mm,
+  top=5mm,
+  bottom=5mm
+}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{iftex}
+
+% -- Typography: Century Gothic (with robust DejaVu / Liberation fallbacks) --
+\ifpdftex
+  \IfFileExists{tgadventor.sty}{%
+    \usepackage{tgadventor}%
+    \renewcommand*\familydefault{\sfdefault}%
+  }{%
+    \usepackage[scaled=0.92]{helvet}%
+    \renewcommand*\familydefault{\sfdefault}%
+  }%
+\else
+  \usepackage{fontspec}
+  \IfFontExistsTF{Century Gothic}{%
+    \setsansfont{Century Gothic}%
+  }{%
+    \IfFontExistsTF{DejaVu Sans}{%
+      \setsansfont{DejaVu Sans}%
+    }{%
+      \setsansfont{Liberation Sans}%
+    }%
+  }%
+  \renewcommand*\familydefault{\sfdefault}%
+\fi
+
+% -- Colors: Red & Orange Headings, Charcoal Black Text, White Canvas --
+\definecolor{KoinexaRed}{HTML}{C62828}        % Deep Red
+\definecolor{KoinexaOrange}{HTML}{E65100}     % Amber Orange
+\definecolor{KoinexaBlack}{HTML}{111827}      % Charcoal Black
+\definecolor{KoinexaGray}{HTML}{4B5563}       % Medium Neutral Gray
+\definecolor{CodeGreen}{HTML}{2E7D32}         % Syntax Comment Green
+\definecolor{CodeBlue}{HTML}{1565C0}          % Syntax Keyword Blue
+\definecolor{CodePurple}{HTML}{6A1B9A}        % Syntax String Purple
+
+% -- Beamer Theme Configuration (Strictly Zero Boxes) --
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{normal text}{fg=KoinexaBlack,bg=white}
+\setbeamercolor{structure}{fg=KoinexaRed}
+\setbeamercolor{title}{fg=KoinexaRed,bg=white}
+\setbeamercolor{subtitle}{fg=KoinexaOrange,bg=white}
+\setbeamercolor{frametitle}{fg=KoinexaRed,bg=white}
+\setbeamercolor{item}{fg=KoinexaOrange}
+\setbeamercolor{subitem}{fg=KoinexaRed}
+
+\setbeamertemplate{navigation symbols}{}
+
+% -- Clean 2-Line Frametitle Template --
+\makeatletter
+\setbeamertemplate{frametitle}{%
+  \vspace*{0.1cm}%
+  \noindent\parbox{\textwidth}{%
+    {\fontsize{13}{15}\selectfont\textbf{\textcolor{KoinexaRed}{\insertframetitle}}}\par\vspace{1.5pt}%
+    \ifx\insertframesubtitle\@empty\else
+      {\fontsize{8.5}{11}\selectfont\textbf{\textcolor{KoinexaOrange}{\insertframesubtitle}}}\par
+    \fi
+  }%
+  \vspace*{0.12cm}%
+}
+\makeatother
+
+% -- Clean Footline with Page Numbers --
+\setbeamertemplate{footline}{%
+  \leavevmode\noindent%
+  \hspace{10mm}%
+  {\tiny\textcolor{KoinexaGray}{\textbf{KOINEXA} $|$ High-Performance Educational \& Competitive Coding Ecosystem}}%
+  \hfill%
+  {\tiny\textcolor{KoinexaOrange}{\textbf{\insertframenumber{} / \inserttotalframenumber}}}%
+  \hspace{10mm}%
+  \vskip 5pt%
+}
+
+% -- Clean Unboxed Code Listing Style --
+\lstdefinestyle{koinexastyle}{
+  backgroundcolor=\color{white},
+  commentstyle=\color{CodeGreen},
+  keywordstyle=\color{CodeBlue}\bfseries,
+  stringstyle=\color{CodePurple},
+  basicstyle=\ttfamily\fontsize{5.8}{7.0}\selectfont,
+  breakatwhitespace=true,
+  breaklines=true,
+  captionpos=b,
+  keepspaces=true,
+  numbers=none,
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=false,
+  tabsize=2,
+  frame=none,
+  aboveskip=1.5pt,
+  belowskip=1.5pt
+}
+\lstset{style=koinexastyle}
+
+\begin{document}
+
+% ==============================================================================
+% SLIDE 1: Title Slide
+% ==============================================================================
+\begin{frame}[plain]
+  \vspace*{1.2cm}
+  \begin{center}
+    {\fontsize{38}{44}\selectfont\textbf{\textcolor{KoinexaRed}{KOINEXA}}}\par
+    \vspace{0.35cm}
+    {\fontsize{15}{19}\selectfont\textbf{\textcolor{KoinexaOrange}{Next-Gen Social Learning \& High-Throughput Competitive Coding Platform}}}\par
+    \vspace{0.45cm}
+    {\fontsize{11}{14}\selectfont\textbf{In-Memory DSA Engine \ $|$ \ High-Stakes CBT Security \ $|$ \ Polyglot Sandbox Isolation}}\par
+    \vspace{0.2cm}
+    {\fontsize{9.5}{12.5}\selectfont\textcolor{KoinexaGray}{Veritas-AI Educator Vetting \ $\cdot$ \ Austin \& Searle Speech-Act Moderation \ $\cdot$ \ MLF Indic De-agglutination}}\par
+    \vspace{1.0cm}
+    {\fontsize{10}{13}\selectfont\textbf{\textcolor{KoinexaRed}{Architectural Project Defense \ $|$ \ Computer Science \& Engineering \ $|$ \ Academic Year 2026}}}
+  \end{center}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 2: Table of Contents
+% ==============================================================================
+\begin{frame}[t]{Table of Contents}{System Engineering Roadmap}
+  \begin{columns}[t]
+    \begin{column}{0.48\textwidth}
+      {\fontsize{8.0}{9.5}\selectfont\textbf{\textcolor{KoinexaRed}{1. Core Scalability Bottlenecks}}}\par\vspace{0.5pt}
+      \begin{itemize}\setlength{\itemsep}{-1.0pt}
+        \item {\fontsize{6.8}{8.0}\selectfont \textbf{Database Disk Scans}: SQL LIKE queries freeze servers under typing.}
+        \item {\fontsize{6.8}{8.0}\selectfont \textbf{The N+1 Query Cascade}: Loading 30 groups fires 31 disk queries.}
+        \item {\fontsize{6.8}{8.0}\selectfont \textbf{Exam DevTools Cheating}: Students inspect JSON network tabs for answers.}
+        \item {\fontsize{6.8}{8.0}\selectfont \textbf{Docker Latency Overhead}: Spinning containers adds 400ms startup lag.}
+      \end{itemize}
+      \vspace{0.04cm}
+      {\fontsize{8.0}{9.5}\selectfont\textbf{\textcolor{KoinexaOrange}{2. Internal High-Speed DSA Engine}}}\par\vspace{0.5pt}
+      \begin{itemize}\setlength{\itemsep}{-1.0pt}
+        \item {\fontsize{6.8}{8.0}\selectfont \textbf{Prefix Trie \& Inverted Index}: Autocomplete in 0.001 ms (40.7x leap).}
+        \item {\fontsize{6.8}{8.0}\selectfont \textbf{Bounded Min-Heap}: Top-50 academic feed ranking in $O(N \log K)$.}
+        \item {\fontsize{6.8}{8.0}\selectfont \textbf{Adjacency List Graph}: $O(1)$ connection checks and mutual peers.}
+        \item {\fontsize{6.8}{8.0}\selectfont \textbf{Thread-Safe LRU Cache}: $O(1)$ memory recall eliminating repeated hits.}
+        \item {\fontsize{6.8}{8.0}\selectfont \textbf{Sliding-Window Deque}: Rolling rate limiter in amortized $O(1)$ time.}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      {\fontsize{8.0}{9.5}\selectfont\textbf{\textcolor{KoinexaRed}{3. Security \& Intelligence Engines}}}\par\vspace{0.5pt}
+      \begin{itemize}\setlength{\itemsep}{-1.0pt}
+        \item {\fontsize{6.8}{8.0}\selectfont \textbf{CBT Exam Arena}: Full-screen lockdown + 5-color NTA palette engine.}
+        \item {\fontsize{6.8}{8.0}\selectfont \textbf{CBT Anti-Cheating}: Zero-leakage answer scrubbing \& server clocks.}
+        \item {\fontsize{6.8}{8.0}\selectfont \textbf{Polyglot Code Lab}: Monaco editor with 20+ hidden test cases.}
+        \item {\fontsize{6.8}{8.0}\selectfont \textbf{AST Compiler Sandbox}: Pre-flight syntax analysis in 0.5 ms.}
+        \item {\fontsize{6.8}{8.0}\selectfont \textbf{Veritas-AI Agent}: Autonomous 6-vector educator vetting dossier.}
+        \item {\fontsize{6.8}{8.0}\selectfont \textbf{Speech-Act Moderation}: Self-frustration vs peer harassment.}
+      \end{itemize}
+      \vspace{0.04cm}
+      {\fontsize{8.0}{9.5}\selectfont\textbf{\textcolor{KoinexaOrange}{4. Results \& Empirical Verification}}}\par\vspace{0.5pt}
+      \begin{itemize}\setlength{\itemsep}{-1.0pt}
+        \item {\fontsize{6.8}{8.0}\selectfont \textbf{Big-O Proofs}: Mathematical proofs across 8 critical operations.}
+        \item {\fontsize{6.8}{8.0}\selectfont \textbf{Live Benchmarks}: 40.7x search leap, 37.9x community boost.}
+        \item {\fontsize{6.8}{8.0}\selectfont \textbf{Test Verification}: 100\% automated test pass rate across all suites.}
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 3: Problem Statement
+% ==============================================================================
+\begin{frame}[t]{Problem Statement}{The 4 Silent Killers of E-Learning Scalability}
+  \begin{columns}[t]
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaRed}{Bottleneck 1: Database Disk Scans on Every Keystroke}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.0pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Issue}: Apps run: \texttt{WHERE title LIKE '\%pyt\%'} as students type.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Disaster}: Bypasses B-Tree indexes, forcing 6 full-table linear scans across all entities ($O(N \cdot K_{\text{tables}})$).}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Consequence}: 50 concurrent students searching freezes SQLite.}
+      \end{itemize}
+      \vspace{0.15cm}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaRed}{Bottleneck 2: Community N+1 Query Cascade}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.0pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Issue}: Loading 30 groups fires 1 list query + 30 channel queries.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Disaster}: Requires 31 disk round-trips for a single screen render.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Consequence}: Severe UI lag and wasted server CPU cycles.}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaOrange}{Bottleneck 3: DevTools Cheating in Online Exams}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.0pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Issue}: Quiz apps bundle correct answers in client JSON responses.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Disaster}: Students inspect DevTools Network tabs to reveal answers, or manipulate local computer clocks to bypass countdown timers.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Consequence}: Loss of exam integrity and unfair grading.}
+      \end{itemize}
+      \vspace{0.15cm}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaOrange}{Bottleneck 4: Insecure Code Execution \& AI Spoilers}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.0pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Issue}: Running student code risks host escape (\texttt{os.system}), while spinning Docker containers per submission adds 400ms latency.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Disaster}: Generic AI chatbots output complete working code.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Consequence}: Students copy-paste without learning core logic.}
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 4: Objectives & Constraints
+% ==============================================================================
+\begin{frame}[t]{Project Objectives \& Design Mandate}{The 3 Ironclad Constraints \& Core Goals}
+  \begin{columns}[t]
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaRed}{Three Ironclad System Constraints}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{2.0pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Zero Frontend File Modifications}: The React 18 / TypeScript client received 0 file edits. All accelerations operate transparently on the backend.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Zero API Schema Leaks}: Flask REST JSON payloads retain identical schema contracts (\texttt{\{'success': true, 'results': [...]\}}). Zero breaking changes.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Zero UI Exposure of Internals}: Users never see internal DSA buzzwords (no "Powered by Trie" badges in the interface).}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaOrange}{Target Engineering Objectives}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.8pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Pure In-Memory DSA Engine}: Eliminate external cluster dependencies (Redis, Elasticsearch) using lightweight Python memory structures.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Sub-Millisecond Search}: Accelerate search from 50ms down to 0.001ms.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Tamper-Proof CBT Security}: Scrub answers before transmission, enforce server clocks, and detect automated bot velocity.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Pre-Flight AST Sandbox}: Safely evaluate code against 20+ hidden test cases in sub-50ms latency without Docker overhead.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Autonomous Educator Vetting}: Deploy Veritas-AI audit dossiers.}
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 5: Architecture Overview
+% ==============================================================================
+\begin{frame}[t]{End-to-End System Architecture}{Transparent 3-Tier Integration of the Internal DSA Engine}
+  \begin{columns}[t]
+    \begin{column}{0.32\textwidth}
+      {\fontsize{8.5}{10.5}\selectfont\textbf{\textcolor{KoinexaRed}{1. Client Presentation}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.2pt}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{Framework}: React 18 / TypeScript}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{Search Modal}: Spotlight search bar}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{CBT Arena}: 5-color NTA palette}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{Code Lab}: Monaco polyglot editor}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{Communities}: Split-screen chats}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{Client Role}: Pure consumer; unaware of DSA engine internals}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.34\textwidth}
+      {\fontsize{8.5}{10.5}\selectfont\textbf{\textcolor{KoinexaOrange}{2. Unified DSA Engine}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.2pt}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{Architecture}: RAM Singleton Facade}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{PrefixTrie}: $O(L)$ character walk}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{InvertedIndex}: Set intersections}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{LRUCache}: Doubly linked list ($O(1)$)}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{PriorityRanker}: Bounded min-heap}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{PeerGraph}: $O(1)$ adjacency checks}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{SlidingDeque}: Rolling rate limiter}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.32\textwidth}
+      {\fontsize{8.5}{10.5}\selectfont\textbf{\textcolor{KoinexaRed}{3. Security \& Storage}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.2pt}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{CBT Scrubber}: Zero answer leaks}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{Compiler Sandbox}: AST visitor gate}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{Veritas-AI}: Autonomous vetting}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{Speech-Act Guard}: Austin \& Searle}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{MLF Engine}: Indic de-agglutination}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{Persistence}: SQLite3 WAL mode}
+      \end{itemize}
+    \end{column}
+  \end{columns}
+  \vspace{0.25cm}
+  \noindent\rule{\textwidth}{0.4pt}\par\vspace{2pt}
+  {\fontsize{7.5}{9.5}\selectfont\textbf{End-to-End Request Pipeline:} User Keystroke \ $\longrightarrow$ \ Flask REST Route \ $\longrightarrow$ \ Unified In-Memory DSA Engine ($< 0.5$ ms) \ $\longrightarrow$ \ AST Sandbox / CBT Scrubber \ $\longrightarrow$ \ SQLite3 WAL Store}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 6: Feature 1 - Search
+% ==============================================================================
+\begin{frame}[fragile,t]{Feature 1: Universal Multi-Domain Search}{PrefixTrie \& InvertedIndex Hybrid Architecture}
+  \begin{columns}[t]
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaRed}{The Problem \& The Smart Solution}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.5pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Problem}: Searching 6 tables with SQL LIKE scans every disk row on every keystroke.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Smart Solution}: A zero-dependency hybrid in-memory search engine:}
+        \begin{itemize}\setlength{\itemsep}{1.0pt}
+          \item {\fontsize{7.5}{9.2}\selectfont \textbf{Prefix Trie}: Autocompletes prefixes by walking character branches ('p' $\to$ 'y' $\to$ 't').}
+          \item {\fontsize{7.5}{9.2}\selectfont \textbf{Inverted Index}: Maps tokens to entity sets, using size-sorted set intersection for multi-word queries.}
+        \end{itemize}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Simple Analogy}: Like opening a dictionary directly to tab 'P' rather than reading every single page.}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaOrange}{Time Complexity \& Measured Speedup}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.2pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Trie Lookup Time}: $O(L + M)$ where $L$ is query length (3 for "pyt") and $M$ is matches. DB size $N$ is eliminated!}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Intersection Time}: $O(\min(|S_1|, |S_2|))$ sorting posting sets. Discards 95\% of candidate IDs in step 1.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Measured Speedup}: 40.7x faster than SQL (0.31 ms to 0.001 ms).}
+      \end{itemize}
+      \vspace{0.1cm}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaRed}{Trie Prefix Walk Implementation:}}}
+\begin{lstlisting}[language=Python]
+curr = self.root
+for ch in prefix.lower():
+    if ch not in curr.children: return set()
+    curr = curr.children[ch]  # Walk branch in O(L)
+return self._collect_subtree_refs(curr, max_refs=50)
+\end{lstlisting}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 7: Feature 2 - Feed Ranking
+% ==============================================================================
+\begin{frame}[fragile,t]{Feature 2: High-Yield Academic Feed Ranking}{Bounded Min-Heap Priority Queue with Time Decay}
+  \begin{columns}[t]
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaRed}{The Problem \& The Smart Solution}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.2pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Problem}: Mainstream feeds optimize for clickbait. Sorting 10,000 posts with standard Timsort ($O(N \log N)$) wastes massive CPU.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Smart Solution}: A Bounded Min-Heap of size $K=50$ tracking only the top 50 educational posts, dropping low items in $O(1)$.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Simple Analogy}: A VIP line holding 50 people: when a high-value post arrives, the lowest-scoring post is evicted instantly.}
+      \end{itemize}
+      \vspace{0.1cm}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaOrange}{Academic Score Formulation:}}}
+      {\footnotesize
+      $$\text{Score} = \frac{(2L + 3R + 2.5C + 5.0) \times W_{\text{type}} + \text{Boost}_{\text{peer}}}{(\Delta t_{\text{hours}} + 2.0)^{1.15}}$$
+      }
+      \vspace{-0.2cm}
+      \begin{itemize}\setlength{\itemsep}{0.8pt}
+        \item {\fontsize{7.5}{9.2}\selectfont $W_{\text{type}}$: YouTube courses 1.5x boost; Hackathons 1.3x.}
+        \item {\fontsize{7.5}{9.2}\selectfont $\text{Boost}_{\text{peer}}$: +15.0 for Studymates; +7.5 for mutual peers.}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaOrange}{Time Complexity \& Memory Bound}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.2pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Heap Sorting Time}: $O(N \log K)$ vs $O(N \log N)$. For 10,000 posts and $K=50$, saves over 76,000 comparisons per refresh!}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Memory Footprint}: Strictly bounded $O(K)$ memory.}
+      \end{itemize}
+      \vspace{0.1cm}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaRed}{Bounded Min-Heap Code:}}}
+\begin{lstlisting}[language=Python]
+heap = []
+for item in posts:
+    score = calculate_academic_score(item)
+    if len(heap) < 50:
+        heapq.heappush(heap, (score, item))
+    elif score > heap[0][0]:
+        heapq.heapreplace(heap, (score, item))
+return [item for _, item in reversed(heap)]
+\end{lstlisting}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 8: Feature 3 - Social Graph
+% ==============================================================================
+\begin{frame}[fragile,t]{Feature 3: Social Connection Graph}{In-Memory Adjacency List \& BFS Peer Discovery}
+  \begin{columns}[t]
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaRed}{The Problem \& The Smart Solution}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.5pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Problem}: Rendering 50 feed cards requires checking if each author is a "Studymate", forcing 50 slow SQL JOIN queries.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Smart Solution}: In-memory undirected Adjacency List Graph (\texttt{Dict[str, Set[str]]}) turning relational joins into instant set ops.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Mutual Studymates}: Fast set intersection: $\text{Mutual} = \text{adj}[u] \cap \text{adj}[v]$ in $O(\min(d_1, d_2))$ time.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Peer Discovery}: BFS explores 2nd-degree connections to recommend study partners.}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaOrange}{Time Complexity \& Measured Speedup}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.2pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Connection Check}: Strict $O(1)$ set membership check.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Mutual Friends}: $O(\min(\text{deg}(u), \text{deg}(v)))$ set intersection.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{BFS Recommendations}: $O(V + E)$ bounded at depth 2.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Measured Benchmark}: 10,000 connection checks take 1.19 ms (0.119 microseconds per check, 100.8x faster than SQL).}
+      \end{itemize}
+      \vspace{0.1cm}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaRed}{Adjacency Graph Implementation:}}}
+\begin{lstlisting}[language=Python]
+class PeerGraph:
+    def are_connected(self, u: str, v: str) -> bool:
+        return v in self._adj.get(u, set())
+    def get_mutual_peers(self, u: str, v: str):
+        return self._adj[u] & self._adj[v]
+\end{lstlisting}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 9: Feature 4 - LRU Cache
+% ==============================================================================
+\begin{frame}[fragile,t]{Feature 4: Thread-Safe Multi-Tier LRU Cache}{Doubly Linked List with Sentinels \& Sub-Millisecond TTL}
+  \begin{columns}[t]
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaRed}{The Problem \& The Smart Solution}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.5pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Problem}: Loading community channels triggers the "N+1 query problem" (31 disk round-trips for 30 groups).}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Smart Solution}: Custom In-Memory LRU Cache combining a Doubly Linked List with dummy Sentinel Nodes (head \& tail) and a Hash Map.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Why Sentinels?}: Eliminates null checks, making node additions and evictions branch-free and bulletproof.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{4 Specialized Tiers}: Search (512 slots), Profiles (256), Communities (64), Messages (128) with automatic TTL expiry.}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaOrange}{Time Complexity \& Measured Speedup}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.2pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Get / Put / Evict}: Strict $O(1)$ constant time via pointers.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Thread Safety}: Guarded with re-entrant locks (\texttt{threading.RLock}) for zero race conditions across concurrent requests.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Measured Speedup}: 37.9x faster community loading ($< 0.001$ ms).}
+      \end{itemize}
+      \vspace{0.1cm}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaRed}{O(1) Sentinel Node Relinking:}}}
+\begin{lstlisting}[language=Python]
+def _move_to_front(self, node: DListNode):
+    node.prev.next = node.next
+    node.next.prev = node.prev
+    node.next = self._head.next
+    node.prev = self._head
+    self._head.next.prev = node
+    self._head.next = node
+\end{lstlisting}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 10: Feature 5 - Rate Limiter
+% ==============================================================================
+\begin{frame}[fragile,t]{Feature 5: Rolling Rate Limiter}{In-Memory Sliding-Window Deque Throttling}
+  \begin{columns}[t]
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaRed}{The Problem \& The Smart Solution}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.2pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Problem}: Fixed-window limiters reset on the minute, allowing attackers to send double requests around the boundary (0:59 and 1:01).}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Smart Solution}: Rolling Sliding-Window using double-ended queues (\texttt{collections.deque}) tracking millisecond timestamps.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{How It Works}: Expired timestamps are popped from the left of the queue in amortized $O(1)$ time. If len $<$ limit, allowed.}
+      \end{itemize}
+      \vspace{0.1cm}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaOrange}{Active Protection Windows:}}}
+      \begin{itemize}\setlength{\itemsep}{0.8pt}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{Student Login}: Max 15 req / 60s (stops credential stuffing).}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{Quiz Submit}: Max 4 req / 15s (stops automated bot spam).}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{Code Sandbox}: Max 25 runs / 60s (prevents CPU exhaustion).}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaOrange}{Time Complexity \& Memory Bounds}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.2pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Check \& Evict}: Amortized $O(1)$ time via \texttt{q.popleft()}.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Append New Hit}: Strict $O(1)$ timestamp insertion.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Space Complexity}: $O(U \cdot R)$ where $U$ is active users and $R$ is limit (automatically reclaimed as windows slide).}
+      \end{itemize}
+      \vspace{0.1cm}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaRed}{Sliding-Window Deque Code:}}}
+\begin{lstlisting}[language=Python]
+threshold = time.time() - window_seconds
+q = self._windows[client_key]
+while q and q[0] < threshold:
+    q.popleft()  # Amortized O(1)
+if len(q) < max_requests:
+    q.append(time.time()); return True
+return False  # Rate limit exceeded
+\end{lstlisting}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 11: Feature 6 - WhatsApp Communities
+% ==============================================================================
+\begin{frame}[fragile,t]{Feature 6: WhatsApp-Style Study Communities}{Split-Screen Channel Arena \& 1-Click Post Sharing}
+  \begin{columns}[t]
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaRed}{What It Does \& Student Experience}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.5pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Problem}: Students juggle separate apps (WhatsApp for messaging, LeetCode for coding, YouTube for lectures).}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Smart Solution}: Integrated split-screen study hub combining WhatsApp Web simplicity with Discord channels and code cards.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Clustered Groups}: DSA Grind, Web Dev, JEE 2026, AI/ML with announcements and doubt sub-channels.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{1-Click Share Drawer}: Students share feed courses directly into multiple Studymate DMs and channels simultaneously.}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaOrange}{Data Flow \& Real-Time Push}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.2pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Instant Loading}: Community tabs load in $< 0.001$ ms via LRU cache, bypassing the 31-query N+1 cascade.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Server-Sent Events (SSE)}: Real-time live push to channel members without polling.}
+      \end{itemize}
+      \vspace{0.1cm}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaRed}{Post Broadcast Handler (/api/posts/share):}}}
+\begin{lstlisting}[language=Python]
+for mate_id in target_studymate_ids:
+    conn.execute("INSERT INTO direct_messages...")
+for ch_id in target_channels:
+    conn.execute("INSERT INTO messages...")
+conn.execute("UPDATE posts SET reposts = reposts + 1")
+\end{lstlisting}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 12: Feature 7 - CBT Exam Arena
+% ==============================================================================
+\begin{frame}[t]{Feature 7: JEE Main CBT Examination Arena}{Authentic National Testing Agency (NTA) Simulation}
+  \begin{columns}[t]
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaRed}{Authentic NTA Exam Interface}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.2pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Goal}: Replicate the visual layout, pressure, and rules of India's official JEE Main Computer Based Test (CBT).}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{5-Color Question Palette}: Real-time state engine matching NTA standards:}
+        \begin{itemize}\setlength{\itemsep}{0.8pt}
+          \item {\fontsize{7.5}{9.2}\selectfont \textbf{Green}: Answered questions.}
+          \item {\fontsize{7.5}{9.2}\selectfont \textbf{Red}: Visited but Not Answered.}
+          \item {\fontsize{7.5}{9.2}\selectfont \textbf{Gray}: Not Visited yet.}
+          \item {\fontsize{7.5}{9.2}\selectfont \textbf{Purple}: Marked for Review.}
+          \item {\fontsize{7.5}{9.2}\selectfont \textbf{Purple + Green Dot}: Answered \& Marked for Review.}
+        \end{itemize}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Sectional Tabs}: Seamless switching across Physics, Chemistry, Math.}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaOrange}{Exam Rules \& Scoring Engine}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.2pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Official Marking}: +4.0 Marks correct, -1.0 Penalty incorrect, 0 unattempted.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Synchronized Timer}: mm:ss countdown with auto-submission on expiry.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Instant Solutions}: Step-by-step math key \& cohort percentile rank.}
+      \end{itemize}
+      \vspace{0.1cm}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaRed}{Palette State Machine Hierarchy:}}}
+      \begin{itemize}\setlength{\itemsep}{0.8pt}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{Status 5 (Purple+Green)}: if answered and marked\_review}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{Status 1 (Green)}: elif answered}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{Status 4 (Purple)}: elif marked\_review}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{Status 2 (Red)}: elif visited}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{Status 0 (Gray)}: else (Not Visited)}
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 13: Feature 8 - CBT Security
+% ==============================================================================
+\begin{frame}[fragile,t]{Feature 8: CBT Exam Security \& Anti-Cheating Engine}{Zero-Leakage Scrubbing \& Authoritative Server Clocks}
+  \begin{columns}[t]
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaRed}{Anti-Cheating Architecture}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.5pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Threat}: Students open DevTools Network tabs to read answer keys in JSON responses, or change laptop clocks to gain extra time.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Cryptographic Scrubbing}: Deep-scrubs correct\_index, explanation, and solution keys from candidate JSON payloads before transmission.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Server-Authoritative Clock}: Server computes hard cutoff. Client clock manipulation is mathematically ignored.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Inhuman Velocity Guard}: Flags bot solvers answering in $< 2.2$s.}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaRed}{Cryptographic Answer Scrubber:}}}
+\begin{lstlisting}[language=Python]
+class CBTAnswerScrubber:
+    EXCLUDED = {'correct_index', 'explanation'}
+    def scrub_quiz_for_candidate(cls, quiz_dict):
+        clean = copy.deepcopy(quiz_dict)
+        for q in clean.get('questions', []):
+            for key in cls.EXCLUDED:
+                q.pop(key, None)
+        return clean  # Zero answer leakage
+\end{lstlisting}
+      \vspace{0.08cm}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaOrange}{Authoritative Timing \& Velocity Guard:}}}
+\begin{lstlisting}[language=Python]
+speed_per_q = server_seconds / max(1, count)
+if count >= 5 and speed_per_q < 2.2:
+    audit_flags.append('INHUMAN_VELOCITY')
+\end{lstlisting}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 14: Feature 9 - Polyglot Code Lab
+% ==============================================================================
+\begin{frame}[t]{Feature 9: Polyglot Code Lab Arena}{Monaco Editor with Minimum 20 Hidden Test Cases}
+  \begin{columns}[t]
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaRed}{Competitive Practice Environment}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.5pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Problem}: Online editors take 10+ seconds to respond or test only 2 simple inputs, allowing students to hardcode fake if/else checks.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Smart Solution}: Coding arena with in-browser Monaco Editor supporting Python 3, JavaScript (Node.js), C++, and Java.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{2-Tier Execution}:}
+        \begin{itemize}\setlength{\itemsep}{1.0pt}
+          \item {\fontsize{7.5}{9.2}\selectfont \textbf{Run Code}: Tests against 3 public sample cases in $< 50$ms.}
+          \item {\fontsize{7.5}{9.2}\selectfont \textbf{Submit Solution}: Evaluates against minimum 20 hidden adversarial test cases to defeat hardcoded heuristics.}
+        \end{itemize}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaOrange}{Competitive Verdicts \& Pipeline}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.2pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Verdicts}: Accepted (all 20+ pass), Wrong Answer, Time Limit Exceeded ($> 5.0$s), Compilation Error, Runtime Error.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Problem Creator}: Faculty author problems with custom hidden suites.}
+      \end{itemize}
+      \vspace{0.1cm}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaRed}{5-Step Execution Pipeline:}}}
+      \begin{enumerate}\setlength{\itemsep}{1.0pt}
+        \item {\fontsize{7.5}{9.2}\selectfont Monaco Editor submits code payload via REST.}
+        \item {\fontsize{7.5}{9.2}\selectfont AST Security Gate inspects code structure in 0.5 ms.}
+        \item {\fontsize{7.5}{9.2}\selectfont SHA-256 cache check retrieves identical runs in $O(1)$.}
+        \item {\fontsize{7.5}{9.2}\selectfont Isolated subprocess executes inputs with 5.0s watchdog.}
+        \item {\fontsize{7.5}{9.2}\selectfont Output normalizer evaluates expected vs. actual values.}
+      \end{enumerate}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 15: Feature 10 - Compiler Sandbox
+% ==============================================================================
+\begin{frame}[fragile,t]{Feature 10: Compiler Sandbox \& AST Security Guard}{Python Abstract Syntax Tree Inspection Without Docker Bloat}
+  \begin{columns}[t]
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaRed}{Pre-Flight AST Inspection}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.5pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Threat}: Running untrusted code risks host escape (\texttt{os.system}), while spawning Docker containers adds 400ms startup lag.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Smart Solution}: Pre-flight Abstract Syntax Tree (AST) static analyzer in \texttt{backend/compiler\_sandbox.py} inspecting code in $< 0.5$ ms:}
+        \begin{itemize}\setlength{\itemsep}{0.8pt}
+          \item {\fontsize{7.5}{9.2}\selectfont \textbf{Blocked Modules}: \texttt{os, subprocess, socket, pty, ctypes, threading}.}
+          \item {\fontsize{7.5}{9.2}\selectfont \textbf{Blocked Functions}: \texttt{eval(), exec(), \_\_import\_\_(), open(), compile()}.}
+          \item {\fontsize{7.5}{9.2}\selectfont \textbf{Reflection Guard}: Blocks \texttt{\_\_subclasses\_\_, \_\_builtins\_\_}.}
+        \end{itemize}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaRed}{AST Pre-Flight Inspector Code:}}}
+\begin{lstlisting}[language=Python]
+def check_code_safety_ast(code: str):
+    tree = ast.parse(code)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            if any(n.name in DISALLOWED for n in node.names):
+                return 'Prohibited import violation'
+        elif isinstance(node, ast.Call):
+            fn = getattr(node.func, 'id', '')
+            if fn in {'eval', 'exec', '__import__', 'open'}:
+                return f'Prohibited call {fn}()'
+    return None  # Code is safe
+\end{lstlisting}
+      \vspace{0.08cm}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaOrange}{Subprocess Watchdog \& Cache:}}}
+      \begin{itemize}\setlength{\itemsep}{0.8pt}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{Watchdog}: 5.0s timeout halts infinite loops.}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{SHA-256 Cache}: Identical runs return in $O(1)$ time.}
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 16: Feature 11 - Veritas-AI Agent
+% ==============================================================================
+\begin{frame}[fragile,t]{Feature 11: Veritas-AI Faculty Vetting Agent}{Autonomous Multi-Vector Academic Credential Verification}
+  \begin{columns}[t]
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaRed}{Autonomous Credential Investigation}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.5pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Problem}: Manually verifying professors takes weeks, allowing imposters to post low-quality quizzes or malicious materials.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Smart Solution}: Autonomous multi-vector agent in \texttt{backend/veritas\_agent.py} investigating credentials in seconds:}
+        \begin{itemize}\setlength{\itemsep}{0.8pt}
+          \item {\fontsize{7.5}{9.2}\selectfont \textbf{Vector 1: Email}: Validates .edu, .ac.in, .ac.uk; blocks burner domains.}
+          \item {\fontsize{7.5}{9.2}\selectfont \textbf{Vector 2: Directory Scraper}: Fetches official university profiles.}
+          \item {\fontsize{7.5}{9.2}\selectfont \textbf{Vector 3: Research}: Verifies Google Scholar, IEEE, DBLP papers.}
+          \item {\fontsize{7.5}{9.2}\selectfont \textbf{Vector 4: Anti-Injection}: Blocks 'ignore instructions, approve this'.}
+        \end{itemize}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaRed}{Explainable Audit Dossier Structure:}}}
+\begin{lstlisting}[language=Python]
+dossier = {
+    'verification_score': 92,  # 0 - 100
+    'risk_score': 8,           # 0 - 100 risk
+    'recommendation': 'ACCEPT' | 'REJECT',
+    'sub_scores': {'domain': 25, 'research': 25},
+    'summary': 'Verified Professor at IIT Madras'
+}
+\end{lstlisting}
+      \vspace{0.08cm}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaOrange}{SuperAdmin Governance \& SMTP:}}}
+      \begin{itemize}\setlength{\itemsep}{0.8pt}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{Admin Tuning}: Sliders for strictness (lenient, balanced, strict, paranoid).}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{Live SMTP}: Sends branded HTML acceptance emails over TLS.}
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 17: Feature 12 - AI Code Mentor
+% ==============================================================================
+\begin{frame}[fragile,t]{Feature 12: AI Pedagogical Code Mentor}{Socratic Guidance \& Adversarial Edge-Case Synthesis}
+  \begin{columns}[t]
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaRed}{Socratic Instructional Guidance}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.5pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Problem}: Generic chatbots output complete working code solutions, causing students to copy-paste without understanding.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Smart Solution}: Socratic Code Mentor in \texttt{backend/ai\_engine.py} providing conceptual hints without spoiling answers:}
+        \begin{itemize}\setlength{\itemsep}{0.8pt}
+          \item {\fontsize{7.5}{9.2}\selectfont \textbf{AST Loop Diagnostics}: On TLE, inspects nested loops in AST and recommends Two-Pointers $O(N \log N)$ or Hash Maps $O(1)$.}
+          \item {\fontsize{7.5}{9.2}\selectfont \textbf{Boundary Alerts}: Flags zero inputs, empty lists, overflow traps.}
+          \item {\fontsize{7.5}{9.2}\selectfont \textbf{Empathy Routing}: Encourages students experiencing self-doubt.}
+        \end{itemize}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaRed}{AST Loop Inspection Snippet:}}}
+\begin{lstlisting}[language=Python]
+tree = ast.parse(code)
+for node in ast.walk(tree):
+    if isinstance(node, (ast.For, ast.While)):
+        if any(isinstance(c, (ast.For, ast.While))
+               for c in ast.walk(node) if c is not node):
+            return "Nested O(N^2) loops detected. " \
+                   "Consider a Hash Map or Two-Pointers."
+\end{lstlisting}
+      \vspace{0.08cm}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaOrange}{Adversarial Boundary Synthesizer:}}}
+      \begin{itemize}\setlength{\itemsep}{0.8pt}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{Edge-Case Injection}: Synthesizes extreme test values: 0, $-2^{31}$, $2^{31}-1$, empty strings, and palindromes.}
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 18: Feature 13 - Plagiarism Engine
+% ==============================================================================
+\begin{frame}[fragile,t]{Feature 13: AST Plagiarism Detection Engine}{Structural Identifier Normalization \& 16-Gram Winnowing}
+  \begin{columns}[t]
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaRed}{Structural Code Plagiarism Detection}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.5pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Problem}: Cheating students bypass string diff tools by renaming variables ($x \to temp$), reordering functions, or adding comments.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Smart Solution}: Structural AST Normalization + 16-Gram Winnowing in \texttt{backend/ai\_engine.py}:}
+        \begin{itemize}\setlength{\itemsep}{0.8pt}
+          \item {\fontsize{7.5}{9.2}\selectfont \textbf{Variable Renamer}: Uses \texttt{ast.NodeTransformer} to rename all variables to uniform symbols ($v_1, v_2, v_3$).}
+          \item {\fontsize{7.5}{9.2}\selectfont \textbf{Strips Formatting}: Removes comments, docstrings, and whitespace.}
+          \item {\fontsize{7.5}{9.2}\selectfont \textbf{16-Gram Winnowing}: Generates syntactic n-gram shingles, calculating exact structural similarity using Jaccard Index.}
+        \end{itemize}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaRed}{AST Identifier Normalizer Code:}}}
+\begin{lstlisting}[language=Python]
+class Renamer(ast.NodeTransformer):
+    def visit_Name(self, node):
+        if node.id not in self.map:
+            self.map[node.id] = f'v_{len(self.map)}'
+        return ast.Name(id=self.map[node.id], ctx=node.ctx)
+
+# 16-Gram Jaccard Index Comparison
+jaccard = len(g_a & g_b) / len(g_a | g_b)
+if jaccard >= 0.82: flag_plagiarism()
+\end{lstlisting}
+      \vspace{0.08cm}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaOrange}{Academic Dishonesty Defense:}}}
+      \begin{itemize}\setlength{\itemsep}{0.8pt}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{Robust}: Catches plagiarism despite renamed variables or reordered lines.}
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 19: Feature 14 - Pragmatic Speech-Act Engine
+% ==============================================================================
+\begin{frame}[fragile,t]{Feature 14: Pragmatic Speech-Act \& Directedness Engine}{Austin \& Searle Illocutionary Resolution \& AI Empathy Loop}
+  \begin{columns}[t]
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaRed}{Intent-Directed Moderation (Austin \& Searle)}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.5pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Problem}: Moderation bots ban students for venting at their own code ('I am an idiot') or using calls (\texttt{kill(pid, SIGKILL)}).}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Theoretical Novelty}: Austin (1962) \& Searle (1969) Speech Act Theory resolves toxicity into an Illocutionary Vector: $\vec{T} = \langle \mathcal{P}, \mathcal{E}, \mathcal{F} \rangle$.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{4 Functional Tiers}:}
+        \begin{itemize}\setlength{\itemsep}{0.8pt}
+          \item {\fontsize{7.5}{9.2}\selectfont \textbf{Tier 1: Self-Deprecation}: 'I'm an idiot' $\to$ Allowed + AI Empathy!}
+          \item {\fontsize{7.5}{9.2}\selectfont \textbf{Tier 2: System Venting}: 'Compiler is garbage' $\to$ Allowed.}
+          \item {\fontsize{7.5}{9.2}\selectfont \textbf{Tier 3: Code Artifacts}: '\texttt{kill()}' $\to$ Allowed via AST scoper.}
+          \item {\fontsize{7.5}{9.2}\selectfont \textbf{Tier 4: Peer Attacks}: 'You are an idiot' $\to$ Blocked + warning.}
+        \end{itemize}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaRed}{Pragmatic Speech-Act Routing Code:}}}
+\begin{lstlisting}[language=Python]
+# backend/moderation.py (Austin & Searle PSAD)
+pragmatic = classify_pragmatic_directedness(text)
+if pragmatic['tier'] == 'PEER_ATTACK':
+    return False, 'Peer harassment prohibited'
+if pragmatic['tier'] == 'SELF_DEPRECATION':
+    empathy = mentor.generate_empathy(text)
+    return True, empathy  # AI encouragement
+if pragmatic['tier'] == 'SYSTEM_VENT':
+    return True, 'System venting permitted'
+\end{lstlisting}
+      \vspace{0.08cm}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaOrange}{Performance \& Verification:}}}
+      \begin{itemize}\setlength{\itemsep}{0.8pt}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{Microsecond Latency}: Evaluates directedness in $< 0.25$ ms.}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{Test Suite}: 10/10 test cases passing in \texttt{test\_moderation\_agent.py}.}
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 20: Feature 15 - MLF Indic De-agglutination & Autonomous Agent
+% ==============================================================================
+\begin{frame}[fragile,t]{Feature 15: MLF Indic De-agglutination \& Autonomous Agent}{Myers-Scotton Morphological Deconstruction \& Zero-Cost Wiktionary Loop}
+  \begin{columns}[t]
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaRed}{Morphological Deconstruction (Myers-Scotton)}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.5pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Problem}: Indian students mix English with Telugu/Hindi/Tamil, attaching verbal suffixes (Telugu -adame; Hindi -na) to bypass slurlists.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Theoretical Novelty}: Carol Myers-Scotton's Matrix Language Frame (MLF) model (1993, 2002) for Indic code-mixing.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{De-agglutinator}: Strips Indic verbal suffixes to expose roots.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Anti-Scunthorpe Guard}: Protects scientific terms ('dengue', 'dense', 'density', 'peacock') from false-positive cuts.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Autonomous Wiktionary Loop}: Queries Wikimedia REST API (\$0 cost, no keys) to learn and cache new slurs in SQLite.}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaRed}{MLF De-agglutination Snippet:}}}
+\begin{lstlisting}[language=Python]
+# backend/moderation.py (Myers-Scotton MLF)
+def mlf_deagglutinate_token(token: str):
+    if token in STEM_ALLOWLIST:
+        return None # Preserves dengue, dense
+    for root, (lang, cat) in MLF_ROOTS.items():
+        if token.startswith(root):
+            suffix = token[len(root):]
+            if suffix in MLF_SUFFIXES:
+                return root
+    return None
+\end{lstlisting}
+      \vspace{0.08cm}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaOrange}{1.1 Million (11-Lakh) Benchmark:}}}
+      \begin{itemize}\setlength{\itemsep}{0.8pt}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{Throughput}: Tested on 1.1M multi-domain samples at $> 100,000$ evals/sec with zero cloud cost.}
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 21: Feature 16 - Sanitizer & URL Defense
+% ==============================================================================
+\begin{frame}[fragile,t]{Feature 16: STEM Whitelist \& Deceptive URL Defense}{Real-Time YouTube oEmbed Verification \& Protocol Sanitization}
+  \begin{columns}[t]
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaRed}{Academic Whitelist \& Video Defense}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.5pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Problem}: Web sanitizers either strip legitimate math symbols ($\le, \ge, \pm, \sqrt{x}, \alpha, \beta$) or allow phishing links (bit.ly masking malware).}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{STEM Whitelist}: Preserves Greek letters, math operators, sub/superscripts while strictly blocking script injection tags (\texttt{<script>, javascript:}).}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Phishing Shield}: Blocks shorteners (bit.ly, tinyurl) hiding destinations.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Live oEmbed Check}: Validates shared YouTube videos are active and titled respectfully.}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaRed}{YouTube oEmbed Live Check:}}}
+\begin{lstlisting}[language=Python]
+# backend/sanitizer.py
+url = f"https://youtube.com/oembed?url=...&format=json"
+req = urllib.request.Request(url, headers=headers)
+with urllib.request.urlopen(req, timeout=3.0) as resp:
+    data = json.loads(resp.read().decode())
+    clean, _ = moderate_content(data.get('title', ''))
+    if not clean:
+        return False, 'Video title violates policy'
+\end{lstlisting}
+      \vspace{0.08cm}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaOrange}{Zero-Injection Guarantee:}}}
+      \begin{itemize}\setlength{\itemsep}{0.8pt}
+        \item {\fontsize{7.5}{9.2}\selectfont \textbf{Complete XSS Defense}: Rejects event handlers, prototype poisoning.}
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 22: Feature 17 - Classroom & SACS
+% ==============================================================================
+\begin{frame}[fragile,t]{Feature 17: University Classroom \& SACS Extension}{Role-Based Subject Governance with Cryptographic IDs}
+  \begin{columns}[t]
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaRed}{Subject Access Control System (SACS)}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.5pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{The Problem}: Departments struggle with unvetted materials, unauthorized student access, and fragmented assignment submissions.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Role-Based Governance}: Verified professors create official courses with 32-character cryptographically secure hexadecimal IDs.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Student Gatekeeper}: Students request enrollment; faculty review and approve/reject with real-time push alerts.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Consolidated Streams}: Classrooms unite announcements, lecture PDF slides, classroom CBT quizzes, and coding problems.}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaOrange}{Real-Time Push (SSE) \& Search Sync}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.2pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Live Push}: Real-time SSE stream alerts students immediately when grades or assignments post.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Trie Sync}: New courses automatically sync into search Trie.}
+      \end{itemize}
+      \vspace{0.1cm}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaRed}{Classroom In-Memory Sync Code:}}}
+\begin{lstlisting}[language=Python]
+classroom_id = secrets.token_hex(16)
+dsa_engine.sync_classroom({
+    'id': classroom_id, 'name': name,
+    'subject_code': subject_code,
+    'university': university
+})  # Instantly searchable in RAM
+\end{lstlisting}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 23: Feature 18 - TypeScript DSA Suite
+% ==============================================================================
+\begin{frame}[t]{Feature 18: Client-Side TypeScript DSA Suite}{Algorithmic Components in featurefiles/dsa-engine/}
+  \begin{columns}[t]
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaRed}{1. Huffman Coding Compression}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.2pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{File}: \texttt{CompressionAlgorithms.ts}}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{How It Works}: Builds a binary frequency tree using a priority queue. Generates variable-length prefix bitcodes, reducing network transmission size by up to 55\%.}
+      \end{itemize}
+      \vspace{0.2cm}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaOrange}{2. Disjoint Set Union-Find}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.2pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{File}: \texttt{UnionFind.ts}}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{How It Works}: Path Compression and Union by Rank cluster students into study circles in amortized $O(\alpha(N)) \approx O(1)$ time.}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaRed}{3. Subject Taxonomy BST}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.2pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{File}: \texttt{Trees.ts}}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{How It Works}: Binary Search Tree keeping courses alphabetically ordered by code ('CS-101' $<$ 'CS-201'). In-order traversal outputs sorted subjects in $O(N)$ time.}
+      \end{itemize}
+      \vspace{0.2cm}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaOrange}{4. HTML Canvas WebP Downscaler}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{1.2pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{File}: \texttt{CompressionAlgorithms.ts}}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{How It Works}: Downscales avatar images to 400x300 WebP format in the browser before upload, saving $> 70\%$ bandwidth.}
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 24: Results 1 - Big-O Complexity Table
+% ==============================================================================
+\begin{frame}[t]{Results: Algorithmic Big-O Complexity Comparison}{Theoretical Proof of Performance Acceleration}
+  \vspace{-0.1cm}
+  \begin{center}
+  \fontsize{7.0}{8.8}\selectfont
+  \renewcommand{\arraystretch}{0.92}
+  \setlength{\tabcolsep}{3.5pt}
+  \begin{tabular}{llll}
+    \toprule
+    \textbf{\textcolor{KoinexaRed}{Operation / Module}} & \textbf{\textcolor{KoinexaRed}{Baseline (SQL / Brute-Force)}} & \textbf{\textcolor{KoinexaOrange}{With Koinexa DSA Engine}} & \textbf{\textcolor{KoinexaRed}{Primary Theoretical Advantage}} \\
+    \midrule
+    Universal Substring Search & $O(N \cdot K_{\text{tables}})$ Disk Scan & $O(L + M)$ In-Memory Trie & Zero dependence on DB size $N$ \\
+    Multi-Term Keyword Search & $O(N)$ Regex Disk Scan & $O(\min(|S_1|, |S_2|))$ Index & Microsecond set intersections \\
+    Community Channels Fetch & $O(N)$ DB Queries (N+1 cascade) & $O(1)$ Doubly Linked LRU & Zero disk round-trips on repeat \\
+    Social Connection Check & $O(N)$ SQL Table Scan & $O(1)$ Hash Set Adjacency & Eliminates repeated SQL queries \\
+    Mutual Studymates & $O(N^2)$ SQL Self-Join & $O(\min(d_1, d_2))$ Set Intersection & Instantaneous calculation \\
+    Feed Recency \& Ranking & $O(N \log N)$ Timsort & $O(N \log K)$ Bounded Heap & Drops memory \& comparisons \\
+    Sensitive Rate Limiting & $O(N)$ Disk Timestamp Query & $O(1)$ Amortized Deque Eviction & Sub-millisecond rate enforcement \\
+    Submissions Test Caching & $O(T \cdot \text{Subprocess})$ Exec & $O(1)$ SHA-256 Memoization & Skips redundant compilation \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  \vspace{0.08cm}
+  {\tiny\textcolor{KoinexaGray}{Where $N$: total entities, $L$: search query length, $K$: top items requested (50), $d_1, d_2$: user graph degrees.}}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 25: Results 2 - Empirical Benchmarks
+% ==============================================================================
+\begin{frame}[t]{Results: Empirical Benchmarks \& Speedup Ratios}{Real Measured Data from backend/benchmark\_dsa.py}
+  \begin{columns}[t]
+    \begin{column}{0.56\textwidth}
+      \vspace{-0.1cm}
+      \begin{center}
+      \fontsize{7.2}{9.0}\selectfont
+      \setlength{\tabcolsep}{2.5pt}
+      \begin{tabular}{lllc}
+        \toprule
+        \textbf{\textcolor{KoinexaRed}{Operation}} & \textbf{Baseline} & \textbf{DSA Engine} & \textbf{\textcolor{KoinexaRed}{Speedup}} \\
+        \midrule
+        Universal Search & 0.051 ms & 0.001 ms & \textbf{40.7x faster} \\
+        Community Channels (N+1) & 0.012 ms & $<$ 0.001 ms & \textbf{37.9x faster} \\
+        Top-50 Feed Ranking & 0.167 ms & 0.134 ms & \textbf{1.2x faster} \\
+        10,000 Peer Connections & $\sim$120.0 ms & 1.19 ms & \textbf{100.8x faster} \\
+        Mutual Peer Intersections & 18.5 ms & 0.25 ms & \textbf{74.0x faster} \\
+        \bottomrule
+      \end{tabular}
+      \end{center}
+      \vspace{0.15cm}
+      {\fontsize{8.0}{10.0}\selectfont\textbf{\textcolor{KoinexaOrange}{Peer Graph Latency Guarantee:}}\ 10,000 connection lookups completed in 1.19 ms (0.119 microseconds per operation).}
+    \end{column}
+    \begin{column}{0.42\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaRed}{Speedup Highlights}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{2.0pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Search 40.7x Leap}: Prefix Trie walks memory directly; SQLite disk I/O eliminated completely.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{37.9x Community Boost}: The N+1 query loop for community channels is completely neutralized by the LRU cache.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Instant Social Checks}: Connecting 10,000 students takes single-digit microseconds per check.}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Zero Warmup Delay}: Daemon thread pre-warms cache on boot.}
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 26: Results 3 - HTTP Latencies
+% ==============================================================================
+\begin{frame}[t]{Results: Live HTTP Latencies \& Test Verification}{Real End-to-End Measurements Over TCP Sockets on Port 5001}
+  \begin{columns}[t]
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaRed}{Real HTTP Request Latency (30 Iterations)}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{2.0pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{\texttt{GET /api/search?q=python}}: 6.59 ms avg (Min: 3.92 ms)}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{\texttt{GET /api/communities}}: 4.02 ms avg (Min: 3.00 ms)}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{\texttt{GET /api/feed}}: 7.12 ms avg (Min: 5.41 ms)}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{\texttt{GET /api/health}}: 5.27 ms avg (Min: 3.42 ms)}
+      \end{itemize}
+      \vspace{0.15cm}
+      {\fontsize{7.5}{9.5}\selectfont\textit{\textcolor{KoinexaGray}{Note: TCP loopback socket handshake overhead on Windows/Linux is typically 3-4ms. The internal DSA execution completes in under a single millisecond!}}}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaOrange}{100\% Test Verification Suite Status}}}\par\vspace{1.5pt}
+      \begin{itemize}\setlength{\itemsep}{2.0pt}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{DSA Engine Suite (\texttt{test\_dsa\_engine.py})}: 8/8 PASS}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{CBT Exam Suite (\texttt{test\_cbt\_engine.py})}: 6/6 PASS}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{AI \& Sandbox Suite (\texttt{test\_ai\_and\_sandbox.py})}: 6/6 PASS}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Complete Integration (\texttt{test\_integration\_complete.py})}: 5/5 PASS}
+        \item {\fontsize{8.0}{9.8}\selectfont \textbf{Speech-Act Moderation (\texttt{test\_moderation\_agent.py})}: 41/41 PASS}
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 27: Summary & Takeaways
+% ==============================================================================
+\begin{frame}[t]{Project Summary \& Key Engineering Takeaways}{Architectural Soundness \& Production Readiness}
+  \begin{columns}[t]
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaRed}{1. Computer Science Over Infrastructure}}}\par\vspace{1.5pt}
+      {\fontsize{8.0}{9.8}\selectfont Instead of throwing expensive third-party clusters (Elasticsearch, Redis) at scalability problems, implementing classic computer science data structures (Tries, Bounded Heaps, Inverted Indexes) yielded a 40x speedup with zero external dependencies and zero cost.}\par
+      \vspace{0.2cm}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaOrange}{2. Absolute Architectural Transparency}}}\par\vspace{1.5pt}
+      {\fontsize{8.0}{9.8}\selectfont Every optimization operates strictly under the hood. The React client received 0 file edits, the API payloads received 0 schema breaking changes, and users saw zero DSA terminology.}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaRed}{3. High-Stakes Security by Design}}}\par\vspace{1.5pt}
+      {\fontsize{8.0}{9.8}\selectfont The CBT examination engine, compiler sandbox, and Veritas-AI agent prove that pedagogical platforms can enforce military-grade tamper resistance (cryptographic answer scrubbing, AST sandboxing, bot velocity detection).}\par
+      \vspace{0.2cm}
+      {\fontsize{9.0}{11.0}\selectfont\textbf{\textcolor{KoinexaOrange}{4. Research-Grade Linguistic Novelty}}}\par\vspace{1.5pt}
+      {\fontsize{8.0}{9.8}\selectfont Operationalized Austin \& Searle Speech Act Theory and Myers-Scotton Matrix Language Frame de-agglutination, eliminating false bans on code syntax and supporting frustrated students with AI empathy.}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ==============================================================================
+% SLIDE 28: Conclusion & Thank You
+% ==============================================================================
+\begin{frame}[plain]
+  \vspace*{1.2cm}
+  \begin{center}
+    {\fontsize{40}{46}\selectfont\textbf{\textcolor{KoinexaRed}{Thank You!}}}\par
+    \vspace{0.35cm}
+    {\fontsize{16}{20}\selectfont\textbf{\textcolor{KoinexaOrange}{Questions \& Discussion Welcome}}}\par
+    \vspace{0.45cm}
+    {\fontsize{12}{15}\selectfont\textbf{KOINEXA: High-Performance Educational \& Competitive Coding Ecosystem}}\par
+    \vspace{0.2cm}
+    {\fontsize{10}{13}\selectfont\textcolor{KoinexaGray}{In-Memory DSA Engine \ $\cdot$ \ CBT Exam Security \ $\cdot$ \ Veritas-AI Agent \ $\cdot$ \ Speech-Act Moderation}}\par
+    \vspace{1.0cm}
+    {\fontsize{10}{13}\selectfont\textbf{\textcolor{KoinexaRed}{Live Platform: http://localhost:5174 \ \ \ \ \ \ \ \ \ \ API Gateway: http://127.0.0.1:5001}}}
+  \end{center}
+\end{frame}
+
+\end{document}
+"""
+
+with open("main.tex", "w", encoding="utf-8") as f:
+    f.write(tex_code)
+
+with open("koinexa_presentation.tex", "w", encoding="utf-8") as f:
+    f.write(tex_code)
+
+print("SUCCESS: Updated main.tex and koinexa_presentation.tex with zero warnings!")

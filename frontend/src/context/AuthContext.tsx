@@ -14,7 +14,27 @@ interface AuthContextType {
   login: (
     credentials: { username?: string; email?: string; password: string; portal_type?: 'student' | 'mentor' },
     deferCommit?: boolean
-  ) => Promise<{ success: boolean; status?: string; user?: User; token?: string; error?: string }>;
+  ) => Promise<{
+    success: boolean;
+    requires_otp?: boolean;
+    identifier?: string;
+    user_id?: string;
+    contact_email?: string;
+    masked_contact_email?: string;
+    status?: string;
+    user?: User;
+    token?: string;
+    error?: string;
+    message?: string;
+  }>;
+  verifyLoginOtp: (
+    identifier: string,
+    otp: string,
+    deferCommit?: boolean
+  ) => Promise<{ success: boolean; status?: string; user?: User; token?: string; error?: string; message?: string }>;
+  resendLoginOtp: (
+    identifier: string
+  ) => Promise<{ success: boolean; message?: string; masked_contact_email?: string; error?: string }>;
   commitUser: (userData: User, authToken: string) => void;
   register: (data: {
     username: string;
@@ -141,6 +161,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     closeAuthModal();
   };
 
+  const safeParseJson = async (res: Response) => {
+    const text = await res.text();
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { success: false, error: res.ok ? 'Unexpected response format from server' : `Server error (${res.status})` };
+    }
+  };
+
   const login = async (
     credentials: { username?: string; email?: string; password: string; portal_type?: 'student' | 'mentor' },
     deferCommit: boolean = false
@@ -153,7 +182,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...credentials, portal_type: activePortal }),
       });
-      const data = await res.json();
+      const data = await safeParseJson(res);
+      if (data.success && data.requires_otp) {
+        return {
+          success: true,
+          requires_otp: true,
+          identifier: data.identifier || credentials.username || credentials.email,
+          user_id: data.user_id,
+          contact_email: data.contact_email,
+          masked_contact_email: data.masked_contact_email,
+          message: data.message,
+        };
+      }
       if (data.success && data.token && data.user) {
         if (!deferCommit) {
           setUser(data.user);
@@ -193,7 +233,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
       });
-      const data = await res.json();
+      const data = await safeParseJson(res);
       if (data.success && data.token && data.user) {
         setUser(data.user);
         setToken(data.token);
@@ -229,7 +269,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(mentorData),
       });
-      const data = await res.json();
+      const data = await safeParseJson(res);
       if (data.success) {
         if (data.token && data.user && data.status === 'active') {
           setUser(data.user);
@@ -277,7 +317,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      const data = await res.json();
+      const data = await safeParseJson(res);
       if (data.success) {
         if (data.token && data.user && data.status === 'active') {
           setUser(data.user);
@@ -304,7 +344,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
-      const data = await res.json();
+      const data = await safeParseJson(res);
       if (data.success) {
         return { success: true, message: data.message };
       }
@@ -321,7 +361,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp }),
       });
-      const data = await res.json();
+      const data = await safeParseJson(res);
       if (data.success) {
         return { success: true, message: data.message };
       }
@@ -338,11 +378,61 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      const data = await res.json();
+      const data = await safeParseJson(res);
       if (data.success) {
         return { success: true, message: data.message };
       }
       return { success: false, error: data.error || 'Failed to reset password' };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Network error occurred' };
+    }
+  };
+
+  const verifyLoginOtp = async (identifier: string, otp: string, deferCommit: boolean = false) => {
+    try {
+      const res = await fetch('/api/auth/login/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier, otp }),
+      });
+      const data = await safeParseJson(res);
+      if (data.success && data.token && data.user) {
+        if (!deferCommit) {
+          setUser(data.user);
+          setToken(data.token);
+          localStorage.setItem('koinexa_token', data.token);
+          closeAuthModal();
+        }
+        return {
+          success: true,
+          status: data.status || data.user.status || 'active',
+          user: data.user,
+          token: data.token,
+          message: data.message,
+        };
+      }
+      return { success: false, error: data.error || 'Invalid verification code' };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Network error occurred' };
+    }
+  };
+
+  const resendLoginOtp = async (identifier: string) => {
+    try {
+      const res = await fetch('/api/auth/login/resend-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier }),
+      });
+      const data = await safeParseJson(res);
+      if (data.success) {
+        return {
+          success: true,
+          message: data.message,
+          masked_contact_email: data.masked_contact_email,
+        };
+      }
+      return { success: false, error: data.error || 'Failed to resend verification code' };
     } catch (err: any) {
       return { success: false, error: err.message || 'Network error occurred' };
     }
@@ -380,6 +470,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         openAuthModal,
         closeAuthModal,
         login,
+        verifyLoginOtp,
+        resendLoginOtp,
         commitUser,
         register,
         registerMentor,

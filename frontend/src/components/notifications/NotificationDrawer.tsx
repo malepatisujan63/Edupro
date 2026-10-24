@@ -12,7 +12,11 @@ import {
   BookOpen,
   CheckCheck,
   Clock,
-  ExternalLink
+  ExternalLink,
+  AlertTriangle,
+  FileText,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { NotificationItem } from '../../types';
@@ -34,6 +38,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+  const [expandedNotepadId, setExpandedNotepadId] = useState<string | null>(null);
 
   const fetchNotifications = async () => {
     if (!user) return;
@@ -209,6 +214,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
             ) : (
               notifications.map((n) => {
                 const isUnread = !n.is_read;
+                const isCbtAlert = n.type === 'cbt_proctor_alert';
                 const isJoinReq = n.type === 'join_request';
                 const isAccepted = n.type === 'join_accepted';
                 const isRejected = n.type === 'join_rejected';
@@ -220,14 +226,18 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                     key={n.id}
                     className={`p-4 rounded-2xl border transition-all ${
                       isUnread
-                        ? 'bg-[var(--x-surface-hover)] border-emerald-500/40 shadow-sm'
+                        ? isCbtAlert
+                          ? 'bg-rose-500/[0.08] border-rose-500/40 shadow-sm'
+                          : 'bg-[var(--x-surface-hover)] border-emerald-500/40 shadow-sm'
                         : 'bg-[var(--x-surface)] border-[var(--x-border)]'
                     }`}
                   >
                     <div className="flex items-start gap-3">
                       <div
                         className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 text-sm ${
-                          isJoinReq || isStudyMateReq
+                          isCbtAlert
+                            ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                            : isJoinReq || isStudyMateReq
                             ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
                             : isAccepted || isStudyMateAccepted
                             ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
@@ -236,11 +246,12 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                             : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                         }`}
                       >
+                        {isCbtAlert && <AlertTriangle className="w-4 h-4 text-rose-400" />}
                         {isJoinReq && <GraduationCap className="w-4 h-4" />}
                         {isStudyMateReq && <UserPlus className="w-4 h-4 text-emerald-400" />}
                         {(isAccepted || isStudyMateAccepted) && <Check className="w-4 h-4 text-emerald-400" />}
                         {isRejected && <X className="w-4 h-4 text-rose-400" />}
-                        {!isJoinReq && !isStudyMateReq && !isAccepted && !isStudyMateAccepted && !isRejected && (
+                        {!isJoinReq && !isStudyMateReq && !isAccepted && !isStudyMateAccepted && !isRejected && !isCbtAlert && (
                           <Sparkles className="w-4 h-4 text-emerald-400" />
                         )}
                       </div>
@@ -258,6 +269,26 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                         <p className="text-xs text-[var(--x-subtext)] mt-1 leading-relaxed">
                           {n.message}
                         </p>
+
+                        {/* CBT Proctor Alert Notepad Viewer */}
+                        {isCbtAlert && n.data?.proctor_notepad && (
+                          <div className="mt-2.5">
+                            <button
+                              onClick={() => setExpandedNotepadId(expandedNotepadId === n.id ? null : n.id)}
+                              className="px-2.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-[11px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
+                            >
+                              <FileText className="w-3.5 h-3.5" />
+                              <span>{expandedNotepadId === n.id ? 'Hide Keystroke Audit Log' : 'View Proctor Invisible Notepad Log'}</span>
+                              {expandedNotepadId === n.id ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                            </button>
+
+                            {expandedNotepadId === n.id && (
+                              <pre className="mt-2 p-2.5 rounded-xl bg-black/60 border border-rose-500/20 text-[10px] font-mono text-zinc-300 max-h-48 overflow-y-auto whitespace-pre-wrap leading-relaxed select-text shadow-inner">
+                                {n.data.proctor_notepad}
+                              </pre>
+                            )}
+                          </div>
+                        )}
 
                         {/* Study Mate Request Action Buttons */}
                         {isStudyMateReq && (

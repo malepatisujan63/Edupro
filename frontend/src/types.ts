@@ -132,6 +132,40 @@ export interface Quiz {
   created_at: string;
   is_solved?: boolean;
   subjects?: string[];
+  already_attempted?: boolean;
+  latest_result?: QuizSubmissionResult;
+  insights?: QuizInsights;
+}
+
+export interface QuizLeaderboardItem {
+  rank: number;
+  user_id: string;
+  user_name: string;
+  score: number;
+  total_marks: number;
+  percentage: number;
+  accuracy: number;
+  time_taken_seconds: number;
+  created_at: string;
+  is_current_user?: boolean;
+}
+
+export interface PercentageBin {
+  bin_label: string;
+  count: number;
+  percentage_of_cohort: number;
+  is_user_bin: boolean;
+}
+
+export interface QuizInsights {
+  leaderboard: QuizLeaderboardItem[];
+  total_cohort: number;
+  cohort_avg_score: number;
+  cohort_avg_percentage: number;
+  user_rank: number | null;
+  top_percentile: string;
+  top_pct_num: number;
+  percentage_bins: PercentageBin[];
 }
 
 export interface QuizEvaluationDetail {
@@ -159,12 +193,53 @@ export interface QuizSubmissionResult {
   accuracy: number;
   time_taken_seconds: number;
   detailed_results: QuizEvaluationDetail[];
+  percentile?: number;
+  rank?: number;
+  total_cohort?: number;
+  top_percentile?: string;
+  cohort_avg_score?: number;
+  cohort_avg_percentage?: number;
+  percentage_bins?: PercentageBin[];
+  leaderboard?: QuizLeaderboardItem[];
+  integrity_status?: string;
+  violation_reason?: string;
+  negative_marks_lost?: number;
+  subject_breakdown?: Record<string, { total: number; correct: number; incorrect: number; unattempted: number; score: number }>;
 }
 
 export interface SampleCase {
   input: string;
   output: string;
   explanation: string;
+}
+
+export interface CodeComplexityInsight {
+  time_complexity: string;
+  space_complexity: string;
+  time_complexity_label?: string;
+  space_complexity_label?: string;
+  reasoning?: string;
+  explanation?: string;
+  beats_runtime_pct?: number;
+  beats_memory_pct?: number;
+  runtime_percentile?: number;
+  is_optimal?: boolean;
+  avg_time_ms?: number;
+}
+
+export interface ProblemLeaderboardItem {
+  rank: number;
+  submission_id: string;
+  user_id: string;
+  user_name: string;
+  avatar?: string;
+  language: string;
+  verdict: string;
+  passed_count: number;
+  total_count: number;
+  execution_time_ms: number;
+  created_at: string;
+  is_current_user?: boolean;
 }
 
 export interface CodingProblem {
@@ -178,9 +253,16 @@ export interface CodingProblem {
   sample_cases: SampleCase[];
   starter_templates?: Record<string, string>;
   total_test_cases?: number;
+  duration_minutes?: number;
   acceptance_rate?: number;
   created_by: string;
   created_at: string;
+  is_solved?: boolean;
+  is_attempted?: boolean;
+  already_attempted?: boolean;
+  latest_submission?: any;
+  complexity?: CodeComplexityInsight;
+  leaderboard?: any;
 }
 
 export interface TestCaseResult {
@@ -192,15 +274,22 @@ export interface TestCaseResult {
   expected_output: string;
   actual_output: string;
   execution_time_ms: number;
+  error_message?: string;
 }
 
 export interface CodeEvalResult {
-  verdict: 'Accepted' | 'Wrong Answer' | 'Time Limit Exceeded' | 'Runtime Error' | 'Compilation Error';
-  all_passed: boolean;
+  verdict: 'Accepted' | 'Wrong Answer' | 'Time Limit Exceeded' | 'Runtime Error' | 'Compilation Error' | 'Integrity Violation';
+  all_passed?: boolean;
   passed_count: number;
   total_count: number;
   avg_time_ms: number;
-  results: TestCaseResult[];
+  results?: TestCaseResult[];
+  error?: string;
+  error_message?: string;
+  is_integrity_violation?: boolean;
+  violation_reason?: string;
+  complexity?: CodeComplexityInsight;
+  leaderboard?: any;
 }
 
 export interface Channel {
@@ -348,6 +437,8 @@ export interface ClassroomQuiz {
   created_at: string;
   attempted?: boolean;
   user_score?: number | null;
+  latest_result?: any;
+  insights?: any;
 }
 
 export interface ClassroomProblem {
@@ -363,6 +454,9 @@ export interface ClassroomProblem {
   starter_templates?: Record<string, string>;
   created_by: string;
   created_at: string;
+  is_solved?: boolean;
+  already_attempted?: boolean;
+  latest_submission?: any;
 }
 
 export interface NotificationItem {
@@ -370,7 +464,7 @@ export interface NotificationItem {
   user_id: string;
   sender_id?: string;
   sender_name?: string;
-  type: 'join_request' | 'join_accepted' | 'join_rejected' | 'new_post' | 'new_contest' | 'new_challenge' | 'studymate_request' | 'studymate_accepted';
+  type: 'join_request' | 'join_accepted' | 'join_rejected' | 'new_post' | 'new_contest' | 'new_challenge' | 'studymate_request' | 'studymate_accepted' | 'cbt_proctor_alert';
   title: string;
   message: string;
   data?: Record<string, any>;

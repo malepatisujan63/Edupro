@@ -39,10 +39,21 @@ function MainLayout() {
   const [targetQuizId, setTargetQuizId] = useState<string | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isWritingContest, setIsWritingContest] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(
+    typeof document !== 'undefined' ? !!document.fullscreenElement : false
+  );
   const [isNotifDrawerOpen, setIsNotifDrawerOpen] = useState(false);
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false);
   const [feedRefreshKey, setFeedRefreshKey] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
 
   const handleSelectTab = (tab: NavTab, classroomId?: string | null) => {
     setActiveTab(tab);
@@ -66,6 +77,14 @@ function MainLayout() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
+  // When admin logs in, ensure they land directly on Veritas-AI Admin Console
+  useEffect(() => {
+    if (user?.role === 'admin' && activeTab !== 'admin') {
+      setActiveTab('admin');
+      window.location.hash = '#/admin';
+    }
+  }, [user]);
+
   // Global Ctrl+K / Cmd+K Spotlight Search Shortcut & Post Creator
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -75,11 +94,14 @@ function MainLayout() {
       }
     };
     const handleOpenCreatePost = () => setIsCreatePostOpen(true);
+    const handleOpenNotif = () => setIsNotifDrawerOpen(true);
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('open-create-post', handleOpenCreatePost);
+    window.addEventListener('open-notifications', handleOpenNotif);
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('open-create-post', handleOpenCreatePost);
+      window.removeEventListener('open-notifications', handleOpenNotif);
     };
   }, []);
 
@@ -107,15 +129,12 @@ function MainLayout() {
 
   return (
     <div className="min-h-screen bg-[var(--x-bg)] text-[var(--x-text)] flex relative selection:bg-[#12BEF9]/30 selection:text-white transition-colors duration-200">
-      {/* ── LEFT DOCKED EXPANDING SIDEBAR (HIDDEN WHILE WRITING CONTEST OR FULL AUTH PAGE) ── */}
-      {!isWritingContest && activeTab !== 'auth' && (
+      {/* ── LEFT DOCKED EXPANDING SIDEBAR (HIDDEN WHILE WRITING CONTEST, FULLSCREEN, OR FULL AUTH PAGE) ── */}
+      {!isWritingContest && !isFullscreen && activeTab !== 'auth' && (
         <LeftNavigation
           activeTab={activeTab}
           onSelectTab={(tab) => handleSelectTab(tab)}
           onOpenSearch={() => setIsSearchOpen(true)}
-          onOpenNotifications={() => setIsNotifDrawerOpen(true)}
-          onOpenCreatePost={() => setIsCreatePostOpen(true)}
-          unreadNotificationsCount={unreadCount}
         />
       )}
 
@@ -131,8 +150,19 @@ function MainLayout() {
               transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
               className="w-full h-full"
             >
-              {activeTab === 'home' && <HomeFeed key={feedRefreshKey} />}
-              {activeTab === 'classroom' && <ClassroomHub initialClassroomId={targetClassroomId} />}
+              {activeTab === 'home' && (
+                <HomeFeed
+                  key={feedRefreshKey}
+                  onOpenNotifications={() => setIsNotifDrawerOpen(true)}
+                  unreadNotificationsCount={unreadCount}
+                />
+              )}
+              {activeTab === 'classroom' && (
+                <ClassroomHub
+                  initialClassroomId={targetClassroomId}
+                  onExamStateChange={setIsWritingContest}
+                />
+              )}
               {(activeTab === 'challenges' || activeTab === 'contests' || activeTab === 'codelab') && (
                 <ChallengesHub
                   onExamStateChange={setIsWritingContest}

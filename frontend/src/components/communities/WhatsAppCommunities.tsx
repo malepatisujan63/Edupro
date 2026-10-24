@@ -35,7 +35,8 @@ import {
   BookOpen,
   Trophy,
   Filter,
-  Clock
+  Clock,
+  Trash2
 } from 'lucide-react';
 import { Community, Channel, ChatMessage, DirectMessage, StudyMate, Post } from '../../types';
 import { useAuth } from '../../context/AuthContext';
@@ -184,6 +185,58 @@ export const WhatsAppCommunities: React.FC = () => {
   const [replyingTo, setReplyingTo] = useState<{ sender: string; text: string } | null>(null);
   const [messageReactions, setMessageReactions] = useState<Record<string, string[]>>({});
   const [copiedMsgId, setCopiedMsgId] = useState<string | null>(null);
+  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
+  const [deletingMsgId, setDeletingMsgId] = useState<string | null>(null);
+
+  const handleDeleteCommunityMessage = async (msgId: string) => {
+    if (!selectedCommunity || !selectedChannel) return;
+    const confirmDel = window.confirm("Are you sure you want to delete this message?");
+    if (!confirmDel) return;
+    try {
+      setDeletingMsgId(msgId);
+      const res = await authFetch(
+        `/api/communities/${selectedCommunity.id}/channels/${selectedChannel.id}/messages/${msgId}`,
+        { method: 'DELETE' }
+      );
+      const data = await res.json();
+      if (data.success) {
+        setCommunityMessages((prev) => prev.filter((m) => m.id !== msgId));
+        if (selectedMessageId === msgId) setSelectedMessageId(null);
+      } else {
+        alert(data.error || "Failed to delete message");
+      }
+    } catch (err) {
+      console.error("Delete message error:", err);
+      alert("Failed to delete message.");
+    } finally {
+      setDeletingMsgId(null);
+    }
+  };
+
+  const handleDeleteDirectMessage = async (msgId: string) => {
+    if (!selectedMate) return;
+    const confirmDel = window.confirm("Are you sure you want to delete this message?");
+    if (!confirmDel) return;
+    try {
+      setDeletingMsgId(msgId);
+      const res = await authFetch(
+        `/api/direct-messages/${selectedMate.id}/${msgId}`,
+        { method: 'DELETE' }
+      );
+      const data = await res.json();
+      if (data.success) {
+        setDirectMessages((prev) => prev.filter((m) => m.id !== msgId));
+        if (selectedMessageId === msgId) setSelectedMessageId(null);
+      } else {
+        alert(data.error || "Failed to delete message");
+      }
+    } catch (err) {
+      console.error("Delete message error:", err);
+      alert("Failed to delete message.");
+    } finally {
+      setDeletingMsgId(null);
+    }
+  };
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const composerInputRef = useRef<HTMLInputElement>(null);
@@ -824,10 +877,10 @@ export const WhatsAppCommunities: React.FC = () => {
         /* ═════════════════════════════════════════════════════════════════
            CHAT ARENA (PURE WHITE BACKGROUND, SLEEK ITALIC TIMES NEW ROMAN)
         ═════════════════════════════════════════════════════════════════ */
-        <div className="flex-1 w-full flex min-h-0 relative overflow-hidden bg-white">
-          <main className="relative z-10 flex-1 h-full flex flex-col min-w-0 min-h-0 bg-white">
+        <div className="flex-1 w-full flex min-h-0 relative overflow-hidden bg-[#efeae2]/40 dark:bg-[#0b141a]">
+          <main className="relative z-10 flex-1 h-full flex flex-col min-w-0 min-h-0 bg-transparent">
             {/* Chat Subheader (Only Back button, Community name & Channel name) */}
-            <div className="h-14 px-4 sm:px-6 flex items-center justify-between bg-white border-b border-neutral-200 flex-shrink-0">
+            <div className="h-14 px-4 sm:px-6 flex items-center justify-between bg-white/95 dark:bg-[#111b21]/95 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800 flex-shrink-0">
               <div className="flex items-center gap-3 min-w-0">
                 <button
                   onClick={() => {
@@ -938,12 +991,17 @@ export const WhatsAppCommunities: React.FC = () => {
                             <div
                               className={`absolute -top-8 ${
                                 isSelf ? 'right-0' : 'left-0'
-                              } hidden group-hover/msg:flex items-center gap-1 bg-white dark:bg-[#16181c] border border-neutral-200 dark:border-neutral-800 rounded-full px-2 py-0.5 shadow-md z-20 transition-all`}
+                              } ${
+                                selectedMessageId === m.id ? 'flex' : 'hidden group-hover/msg:flex'
+                              } items-center gap-1 bg-white dark:bg-[#16181c] border border-neutral-200 dark:border-neutral-800 rounded-full px-2 py-0.5 shadow-md z-20 transition-all`}
                             >
                               {QUICK_EMOJIS.slice(0, 3).map((em) => (
                                 <button
                                   key={em}
-                                  onClick={() => handleAddReaction(m.id, em)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleAddReaction(m.id, em);
+                                  }}
                                   className="p-1 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 text-xs transition-transform active:scale-125 cursor-pointer"
                                 >
                                   {em}
@@ -951,14 +1009,20 @@ export const WhatsAppCommunities: React.FC = () => {
                               ))}
                               <div className="w-px h-3.5 bg-neutral-200 dark:bg-neutral-700 mx-0.5" />
                               <button
-                                onClick={() => handleStartReply(m.user_name, m.text)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleStartReply(m.user_name, m.text);
+                                }}
                                 title="Reply"
                                 className="p-1 rounded-full text-neutral-400 hover:text-emerald-500 hover:bg-emerald-500/10 transition-colors cursor-pointer"
                               >
                                 <CornerDownRight className="w-3.5 h-3.5" />
                               </button>
                               <button
-                                onClick={() => handleCopyText(m.id, m.text)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCopyText(m.id, m.text);
+                                }}
                                 title="Copy Text"
                                 className="p-1 rounded-full text-neutral-400 hover:text-emerald-500 hover:bg-emerald-500/10 transition-colors cursor-pointer"
                               >
@@ -968,20 +1032,33 @@ export const WhatsAppCommunities: React.FC = () => {
                                   <Copy className="w-3.5 h-3.5" />
                                 )}
                               </button>
+                              {(isSelf || selectedCommunity?.admin_id === user?.id) && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteCommunityMessage(m.id);
+                                  }}
+                                  disabled={deletingMsgId === m.id}
+                                  title="Delete Message"
+                                  className="p-1 rounded-full text-neutral-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              )}
                             </div>
 
-                            {/* Bubble Card - White Background, Sleek Times New Roman Italic Black Text */}
+                            {/* Bubble Card - Authentic WhatsApp Themed Palette */}
                             <div
-                              className={`p-3 sm:p-3.5 rounded-2xl space-y-1.5 text-xs relative overflow-hidden shadow-xs border bg-white ${
+                              onClick={() => setSelectedMessageId((prev) => (prev === m.id ? null : m.id))}
+                              className={`p-3 sm:p-3.5 rounded-2xl space-y-1.5 text-xs relative overflow-hidden shadow-xs border transition-all cursor-pointer ${
                                 isSelf
-                                  ? 'border-neutral-200/90 rounded-tr-xs'
-                                  : 'border-neutral-200/90 rounded-tl-xs'
-                              }`}
+                                  ? 'bg-[#d9fdd3] text-[#111b21] dark:bg-[#005c4b] dark:text-[#e9edef] border-emerald-300/40 dark:border-emerald-600/30 rounded-tr-xs'
+                                  : 'bg-white text-[#111b21] dark:bg-[#202c33] dark:text-[#e9edef] border-neutral-200/90 dark:border-neutral-700/60 rounded-tl-xs'
+                              } ${selectedMessageId === m.id ? 'ring-2 ring-[#12BEF9] shadow-md' : ''}`}
                             >
                               {!isSelf && (
                                 <div
-                                  style={{ fontFamily: '"Times New Roman", Times, Georgia, serif' }}
-                                  className="text-xs font-normal italic text-emerald-700 relative z-10 pb-0.5"
+                                  className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 relative z-10 pb-0.5"
                                 >
                                   {m.user_name}
                                 </div>
@@ -989,8 +1066,7 @@ export const WhatsAppCommunities: React.FC = () => {
 
                               {m.text && (
                                 <p
-                                  style={{ fontFamily: '"Times New Roman", Times, Georgia, serif' }}
-                                  className="leading-relaxed whitespace-pre-wrap text-[14px] sm:text-[15px] relative z-10 font-light italic text-black"
+                                  className="leading-relaxed whitespace-pre-wrap text-[14px] sm:text-[15px] relative z-10 font-normal text-inherit"
                                 >
                                   {m.text}
                                 </p>
@@ -1091,12 +1167,17 @@ export const WhatsAppCommunities: React.FC = () => {
                             <div
                               className={`absolute -top-8 ${
                                 isSelf ? 'right-0' : 'left-0'
-                              } hidden group-hover/msg:flex items-center gap-1 bg-white dark:bg-[#16181c] border border-neutral-200 dark:border-neutral-800 rounded-full px-2 py-0.5 shadow-md z-20 transition-all`}
+                              } ${
+                                selectedMessageId === m.id ? 'flex' : 'hidden group-hover/msg:flex'
+                              } items-center gap-1 bg-white dark:bg-[#16181c] border border-neutral-200 dark:border-neutral-800 rounded-full px-2 py-0.5 shadow-md z-20 transition-all`}
                             >
                               {QUICK_EMOJIS.slice(0, 3).map((em) => (
                                 <button
                                   key={em}
-                                  onClick={() => handleAddReaction(m.id, em)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleAddReaction(m.id, em);
+                                  }}
                                   className="p-1 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 text-xs transition-transform active:scale-125 cursor-pointer"
                                 >
                                   {em}
@@ -1104,14 +1185,20 @@ export const WhatsAppCommunities: React.FC = () => {
                               ))}
                               <div className="w-px h-3.5 bg-neutral-200 dark:bg-neutral-700 mx-0.5" />
                               <button
-                                onClick={() => handleStartReply(m.sender_name, m.text)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleStartReply(m.sender_name, m.text);
+                                }}
                                 title="Reply"
                                 className="p-1 rounded-full text-neutral-400 hover:text-emerald-500 hover:bg-emerald-500/10 transition-colors cursor-pointer"
                               >
                                 <CornerDownRight className="w-3.5 h-3.5" />
                               </button>
                               <button
-                                onClick={() => handleCopyText(m.id, m.text)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCopyText(m.id, m.text);
+                                }}
                                 title="Copy Text"
                                 className="p-1 rounded-full text-neutral-400 hover:text-emerald-500 hover:bg-emerald-500/10 transition-colors cursor-pointer"
                               >
@@ -1121,20 +1208,33 @@ export const WhatsAppCommunities: React.FC = () => {
                                   <Copy className="w-3.5 h-3.5" />
                                 )}
                               </button>
+                              {isSelf && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteDirectMessage(m.id);
+                                  }}
+                                  disabled={deletingMsgId === m.id}
+                                  title="Delete Message"
+                                  className="p-1 rounded-full text-neutral-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              )}
                             </div>
 
-                            {/* Bubble Card - White Background, Sleek Times New Roman Italic Black Text */}
+                            {/* Bubble Card - Authentic WhatsApp Themed Palette */}
                             <div
-                              className={`p-3 sm:p-3.5 rounded-2xl space-y-1.5 text-xs relative overflow-hidden shadow-xs border bg-white ${
+                              onClick={() => setSelectedMessageId((prev) => (prev === m.id ? null : m.id))}
+                              className={`p-3 sm:p-3.5 rounded-2xl space-y-1.5 text-xs relative overflow-hidden shadow-xs border transition-all cursor-pointer ${
                                 isSelf
-                                  ? 'border-neutral-200/90 rounded-tr-xs'
-                                  : 'border-neutral-200/90 rounded-tl-xs'
-                              }`}
+                                  ? 'bg-[#d9fdd3] text-[#111b21] dark:bg-[#005c4b] dark:text-[#e9edef] border-emerald-300/40 dark:border-emerald-600/30 rounded-tr-xs'
+                                  : 'bg-white text-[#111b21] dark:bg-[#202c33] dark:text-[#e9edef] border-neutral-200/90 dark:border-neutral-700/60 rounded-tl-xs'
+                              } ${selectedMessageId === m.id ? 'ring-2 ring-[#12BEF9] shadow-md' : ''}`}
                             >
                               {!isSelf && (
                                 <div
-                                  style={{ fontFamily: '"Times New Roman", Times, Georgia, serif' }}
-                                  className="text-xs font-normal italic text-emerald-700 relative z-10 pb-0.5"
+                                  className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 relative z-10 pb-0.5"
                                 >
                                   {m.sender_name}
                                 </div>
@@ -1142,8 +1242,7 @@ export const WhatsAppCommunities: React.FC = () => {
 
                               {m.text && (
                                 <p
-                                  style={{ fontFamily: '"Times New Roman", Times, Georgia, serif' }}
-                                  className="leading-relaxed whitespace-pre-wrap text-[14px] sm:text-[15px] relative z-10 font-light italic text-black"
+                                  className="leading-relaxed whitespace-pre-wrap text-[14px] sm:text-[15px] relative z-10 font-normal text-inherit"
                                 >
                                   {m.text}
                                 </p>
@@ -1211,10 +1310,10 @@ export const WhatsAppCommunities: React.FC = () => {
                     initial={{ width: 0, opacity: 0 }}
                     animate={{ width: 320, opacity: 1 }}
                     exit={{ width: 0, opacity: 0 }}
-                    className="border-l border-neutral-200 bg-white h-full overflow-y-auto p-5 flex-shrink-0"
+                    className="border-l border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#111b21] h-full overflow-y-auto p-5 flex-shrink-0"
                   >
                     {/* Header with close button */}
-                    <div className="flex items-center justify-between pb-3 border-b border-neutral-200">
+                    <div className="flex items-center justify-between pb-3 border-b border-neutral-200 dark:border-neutral-800">
                       <span
                         style={{ fontFamily: '"Times New Roman", Times, Georgia, serif' }}
                         className="text-base font-light italic text-black dark:text-white"
@@ -1394,24 +1493,24 @@ export const WhatsAppCommunities: React.FC = () => {
               )}
             </AnimatePresence>
 
-            {/* Message Composer Footer - Pure White, Times New Roman Sleek Italic Text */}
-            <div className="p-3 sm:p-4 bg-white border-t border-neutral-200 flex-shrink-0">
+            {/* Message Composer Footer - Authentic WhatsApp Themed Styling */}
+            <div className="p-3 sm:p-4 bg-white/95 dark:bg-[#111b21]/95 backdrop-blur-md border-t border-neutral-200 dark:border-neutral-800 flex-shrink-0">
               {replyingTo && (
-                <div className="mb-2 p-2.5 rounded-2xl bg-white border border-neutral-200 border-l-4 border-l-emerald-500 flex items-center justify-between text-xs shadow-xs">
+                <div className="mb-2 p-2.5 rounded-2xl bg-white dark:bg-[#202c33] border border-neutral-200 dark:border-neutral-700 border-l-4 border-l-emerald-500 flex items-center justify-between text-xs shadow-xs">
                   <div className="min-w-0 pr-2">
-                    <span className="font-bold text-emerald-600 block truncate">
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400 block truncate">
                       Replying to {replyingTo.sender}
                     </span>
                     <p
                       style={{ fontFamily: '"Times New Roman", Times, Georgia, serif' }}
-                      className="text-xs text-black truncate mt-0.5 font-light italic"
+                      className="text-xs text-neutral-800 dark:text-neutral-200 truncate mt-0.5 font-light italic"
                     >
                       "{replyingTo.text}"
                     </p>
                   </div>
                   <button
                     onClick={() => setReplyingTo(null)}
-                    className="p-1 rounded-full text-neutral-400 hover:text-black transition-colors cursor-pointer"
+                    className="p-1 rounded-full text-neutral-400 hover:text-black dark:hover:text-white transition-colors cursor-pointer"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -1419,7 +1518,7 @@ export const WhatsAppCommunities: React.FC = () => {
               )}
 
               {sendError && (
-                <div className="mb-2 px-3 py-1.5 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-600 text-[11px] font-medium">
+                <div className="mb-2 px-3 py-1.5 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-[11px] font-medium">
                   {sendError}
                 </div>
               )}
@@ -1430,7 +1529,7 @@ export const WhatsAppCommunities: React.FC = () => {
 
                 <form
                   onSubmit={handleSendMessage}
-                  className="relative z-10 w-full flex items-center gap-2 sm:gap-3 bg-white p-1.5 sm:p-2 rounded-full border border-neutral-200 shadow-xs"
+                  className="relative z-10 w-full flex items-center gap-2 sm:gap-3 bg-neutral-100 dark:bg-[#202c33] p-1.5 sm:p-2 rounded-full border border-neutral-300 dark:border-neutral-700 shadow-xs"
                 >
                   <button
                     type="button"
@@ -1440,7 +1539,7 @@ export const WhatsAppCommunities: React.FC = () => {
                     className={`p-2 rounded-full transition-all cursor-pointer flex-shrink-0 ${
                       showCodeInput
                         ? 'bg-emerald-600 text-white shadow-xs'
-                        : 'text-neutral-500 hover:text-black hover:bg-neutral-100'
+                        : 'text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white hover:bg-neutral-200 dark:hover:bg-neutral-800'
                     } ${isSending ? 'opacity-40 cursor-not-allowed' : ''}`}
                   >
                     <Code2 className="w-4 h-4" />
@@ -1458,7 +1557,7 @@ export const WhatsAppCommunities: React.FC = () => {
                     onChange={(e) => setTextInput(e.target.value)}
                     disabled={isSending}
                     style={{ fontFamily: '"Times New Roman", Times, Georgia, serif' }}
-                    className="flex-1 min-w-0 px-2 py-1 bg-transparent text-sm sm:text-base text-black placeholder-neutral-400 focus:outline-none font-light italic"
+                    className="flex-1 min-w-0 px-2 py-1 bg-transparent text-sm sm:text-base text-neutral-900 dark:text-[#e9edef] placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none font-light italic"
                   />
 
                   <button

@@ -41,7 +41,12 @@ import {
   Filter,
   Layers,
   Flame,
-  CheckCheck
+  CheckCheck,
+  AlertTriangle,
+  Trash2,
+  BarChart3,
+  Cpu,
+  Zap
 } from 'lucide-react';
 import Editor from '@monaco-editor/react';
 import { useAuth } from '../../context/AuthContext';
@@ -83,9 +88,10 @@ const extractYouTubeVideoId = (url?: string | null): string | null => {
 
 interface ClassroomHubProps {
   initialClassroomId?: string | null;
+  onExamStateChange?: (isWriting: boolean) => void;
 }
 
-export const ClassroomHub: React.FC<ClassroomHubProps> = ({ initialClassroomId }) => {
+export const ClassroomHub: React.FC<ClassroomHubProps> = ({ initialClassroomId, onExamStateChange }) => {
   const { user, authFetch, openAuthModal } = useAuth();
   const { theme } = useTheme();
 
@@ -174,6 +180,10 @@ export const ClassroomHub: React.FC<ClassroomHubProps> = ({ initialClassroomId }
   const [isQuizTimerActive, setIsQuizTimerActive] = useState(false);
   const [quizResult, setQuizResult] = useState<any | null>(null);
   const [isSubmittingQuiz, setIsSubmittingQuiz] = useState(false);
+  const [quizAutoExitSeconds, setQuizAutoExitSeconds] = useState<number | null>(null);
+  const [quizAutoExitCancelled, setQuizAutoExitCancelled] = useState(false);
+  const classroomNotepadRef = useRef<string[]>([]);
+  const classroomViolationTriggeredRef = useRef<boolean>(false);
 
   // ─── TAB 4: CHALLENGES / LABS STATES ─────────────────────────────
   const [problems, setProblems] = useState<ClassroomProblem[]>([]);
@@ -198,6 +208,26 @@ export const ClassroomHub: React.FC<ClassroomHubProps> = ({ initialClassroomId }
   const [isRunningCode, setIsRunningCode] = useState(false);
   const [isSubmittingCode, setIsSubmittingCode] = useState(false);
   const [codeRunResult, setCodeRunResult] = useState<CodeEvalResult | null>(null);
+  const [codeSubmitted, setCodeSubmitted] = useState(false);
+  const [codeAutoExitSeconds, setCodeAutoExitSeconds] = useState<number | null>(null);
+  const [codeAutoExitCancelled, setCodeAutoExitCancelled] = useState(false);
+
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(() => !!document.fullscreenElement);
+  const problemNotepadRef = useRef<string[]>([]);
+  const problemViolationTriggeredRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    const handleFs = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFs);
+    return () => document.removeEventListener('fullscreenchange', handleFs);
+  }, []);
+
+  useEffect(() => {
+    const isWriting = !!activeQuizToTake || !!activeProblemToSolve || isFullscreen;
+    onExamStateChange?.(isWriting);
+  }, [activeQuizToTake, activeProblemToSolve, isFullscreen, onExamStateChange]);
 
   const isFaculty = user?.role === 'university';
 
@@ -606,6 +636,32 @@ export const ClassroomHub: React.FC<ClassroomHubProps> = ({ initialClassroomId }
     }
   };
 
+  const [deletingClassroomMsgId, setDeletingClassroomMsgId] = useState<string | null>(null);
+
+  const handleDeleteClassroomMessage = async (msgId: string) => {
+    if (!selectedClassroom || !selectedChannel) return;
+    const confirmDel = window.confirm("Are you sure you want to delete this message?");
+    if (!confirmDel) return;
+    try {
+      setDeletingClassroomMsgId(msgId);
+      const res = await authFetch(
+        `/api/classrooms/${selectedClassroom.id}/channels/${selectedChannel.id}/messages/${msgId}`,
+        { method: 'DELETE' }
+      );
+      const data = await res.json();
+      if (data.success) {
+        setChannelMessages((prev) => prev.filter((m) => m.id !== msgId));
+      } else {
+        alert(data.error || "Failed to delete message");
+      }
+    } catch (err: any) {
+      console.error("Delete classroom message error:", err);
+      alert("Failed to delete message.");
+    } finally {
+      setDeletingClassroomMsgId(null);
+    }
+  };
+
   // ─── ACTIONS: TAB 3 CONTESTS ─────────────────────────────────────
   const handlePublishQuiz = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -663,17 +719,118 @@ export const ClassroomHub: React.FC<ClassroomHubProps> = ({ initialClassroomId }
     }
   };
 
-  const handleStartQuiz = (q: ClassroomQuiz) => {
+  // 15-second Auto-exit countdown for Classroom Assessment
+  useEffect(() => {
+    if (!quizResult || quizAutoExitCancelled) {
+      setQuizAutoExitSeconds(null);
+      return;
+    }
+    setQuizAutoExitSeconds(15);
+    const timer = setInterval(() => {
+      setQuizAutoExitSeconds((prev) => {
+        if (prev === null) return null;
+        if (prev <= 1) {
+          clearInterval(timer);
+          handleCloseQuiz();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [quizResult, quizAutoExitCancelled]);
+
+  const handleCloseQuiz = async () => {
+    if (document.fullscreenElement) {
+      try {
+        await document.exitFullscreen();
+      } catch {}
+    }
+    setActiveQuizToTake(null);
+    setQuizResult(null);
+    setIsQuizTimerActive(false);
+    setQuizAutoExitSeconds(null);
+    setQuizAutoExitCancelled(false);
+  };
+
+  // 15-second Auto-exit countdown for Classroom Coding Challenge
+  useEffect(() => {
+    if (!codeSubmitted || codeAutoExitCancelled) {
+      setCodeAutoExitSeconds(null);
+      return;
+    }
+    setCodeAutoExitSeconds(15);
+    const timer = setInterval(() => {
+      setCodeAutoExitSeconds((prev) => {
+        if (prev === null) return null;
+        if (prev <= 1) {
+          clearInterval(timer);
+          handleCloseProblem();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [codeSubmitted, codeAutoExitCancelled]);
+
+  const handleCloseProblem = async () => {
+    if (document.fullscreenElement) {
+      try {
+        await document.exitFullscreen();
+      } catch {}
+    }
+    setActiveProblemToSolve(null);
+    setCodeRunResult(null);
+    setCodeSubmitted(false);
+    setCodeAutoExitSeconds(null);
+    setCodeAutoExitCancelled(false);
+  };
+
+  const handleStartQuiz = async (q: ClassroomQuiz) => {
+    // Eagerly request fullscreen right on user click gesture
+    try {
+      if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+        await document.documentElement.requestFullscreen();
+      }
+    } catch (e) {
+      console.warn('Fullscreen auto-request blocked by browser gesture rules', e);
+    }
+
     setActiveQuizToTake(q);
     setCurrentQIndex(0);
+
+    // If candidate already attempted, display review/solution directly! Cannot be re-given!
+    if (q.attempted && q.latest_result) {
+      setQuizResult(q.latest_result);
+      setIsQuizTimerActive(false);
+      setQuizAutoExitCancelled(false);
+      setQuizAutoExitSeconds(15);
+      setQuizAnswers(q.latest_result.answers || {});
+      return;
+    }
+
     setQuizAnswers({});
     setQuizStatuses({});
     setQuizSecondsLeft(q.duration_minutes * 60);
     setIsQuizTimerActive(true);
     setQuizResult(null);
+    setQuizAutoExitCancelled(false);
+    setQuizAutoExitSeconds(null);
+    classroomNotepadRef.current = [
+      `[${new Date().toLocaleTimeString()}] Classroom CBT assessment session initialized. Mouse-only navigation strictly enforced.`
+    ];
+    classroomViolationTriggeredRef.current = false;
+
+    // Lock keyboard if supported (Chromium API) to capture Escape directly
+    if ('keyboard' in navigator && (navigator as any).keyboard?.lock) {
+      try {
+        await (navigator as any).keyboard.lock(['Escape']);
+      } catch {}
+    }
   };
 
-  const handleSubmitQuiz = async () => {
+  const handleSubmitQuiz = async (violationReason?: string) => {
     if (!activeQuizToTake || !selectedClassroom) return;
     setIsSubmittingQuiz(true);
     setIsQuizTimerActive(false);
@@ -687,18 +844,28 @@ export const ClassroomHub: React.FC<ClassroomHubProps> = ({ initialClassroomId }
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             answers: quizAnswers,
-            time_taken_seconds: Math.max(1, timeTaken)
+            time_taken_seconds: Math.max(1, timeTaken),
+            proctor_notepad: classroomNotepadRef.current.join('\n'),
+            violation_reason: violationReason || null
           })
         }
       );
       const data = await res.json();
       if (data.success) {
         setQuizResult(data);
+        setQuizAutoExitCancelled(false);
+        setQuizAutoExitSeconds(15);
         confetti({
           particleCount: 80,
           spread: 70,
           origin: { y: 0.6 }
         });
+        // Release keyboard lock (fullscreen remains active to review solutions & evaluation)
+        if ('keyboard' in navigator && (navigator as any).keyboard?.unlock) {
+          try {
+            (navigator as any).keyboard.unlock();
+          } catch {}
+        }
         // Refresh quizzes
         const qRes = await authFetch(`/api/classrooms/${selectedClassroom.id}/quizzes`);
         const qData = await qRes.json();
@@ -710,6 +877,139 @@ export const ClassroomHub: React.FC<ClassroomHubProps> = ({ initialClassroomId }
       setIsSubmittingQuiz(false);
     }
   };
+
+  // ── CLASSROOM CBT INVISIBLE NOTEPAD & ZERO-KEYBOARD FULLSCREEN LOCKDOWN ──
+  useEffect(() => {
+    if (!activeQuizToTake || !isQuizTimerActive || quizResult) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // STRICT RULE: No keyboard buttons should work while exam is in session
+      e.preventDefault();
+      e.stopPropagation();
+
+      const timestamp = new Date().toLocaleTimeString();
+      const keyName = e.key;
+      const isEscape = keyName === 'Escape' || e.code === 'Escape' || e.keyCode === 27;
+      const isModifierCombo = e.ctrlKey || e.altKey || (e.shiftKey && keyName !== 'Shift') || e.metaKey;
+
+      // Note every single blocked key into the invisible notepad
+      const entry = `[${timestamp}] Blocked Key: '${keyName}' | Code: ${e.code} | Modifiers: ${e.ctrlKey ? 'Ctrl ' : ''}${e.altKey ? 'Alt ' : ''}${e.shiftKey ? 'Shift ' : ''}${e.metaKey ? 'Meta ' : ''}`.trim();
+      classroomNotepadRef.current.push(entry);
+
+      // Rule 1: Pressing ESC auto-submits immediately
+      if (isEscape) {
+        if (!classroomViolationTriggeredRef.current) {
+          classroomViolationTriggeredRef.current = true;
+          const reason = 'Escape Key Violation: Candidate pressed Escape during fullscreen exam. Assessment auto-submitted.';
+          classroomNotepadRef.current.push(`[${timestamp}] 🚨 VIOLATION: ${reason}`);
+          handleSubmitQuiz(reason);
+        }
+        return;
+      }
+
+      // Rule 2: Pressing commands using Ctrl, Alt, Shift, Meta auto-submits immediately
+      if (isModifierCombo) {
+        if (!classroomViolationTriggeredRef.current) {
+          classroomViolationTriggeredRef.current = true;
+          const combo = `${e.ctrlKey ? 'Ctrl+' : ''}${e.altKey ? 'Alt+' : ''}${e.shiftKey ? 'Shift+' : ''}${e.metaKey ? 'Meta+' : ''}${keyName}`;
+          const reason = `Command Violation [${combo}]: Keyboard commands prohibited in CBT exam. Assessment auto-submitted.`;
+          classroomNotepadRef.current.push(`[${timestamp}] 🚨 VIOLATION: ${reason}`);
+          handleSubmitQuiz(reason);
+        }
+        return;
+      }
+    };
+
+    const preventKeyboardAction = (e: KeyboardEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    window.addEventListener('keydown', handleKeyDown, true);
+    window.addEventListener('keypress', preventKeyboardAction, true);
+    window.addEventListener('keyup', preventKeyboardAction, true);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown, true);
+      window.removeEventListener('keypress', preventKeyboardAction, true);
+      window.removeEventListener('keyup', preventKeyboardAction, true);
+    };
+  }, [activeQuizToTake, isQuizTimerActive, quizResult, selectedClassroom, quizSecondsLeft, quizAnswers]);
+
+  // Fullscreen exit detection during active classroom quiz (exiting fullscreen auto-submits)
+  useEffect(() => {
+    if (!activeQuizToTake || !isQuizTimerActive || quizResult) return;
+
+    const handleFullscreenChange = () => {
+      const inFull = !!document.fullscreenElement;
+      if (!inFull && !classroomViolationTriggeredRef.current) {
+        classroomViolationTriggeredRef.current = true;
+        const reason = 'Escape / Fullscreen Exit Violation: Assessment auto-submitted because fullscreen mode was interrupted or exited.';
+        classroomNotepadRef.current.push(`[${new Date().toLocaleTimeString()}] 🚨 VIOLATION: ${reason}`);
+        handleSubmitQuiz(reason);
+      }
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, [activeQuizToTake, isQuizTimerActive, quizResult, selectedClassroom, quizSecondsLeft, quizAnswers]);
+
+  // ── STRICT ZERO-TOLERANCE TAB SWITCH & WINDOW BLUR DETECTOR (ALL DEVICES: MOBILE, TABLET, DESKTOP) ──
+  useEffect(() => {
+    if (!activeQuizToTake || !isQuizTimerActive || quizResult) return;
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden' && !classroomViolationTriggeredRef.current) {
+        classroomViolationTriggeredRef.current = true;
+        const reason = 'Tab Switch Violation: Candidate navigated away to another tab, window, or app during classroom CBT assessment. Assessment auto-submitted.';
+        classroomNotepadRef.current.push(`[${new Date().toLocaleTimeString()}] 🚨 VIOLATION: ${reason}`);
+        handleSubmitQuiz(reason);
+      }
+    };
+
+    const handleWindowBlur = () => {
+      if (!classroomViolationTriggeredRef.current) {
+        classroomViolationTriggeredRef.current = true;
+        const reason = 'Window Focus Lost: Candidate switched focus away from classroom CBT assessment window. Assessment auto-submitted.';
+        classroomNotepadRef.current.push(`[${new Date().toLocaleTimeString()}] 🚨 VIOLATION: ${reason}`);
+        handleSubmitQuiz(reason);
+      }
+    };
+
+    const handleClipboardViolation = (e: ClipboardEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!classroomViolationTriggeredRef.current) {
+        classroomViolationTriggeredRef.current = true;
+        const reason = 'Clipboard Action Violation: External clipboard copying or pasting is strictly prohibited. Assessment auto-submitted.';
+        classroomNotepadRef.current.push(`[${new Date().toLocaleTimeString()}] 🚨 VIOLATION: ${reason}`);
+        handleSubmitQuiz(reason);
+      }
+    };
+
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('blur', handleWindowBlur);
+    window.addEventListener('copy', handleClipboardViolation, true);
+    window.addEventListener('paste', handleClipboardViolation, true);
+    window.addEventListener('cut', handleClipboardViolation, true);
+    document.addEventListener('contextmenu', handleContextMenu);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('blur', handleWindowBlur);
+      window.removeEventListener('copy', handleClipboardViolation, true);
+      window.removeEventListener('paste', handleClipboardViolation, true);
+      window.removeEventListener('cut', handleClipboardViolation, true);
+      document.removeEventListener('contextmenu', handleContextMenu);
+    };
+  }, [activeQuizToTake, isQuizTimerActive, quizResult, selectedClassroom, quizSecondsLeft, quizAnswers]);
 
   // ─── ACTIONS: TAB 4 CHALLENGES / LABS ────────────────────────────
   const handlePublishProblem = async (e: React.FormEvent) => {
@@ -765,11 +1065,47 @@ export const ClassroomHub: React.FC<ClassroomHubProps> = ({ initialClassroomId }
     }
   };
 
-  const handleOpenProblem = (prob: ClassroomProblem) => {
+  const handleOpenProblem = async (prob: ClassroomProblem) => {
+    // Eagerly request fullscreen right on user click gesture
+    try {
+      if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+        await document.documentElement.requestFullscreen();
+      }
+    } catch (e) {
+      console.warn('Fullscreen gesture blocked', e);
+    }
+
     setActiveProblemToSolve(prob);
+    setCodeAutoExitCancelled(false);
+    setCodeAutoExitSeconds(null);
+    problemViolationTriggeredRef.current = false;
+    problemNotepadRef.current = [
+      `[${new Date().toLocaleTimeString()}] Classroom Lab Challenge session initialized. Fullscreen strictly enforced.`
+    ];
+
+    // If candidate already attempted, display review/solution directly! Cannot be re-given!
+    if (prob.already_attempted && prob.latest_submission) {
+      setProblemCode(prob.latest_submission.code);
+      setProblemLang((prob.latest_submission.language || 'python') as any);
+      setCodeRunResult({
+        verdict: prob.latest_submission.verdict,
+        all_passed: prob.latest_submission.verdict === 'Accepted',
+        passed_count: prob.latest_submission.passed_count,
+        total_count: prob.latest_submission.total_count,
+        avg_time_ms: prob.latest_submission.execution_time_ms,
+        results: [],
+        complexity: prob.latest_submission.complexity
+      });
+      setCodeSubmitted(true);
+      setActiveLabTab('output');
+      setCodeAutoExitSeconds(15);
+      return;
+    }
+
     const template = prob.starter_templates?.[problemLang] || '# Write your solution here\n';
     setProblemCode(template);
     setCodeRunResult(null);
+    setCodeSubmitted(false);
     setActiveLabTab('testcases');
   };
 
@@ -845,7 +1181,7 @@ export const ClassroomHub: React.FC<ClassroomHubProps> = ({ initialClassroomId }
     }
   };
 
-  const handleSubmitProblemCode = async () => {
+  const handleSubmitProblemCode = async (violationReason?: string) => {
     if (!activeProblemToSolve || !selectedClassroom) return;
     setIsSubmittingCode(true);
     setActiveLabTab('output');
@@ -857,13 +1193,23 @@ export const ClassroomHub: React.FC<ClassroomHubProps> = ({ initialClassroomId }
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             code: problemCode,
-            language: problemLang
+            language: problemLang,
+            violation_reason: violationReason || null,
+            proctor_notepad: problemNotepadRef.current.join('\n')
           })
         }
       );
       const data = await res.json();
       if (data.success) {
-        setCodeRunResult(data.result || data);
+        setCodeRunResult({
+          ...(data.result || data),
+          verdict: data.verdict,
+          violation_reason: data.violation_reason,
+          complexity: data.complexity
+        });
+        setCodeSubmitted(true);
+        setCodeAutoExitCancelled(false);
+        setCodeAutoExitSeconds(15);
         if (data.verdict === 'Accepted') {
           confetti({
             particleCount: 80,
@@ -871,6 +1217,10 @@ export const ClassroomHub: React.FC<ClassroomHubProps> = ({ initialClassroomId }
             origin: { y: 0.6 }
           });
         }
+        // Refresh problems list
+        const probRes = await authFetch(`/api/classrooms/${selectedClassroom.id}/problems`);
+        const probData = await probRes.json();
+        if (probData.success) setProblems(probData.problems || []);
       } else {
         setCodeRunResult({
           verdict: 'Compilation Error',
@@ -917,58 +1267,132 @@ export const ClassroomHub: React.FC<ClassroomHubProps> = ({ initialClassroomId }
     }
   };
 
+  // ── STRICT ZERO-TOLERANCE PROCTORING FOR CLASSROOM LAB CHALLENGES ──
+  useEffect(() => {
+    if (!activeProblemToSolve || codeSubmitted) return;
+
+    const handleFsChange = () => {
+      if (!document.fullscreenElement && !problemViolationTriggeredRef.current) {
+        problemViolationTriggeredRef.current = true;
+        const reason = 'Fullscreen Exit Violation: Interrupted or exited fullscreen during classroom lab challenge.';
+        problemNotepadRef.current.push(`[${new Date().toLocaleTimeString()}] 🚨 VIOLATION: ${reason}`);
+        handleSubmitProblemCode(reason);
+      }
+    };
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden' && !problemViolationTriggeredRef.current) {
+        problemViolationTriggeredRef.current = true;
+        const reason = 'Tab Switch Violation: Navigated to another tab, window, or application during classroom lab challenge.';
+        problemNotepadRef.current.push(`[${new Date().toLocaleTimeString()}] 🚨 VIOLATION: ${reason}`);
+        handleSubmitProblemCode(reason);
+      }
+    };
+
+    const handleBlur = () => {
+      if (!problemViolationTriggeredRef.current) {
+        problemViolationTriggeredRef.current = true;
+        const reason = 'Window Focus Lost: Switched window focus away from classroom lab challenge.';
+        problemNotepadRef.current.push(`[${new Date().toLocaleTimeString()}] 🚨 VIOLATION: ${reason}`);
+        handleSubmitProblemCode(reason);
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isEscape = e.key === 'Escape' || e.code === 'Escape' || e.keyCode === 27;
+      const isDevTools = (e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c');
+      const isViewSource = (e.ctrlKey || e.metaKey) && (e.key === 'u' || e.key === 'U');
+      const isPaste = (e.ctrlKey || e.metaKey) && (e.key === 'v' || e.key === 'V');
+
+      if (isEscape || isDevTools || isViewSource || isPaste) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!problemViolationTriggeredRef.current) {
+          problemViolationTriggeredRef.current = true;
+          const reason = isEscape
+            ? 'Escape Key Violation: Escape key pressed during classroom lab challenge. Solution auto-submitted.'
+            : isPaste
+            ? 'Clipboard Violation: External pasting is strictly prohibited in classroom lab challenge.'
+            : 'Shortcut Violation: Developer tools and inspection shortcuts are prohibited.';
+          problemNotepadRef.current.push(`[${new Date().toLocaleTimeString()}] 🚨 VIOLATION: ${reason}`);
+          handleSubmitProblemCode(reason);
+        }
+      }
+    };
+
+    document.addEventListener('fullscreenchange', handleFsChange);
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('blur', handleBlur);
+    window.addEventListener('keydown', handleKeyDown, true);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFsChange);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('blur', handleBlur);
+      window.removeEventListener('keydown', handleKeyDown, true);
+    };
+  }, [activeProblemToSolve, codeSubmitted, problemCode, problemLang, selectedClassroom]);
+
   const formatExamTime = (secs: number) => {
     const mins = Math.floor(secs / 60);
     const remSecs = secs % 60;
     return `${mins.toString().padStart(2, '0')}:${remSecs.toString().padStart(2, '0')}`;
   };
 
-  return (
-    <div className="min-h-screen bg-[var(--x-bg)] text-[var(--x-text)] pl-0 lg:pl-[68px] xl:pl-[76px] 2xl:pl-[84px] pb-24 lg:pb-0 flex flex-col selection:bg-[#0A84FF]/30 selection:text-white">
-      {/* ── FULL-WIDTH VIEWPORT HEADER (BORDERLESS, SLEEK & CLEAN) ── */}
-      <header className="w-full sticky top-0 z-30 bg-[var(--x-bg)]/85 backdrop-blur-md px-4 sm:px-8 py-3.5 flex items-center justify-between transition-colors">
-        {/* Top Left: Sleek & Stylish Classroom in Times New Roman */}
-        <div className="flex items-center gap-3">
-          {selectedClassroom && (
-            <button
-              onClick={() => setSelectedClassroom(null)}
-              title="Back to all subjects"
-              className="p-1.5 -ml-1 rounded-full hover:bg-[var(--x-surface-hover)] text-[var(--x-subtext)] hover:text-[var(--x-text)] transition-colors cursor-pointer"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-          )}
-          <h1
-            className="text-3xl sm:text-4xl font-light tracking-wide text-[var(--x-text)] select-none cursor-pointer hover:opacity-80 transition-opacity"
-            style={{ fontFamily: '"Times New Roman", Times, Georgia, serif' }}
-            onClick={() => setSelectedClassroom(null)}
-          >
-            Classroom
-          </h1>
-        </div>
+  const isTakingTestOrInFull = !!activeQuizToTake || !!activeProblemToSolve || isFullscreen;
 
-        {/* Top Right of Viewport: Add Subject (Faculty) / Join Subject (Student) */}
-        <div>
-          <button
-            onClick={() => {
-              if (!user) {
-                openAuthModal('login');
-              } else if (isFaculty) {
-                setIsCreateModalOpen(true);
-              } else {
-                setIsJoinModalOpen(true);
-              }
-            }}
-            className="x-btn-accent text-xs sm:text-sm px-5 py-2 font-bold cursor-pointer transition-transform active:scale-95 flex items-center gap-1.5 shadow-md hover:shadow-cyan-500/20"
-          >
-            <Plus className="w-4 h-4 stroke-[2.5]" />
-            <span>{isFaculty ? 'Add Subject' : 'Join Subject'}</span>
-          </button>
-        </div>
-      </header>
+  return (
+    <div
+      className={`min-h-screen bg-[var(--x-bg)] text-[var(--x-text)] ${
+        isTakingTestOrInFull ? 'p-0' : 'pl-0 lg:pl-[68px] xl:pl-[76px] 2xl:pl-[84px] pb-24 lg:pb-0'
+      } flex flex-col selection:bg-[#0A84FF]/30 selection:text-white`}
+    >
+      {/* ── FULL-WIDTH VIEWPORT HEADER (HIDDEN WHILE TAKING ASSESSMENT OR IN FULLSCREEN) ── */}
+      {!isTakingTestOrInFull && (
+        <header className="w-full sticky top-0 z-30 bg-[var(--x-bg)]/85 backdrop-blur-md px-4 sm:px-8 py-3.5 flex items-center justify-between transition-colors">
+          {/* Top Left: Sleek & Stylish Classroom in Times New Roman */}
+          <div className="flex items-center gap-3">
+            {selectedClassroom && (
+              <button
+                onClick={() => setSelectedClassroom(null)}
+                title="Back to all subjects"
+                className="p-1.5 -ml-1 rounded-full hover:bg-[var(--x-surface-hover)] text-[var(--x-subtext)] hover:text-[var(--x-text)] transition-colors cursor-pointer"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+            )}
+            <h1
+              className="text-3xl sm:text-4xl font-light tracking-wide text-[var(--x-text)] select-none cursor-pointer hover:opacity-80 transition-opacity"
+              style={{ fontFamily: '"Times New Roman", Times, Georgia, serif' }}
+              onClick={() => setSelectedClassroom(null)}
+            >
+              Classroom
+            </h1>
+          </div>
+
+          {/* Top Right of Viewport: Add Subject (Faculty) / Join Subject (Student) */}
+          <div>
+            <button
+              onClick={() => {
+                if (!user) {
+                  openAuthModal('login');
+                } else if (isFaculty) {
+                  setIsCreateModalOpen(true);
+                } else {
+                  setIsJoinModalOpen(true);
+                }
+              }}
+              className="x-btn-accent text-xs sm:text-sm px-5 py-2 font-bold cursor-pointer transition-transform active:scale-95 flex items-center gap-1.5 shadow-md hover:shadow-cyan-500/20"
+            >
+              <Plus className="w-4 h-4 stroke-[2.5]" />
+              <span>{isFaculty ? 'Add Subject' : 'Join Subject'}</span>
+            </button>
+          </div>
+        </header>
+      )}
 
       {/* ── MAIN CONTENT OUTLET ── */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+      <main className={`flex-1 w-full mx-auto ${isTakingTestOrInFull ? 'p-0 max-w-none' : 'max-w-7xl p-4 sm:p-6 space-y-6'}`}>
         {selectedClassroom ? (
           /* ═════════════════════════════════════════════════════════════════
              SUBJECT ARENA (THE 4 SCOPED TABS)
@@ -1540,6 +1964,16 @@ export const ClassroomHub: React.FC<ClassroomHubProps> = ({ initialClassroomId }
                                   </span>
                                 )}
                                 <span className="text-[var(--x-subtext)]">{formatDate(m.created_at)}</span>
+                                {(isSelf || isFaculty) && (
+                                  <button
+                                    onClick={() => handleDeleteClassroomMessage(m.id)}
+                                    disabled={deletingClassroomMsgId === m.id}
+                                    title="Delete Message"
+                                    className="p-1 rounded-full text-neutral-400 hover:text-rose-500 hover:bg-rose-500/10 active:scale-90 transition-all cursor-pointer select-none"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </button>
+                                )}
                               </div>
 
                               <div
@@ -1675,10 +2109,14 @@ export const ClassroomHub: React.FC<ClassroomHubProps> = ({ initialClassroomId }
 
                         <div className="flex items-center gap-2 w-full sm:w-auto">
                           {q.attempted ? (
-                            <div className="px-4 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center gap-1.5">
-                              <CheckCircle2 className="w-4 h-4" />
-                              <span>Score: {q.user_score} / {q.total_marks}</span>
-                            </div>
+                            <button
+                              onClick={() => handleStartQuiz(q)}
+                              className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-[var(--x-surface-hover)] border border-[var(--x-border)] hover:bg-[var(--x-surface)] text-xs font-bold text-[var(--x-text)] transition-all cursor-pointer flex items-center justify-center gap-2 shadow-sm"
+                            >
+                              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                              <span>Review Solutions & Score ({q.user_score}/{q.total_marks})</span>
+                              <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+                            </button>
                           ) : (
                             <button
                               onClick={() => handleStartQuiz(q)}
@@ -1755,10 +2193,15 @@ export const ClassroomHub: React.FC<ClassroomHubProps> = ({ initialClassroomId }
 
                           <button
                             onClick={() => handleOpenProblem(p)}
-                            className="px-5 py-2.5 rounded-xl bg-[#0A84FF] hover:bg-[#0071e3] text-white text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg shadow-blue-500/30 active:scale-95 flex-shrink-0 btn-keep-white"
+                            className={`px-5 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg active:scale-95 flex-shrink-0 ${
+                              p.is_solved || p.already_attempted
+                                ? 'bg-[var(--x-surface-hover)] border border-[var(--x-border)] text-[var(--x-text)] shadow-none hover:bg-[var(--x-surface)]'
+                                : 'bg-[#0A84FF] hover:bg-[#0071e3] text-white shadow-blue-500/30 btn-keep-white'
+                            }`}
                           >
                             <Code2 className="w-4 h-4" />
-                            <span>Solve Challenge</span>
+                            <span>{p.is_solved || p.already_attempted ? 'Review Solution' : 'Solve Challenge'}</span>
+                            {(p.is_solved || p.already_attempted) && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 ml-1" />}
                           </button>
                         </div>
                       ))
@@ -2439,322 +2882,826 @@ export const ClassroomHub: React.FC<ClassroomHubProps> = ({ initialClassroomId }
         )}
       </AnimatePresence>
 
-      {/* ── STUDENT ASSESSMENT RUNNER MODAL ── */}
+      {/* ── STUDENT ASSESSMENT RUNNER MODAL (FULLSCREEN CBT ARENA) ── */}
       <AnimatePresence>
         {activeQuizToTake && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 dark:bg-black/90 backdrop-blur-xl"
-            />
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-4xl h-[85vh] rounded-[32px] bg-[var(--x-surface)] border border-[var(--x-border)] text-[var(--x-text)] flex flex-col overflow-hidden shadow-2xl z-10"
-            >
-              {/* Header with Timer */}
-              <div className="px-6 py-4 border-b border-[var(--x-border)] bg-[var(--x-surface)] flex items-center justify-between">
-                <div>
-                  <h3 className="text-base font-extrabold text-[var(--x-text)]">{activeQuizToTake.title}</h3>
-                  <p className="text-xs text-[var(--x-subtext)]">Marking: +4 for correct, -1 for wrong</p>
+          <div className="fixed inset-0 z-[70] bg-[var(--x-bg)] text-[var(--x-text)] flex flex-col overflow-hidden">
+            {/* Auto-Exit 15s Countdown Banner */}
+            {quizAutoExitSeconds !== null && !quizAutoExitCancelled && (
+              <div className="w-full bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 text-white px-4 py-2 text-xs font-bold flex items-center justify-between z-50 shadow-md flex-shrink-0">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 animate-spin" />
+                  <span>Exiting to Classroom assessments in {quizAutoExitSeconds}s...</span>
                 </div>
-
-                <div className="flex items-center gap-3">
-                  <div className="px-3.5 py-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-[#0A84FF] font-mono text-sm font-extrabold flex items-center gap-1.5">
-                    <Clock className="w-4 h-4" />
-                    <span>{formatExamTime(quizSecondsLeft)}</span>
-                  </div>
-
+                <div className="flex items-center gap-2">
                   <button
-                    onClick={handleSubmitQuiz}
-                    disabled={isSubmittingQuiz}
-                    className="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all cursor-pointer shadow-md disabled:opacity-50 btn-keep-white"
+                    onClick={() => setQuizAutoExitCancelled(true)}
+                    className="px-2.5 py-1 rounded bg-black/30 hover:bg-black/50 text-white text-[11px] font-semibold cursor-pointer transition-colors"
                   >
-                    {isSubmittingQuiz ? 'Submitting...' : 'Submit Assessment'}
+                    Stay & Review
+                  </button>
+                  <button
+                    onClick={handleCloseQuiz}
+                    className="px-2.5 py-1 rounded bg-white text-black hover:bg-neutral-200 text-[11px] font-bold cursor-pointer transition-colors"
+                  >
+                    Exit Now
                   </button>
                 </div>
               </div>
+            )}
 
-              {/* Body */}
-              <div className="flex-1 flex overflow-hidden">
-                {quizResult ? (
-                  /* Evaluation Result Card */
-                  <div className="flex-1 p-8 flex flex-col items-center justify-center space-y-4 text-center">
-                    <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-500 shadow-xl">
-                      <CheckCircle2 className="w-8 h-8" />
+            {/* Viewport Top Header */}
+            <div className="px-6 py-3.5 border-b border-[var(--x-border)] bg-[var(--x-surface)] flex items-center justify-between flex-shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-blue-500/15 border border-blue-500/25 flex items-center justify-center text-[#0A84FF]">
+                  <Award className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-[var(--x-text)] leading-tight">{activeQuizToTake.title}</h3>
+                  <p className="text-xs text-[var(--x-subtext)] flex items-center gap-2 mt-0.5">
+                    <span>Marking: +4 / -1</span>
+                    <span>•</span>
+                    <span>Total: {activeQuizToTake.questions?.length || 0} Questions</span>
+                    {!quizResult && (
+                      <span className="text-emerald-500 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                        • 🛡️ Zero-Tolerance Proctoring Active
+                      </span>
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                {!quizResult ? (
+                  <>
+                    <div className="px-3.5 py-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-[#0A84FF] font-mono text-sm font-extrabold flex items-center gap-1.5">
+                      <Clock className="w-4 h-4" />
+                      <span>{formatExamTime(quizSecondsLeft)}</span>
                     </div>
-                    <h2 className="text-2xl font-extrabold text-[var(--x-text)]">Assessment Submitted!</h2>
-                    <p className="text-sm text-[var(--x-subtext)]">
-                      Your score: <span className="font-extrabold text-[#0A84FF] text-xl">{quizResult.score}</span> / {quizResult.max_marks}
-                    </p>
-                    <div className="flex items-center gap-4 text-xs">
-                      <span className="text-emerald-500 font-semibold">Correct: {quizResult.correct_count}</span>
-                      <span className="text-rose-500 font-semibold">Incorrect: {quizResult.incorrect_count}</span>
-                      <span className="text-[var(--x-subtext)]">Accuracy: {quizResult.accuracy}%</span>
-                    </div>
+
                     <button
-                      onClick={() => setActiveQuizToTake(null)}
-                      className="px-6 py-2.5 rounded-xl bg-[#0A84FF] text-white text-xs font-bold cursor-pointer mt-4 btn-keep-white"
+                      onClick={() => handleSubmitQuiz()}
+                      disabled={isSubmittingQuiz}
+                      className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all cursor-pointer shadow-md disabled:opacity-50 btn-keep-white"
                     >
-                      Close Assessment
+                      {isSubmittingQuiz ? 'Submitting...' : 'Submit Assessment'}
                     </button>
-                  </div>
+                  </>
                 ) : (
-                  /* Active Questions */
-                  <div className="flex-1 flex">
-                    <div className="flex-1 p-6 space-y-5 overflow-y-auto">
-                      {activeQuizToTake.questions && activeQuizToTake.questions[currentQIndex] && (
-                        <div className="space-y-4">
-                          <span className="text-xs text-[#0A84FF] font-bold uppercase tracking-wider">
-                            Question {currentQIndex + 1} of {activeQuizToTake.questions.length}
+                  <button
+                    onClick={handleCloseQuiz}
+                    className="px-4 py-2 rounded-xl bg-[var(--x-surface-hover)] hover:bg-[var(--x-surface)] border border-[var(--x-border)] text-xs font-bold text-[var(--x-text)] transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <span>Return to Assessments</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Arena Main Body */}
+            <div className="flex-1 flex overflow-hidden">
+              {quizResult ? (
+                /* ═════════════════════════════════════════════════════════════
+                   SOLUTIONS REVIEW & COHORT INSIGHTS VIEW
+                ═════════════════════════════════════════════════════════════ */
+                <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 max-w-5xl w-full mx-auto">
+                  {/* Proctor Violation Alert Box */}
+                  {(quizResult.violation_reason || (quizResult.integrity_status && quizResult.integrity_status.includes('VIOLATION'))) && (
+                    <div className="w-full p-4 rounded-2xl bg-rose-500/15 border border-rose-500/40 text-rose-500 flex items-start gap-3 shadow-lg">
+                      <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5 text-rose-500" />
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-wider">CBT Proctor Violation: Assessment Auto-Submitted</p>
+                        <p className="text-xs text-[var(--x-text)] mt-1 leading-relaxed">
+                          {quizResult.violation_reason || 'Proctor security violation triggered zero-tolerance auto-submit.'} Your complete keystroke and navigation audit log was dispatched to your classroom faculty.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Score & Percentile Overview Card */}
+                  <div className="p-6 sm:p-8 rounded-[28px] border border-[var(--x-border)] bg-[var(--x-surface)] shadow-lg relative overflow-hidden">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
+                      <div className="space-y-2 text-center sm:text-left">
+                        <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
+                          <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-500 text-xs font-extrabold uppercase tracking-wider border border-emerald-500/30">
+                            Evaluation Complete
                           </span>
-                          <h4 className="text-base font-semibold text-[var(--x-text)] leading-relaxed">
-                            {activeQuizToTake.questions[currentQIndex].question || activeQuizToTake.questions[currentQIndex].question_text}
-                          </h4>
-
-                          <div className="space-y-2.5 pt-2">
-                            {activeQuizToTake.questions[currentQIndex].options.map((opt, oIdx) => {
-                              const qId = activeQuizToTake.questions[currentQIndex].id;
-                              const isSelected = quizAnswers[qId] === oIdx;
-
-                              return (
-                                <button
-                                  key={oIdx}
-                                  onClick={() => setQuizAnswers((prev) => ({ ...prev, [qId]: oIdx }))}
-                                  className={`w-full p-4 rounded-2xl text-xs font-medium text-left flex items-center gap-3 transition-all cursor-pointer ${
-                                    isSelected
-                                      ? 'bg-[#0A84FF]/15 border border-[#0A84FF] text-[var(--x-text)] shadow-md'
-                                      : 'bg-[var(--x-bg)] border border-[var(--x-border)] text-[var(--x-text)] hover:bg-[var(--x-surface-hover)]'
-                                  }`}
-                                >
-                                  <div
-                                    className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                                      isSelected ? 'bg-[#0A84FF] text-white btn-keep-white' : 'bg-[var(--x-surface-hover)] text-[var(--x-subtext)]'
-                                    }`}
-                                  >
-                                    {['A', 'B', 'C', 'D'][oIdx]}
-                                  </div>
-                                  <span>{opt}</span>
-                                </button>
-                              );
-                            })}
-                          </div>
+                          {quizResult.insights?.top_percentile && (
+                            <span className="px-3.5 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-500 dark:text-amber-400 text-xs font-black uppercase tracking-wider border border-amber-500/40 flex items-center gap-1.5 shadow-sm">
+                              <Trophy className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                              <span>{quizResult.insights.top_percentile}</span>
+                            </span>
+                          )}
+                          {quizResult.insights?.rank !== undefined && (
+                            <span className="px-3 py-1 rounded-full bg-[var(--x-surface-hover)] text-[var(--x-subtext)] text-xs font-mono font-bold border border-[var(--x-border)]">
+                              Rank #{quizResult.insights.rank} of {quizResult.insights.total_attempts || 1}
+                            </span>
+                          )}
                         </div>
-                      )}
+                        <h2 className="text-2xl sm:text-3xl font-extrabold text-[var(--x-text)] tracking-tight">
+                          {activeQuizToTake.title}
+                        </h2>
+                        <p className="text-xs text-[var(--x-subtext)]">
+                          Classroom assessment grading (+4 correct, -1 wrong, 0 unattempted). Once submitted, assessment cannot be re-taken.
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-4 bg-[var(--x-surface-hover)] p-4 sm:p-5 rounded-[22px] border border-[var(--x-border)]">
+                        <div className="text-center px-4 border-r border-[var(--x-border)]">
+                          <span className="text-xs text-[var(--x-subtext)] block font-medium">Final Score</span>
+                          <span className={`text-3xl sm:text-4xl font-black tracking-tight ${quizResult.score >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                            {quizResult.score}
+                          </span>
+                          <span className="text-[10px] text-[var(--x-subtext)] block font-mono">/ {quizResult.max_marks}</span>
+                        </div>
+                        <div className="text-center px-4">
+                          <span className="text-xs text-[var(--x-subtext)] block font-medium">Accuracy</span>
+                          <span className="text-3xl sm:text-4xl font-black text-[#0A84FF] tracking-tight">
+                            {quizResult.accuracy}%
+                          </span>
+                          <span className="text-[10px] text-[var(--x-subtext)] block font-mono">
+                            {quizResult.correct_count} / {activeQuizToTake.questions?.length || quizResult.total_questions || 1}
+                          </span>
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Question Palette Sidebar */}
-                    <div className="w-56 border-l border-[var(--x-border)] bg-[var(--x-surface)] p-4 space-y-3">
-                      <span className="text-xs font-bold text-[var(--x-text)] block">Question Palette</span>
-                      <div className="grid grid-cols-4 gap-2">
-                        {activeQuizToTake.questions?.map((q, idx) => {
-                          const isAnswered = quizAnswers[q.id] !== undefined;
-                          const isCurrent = idx === currentQIndex;
-
-                          return (
-                            <button
-                              key={q.id}
-                              onClick={() => setCurrentQIndex(idx)}
-                              className={`h-9 rounded-xl text-xs font-bold cursor-pointer transition-all ${
-                                isCurrent
-                                  ? 'ring-2 ring-blue-500 bg-[#0A84FF] text-white btn-keep-white'
-                                  : isAnswered
-                                  ? 'bg-emerald-600 text-white btn-keep-white'
-                                  : 'bg-[var(--x-bg)] border border-[var(--x-border)] text-[var(--x-subtext)] hover:text-[var(--x-text)] hover:bg-[var(--x-surface-hover)]'
-                              }`}
-                            >
-                              {idx + 1}
-                            </button>
-                          );
-                        })}
+                    {/* Stat Badges */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-[var(--x-border)]">
+                      <div className="p-3.5 rounded-[16px] bg-emerald-500/10 border border-emerald-500/25 text-center">
+                        <span className="text-xs text-emerald-500 font-bold block">Correct (+4)</span>
+                        <span className="text-2xl font-black text-[var(--x-text)]">{quizResult.correct_count}</span>
+                      </div>
+                      <div className="p-3.5 rounded-[16px] bg-rose-500/10 border border-rose-500/25 text-center">
+                        <span className="text-xs text-rose-500 font-bold block">Incorrect (-1)</span>
+                        <span className="text-2xl font-black text-[var(--x-text)]">{quizResult.incorrect_count}</span>
+                      </div>
+                      <div className="p-3.5 rounded-[16px] bg-[var(--x-surface-hover)] border border-[var(--x-border)] text-center">
+                        <span className="text-xs text-[var(--x-subtext)] font-bold block">Unattempted</span>
+                        <span className="text-2xl font-black text-[var(--x-text)]">
+                          {quizResult.unattempted_count ?? Math.max(0, (activeQuizToTake.questions?.length || 0) - (quizResult.correct_count + quizResult.incorrect_count))}
+                        </span>
+                      </div>
+                      <div className="p-3.5 rounded-[16px] bg-[#0A84FF]/10 border border-[#0A84FF]/25 text-center">
+                        <span className="text-xs text-[#0A84FF] font-bold block">Time Taken</span>
+                        <span className="text-2xl font-black text-[var(--x-text)] font-mono">
+                          {formatExamTime(quizResult.time_taken_seconds || 0)}
+                        </span>
                       </div>
                     </div>
                   </div>
-                )}
-              </div>
-            </motion.div>
+
+                  {/* Cohort Benchmark & Percentage Bins Distribution Bar Graph */}
+                  {quizResult.insights?.percentage_bins && quizResult.insights.percentage_bins.length > 0 && (
+                    <div className="p-6 sm:p-8 rounded-[28px] border border-[var(--x-border)] bg-[var(--x-surface)] shadow-lg space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[var(--x-border)]">
+                        <div>
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/15 border border-blue-500/30 text-[#0A84FF] text-xs font-bold tracking-wide mb-1">
+                            <BarChart3 className="w-3.5 h-3.5" />
+                            <span>COHORT DISTRIBUTION & PERCENTILE BENCHMARK</span>
+                          </div>
+                          <h3 className="text-lg sm:text-xl font-extrabold text-[var(--x-text)] tracking-tight">
+                            Average Bar Graph & Score Bins
+                          </h3>
+                          <p className="text-xs text-[var(--x-subtext)]">
+                            Compare your score against the cohort of classroom students.
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <div className="px-4 py-2 rounded-xl bg-[var(--x-surface-hover)] border border-[var(--x-border)] text-center">
+                            <span className="text-[10px] text-[var(--x-subtext)] font-bold uppercase tracking-wider block">Class Average</span>
+                            <span className="text-sm font-black text-[var(--x-text)] font-mono">
+                              {quizResult.insights.cohort_average_score ?? '—'} pts
+                              <span className="text-xs font-semibold text-[#0A84FF] ml-1">
+                                ({quizResult.insights.cohort_average_percentage || 0}%)
+                              </span>
+                            </span>
+                          </div>
+                          <div className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500/15 to-orange-500/15 border border-amber-500/35 text-center">
+                            <span className="text-[10px] text-amber-500 dark:text-amber-400 font-bold uppercase tracking-wider block">Your Standing</span>
+                            <span className="text-sm font-black text-amber-500 dark:text-amber-400 font-mono">
+                              {quizResult.insights.top_percentile || `Rank #${quizResult.insights.rank}`}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Graphical Bar Chart */}
+                      {(() => {
+                        const bins = quizResult.insights.percentage_bins;
+                        const maxCount = Math.max(...bins.map((b: any) => b.count), 1);
+                        return (
+                          <div className="h-48 pt-8 pb-2 px-3 sm:px-6 rounded-2xl bg-[var(--x-bg)] border border-[var(--x-border)] flex items-end justify-between gap-2 sm:gap-4 relative overflow-hidden">
+                            <div className="absolute inset-x-0 top-1/4 border-b border-[var(--x-border)]/30 pointer-events-none" />
+                            <div className="absolute inset-x-0 top-2/4 border-b border-[var(--x-border)]/30 pointer-events-none" />
+                            <div className="absolute inset-x-0 top-3/4 border-b border-[var(--x-border)]/30 pointer-events-none" />
+
+                            {bins.map((bin: any, idx: number) => {
+                              const heightPct = Math.max((bin.count / maxCount) * 100, 8);
+                              return (
+                                <div key={idx} className="flex-1 flex flex-col items-center h-full justify-end group relative z-10">
+                                  {bin.is_user_bin && (
+                                    <div className="absolute -top-7 z-20 px-2 py-0.5 rounded-full bg-[#0A84FF] text-white text-[10px] font-black shadow-md whitespace-nowrap animate-bounce flex items-center gap-1">
+                                      <span>You</span>
+                                      <span className="opacity-80">({bin.count})</span>
+                                    </div>
+                                  )}
+                                  {!bin.is_user_bin && (
+                                    <span className="text-[10px] font-mono text-[var(--x-subtext)] mb-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      {bin.count} {bin.count === 1 ? 'student' : 'students'}
+                                    </span>
+                                  )}
+                                  <div
+                                    style={{ height: `${heightPct}%` }}
+                                    className={`w-full max-w-[50px] rounded-t-xl transition-all duration-500 ${
+                                      bin.is_user_bin
+                                        ? 'bg-gradient-to-t from-blue-600 to-[#0A84FF] shadow-lg shadow-blue-500/30 border-t-2 border-blue-300 ring-2 ring-blue-500/20'
+                                        : 'bg-[var(--x-surface-hover)] hover:bg-slate-600/30 border-t border-white/10'
+                                    }`}
+                                  />
+                                  <span className={`text-[10px] font-mono mt-2 truncate max-w-full ${bin.is_user_bin ? 'font-extrabold text-[#0A84FF]' : 'text-[var(--x-subtext)]'}`}>
+                                    {bin.bin_label}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
+
+                  {/* Classroom Leaderboard Card */}
+                  {quizResult.insights?.leaderboard && quizResult.insights.leaderboard.length > 0 && (
+                    <div className="p-6 sm:p-8 rounded-[28px] border border-[var(--x-border)] bg-[var(--x-surface)] shadow-lg space-y-4">
+                      <div className="flex items-center justify-between pb-3 border-b border-[var(--x-border)]">
+                        <div>
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-500 text-xs font-bold tracking-wide mb-1">
+                            <Trophy className="w-3.5 h-3.5" />
+                            <span>CLASSROOM LEADERBOARD</span>
+                          </div>
+                          <h3 className="text-lg sm:text-xl font-extrabold text-[var(--x-text)] tracking-tight">
+                            Top Rankers & Standings
+                          </h3>
+                        </div>
+                        <span className="text-xs text-[var(--x-subtext)] font-mono px-3 py-1.5 rounded-xl bg-[var(--x-surface-hover)] border border-[var(--x-border)]">
+                          {quizResult.insights.total_attempts || quizResult.insights.leaderboard.length} Total Submissions
+                        </span>
+                      </div>
+
+                      <div className="overflow-x-auto rounded-2xl border border-[var(--x-border)]">
+                        <table className="w-full text-left text-xs">
+                          <thead className="bg-[var(--x-surface-hover)] text-[var(--x-subtext)] font-bold uppercase tracking-wider text-[10px] border-b border-[var(--x-border)]">
+                            <tr>
+                              <th className="py-3 px-4">Rank</th>
+                              <th className="py-3 px-4">Candidate</th>
+                              <th className="py-3 px-4 text-center">Score</th>
+                              <th className="py-3 px-4 text-center">Percentage</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-[var(--x-border)]">
+                            {quizResult.insights.leaderboard.map((entry: any, eIdx: number) => (
+                              <tr
+                                key={eIdx}
+                                className={`transition-colors ${
+                                  entry.is_current_user
+                                    ? 'bg-blue-500/10 font-bold border-l-4 border-l-[#0A84FF]'
+                                    : 'hover:bg-[var(--x-surface-hover)]/60'
+                                }`}
+                              >
+                                <td className="py-3 px-4">
+                                  <span className={`w-6 h-6 rounded-full inline-flex items-center justify-center text-xs font-black ${
+                                    entry.rank === 1 ? 'bg-amber-400 text-black' : entry.rank === 2 ? 'bg-slate-300 text-black' : entry.rank === 3 ? 'bg-amber-700 text-white' : 'text-[var(--x-subtext)]'
+                                  }`}>
+                                    {entry.rank}
+                                  </span>
+                                </td>
+                                <td className="py-3 px-4 font-semibold text-[var(--x-text)]">
+                                  {entry.user_name} {entry.is_current_user && <span className="text-[#0A84FF] ml-1">(You)</span>}
+                                </td>
+                                <td className="py-3 px-4 text-center font-mono font-bold text-[var(--x-text)]">{entry.score}</td>
+                                <td className="py-3 px-4 text-center font-mono text-[#0A84FF]">{entry.percentage}%</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Detailed Solutions Breakdown */}
+                  <div className="p-6 sm:p-8 rounded-[28px] border border-[var(--x-border)] bg-[var(--x-surface)] shadow-lg space-y-6">
+                    <div className="flex items-center justify-between pb-3 border-b border-[var(--x-border)]">
+                      <div>
+                        <h3 className="text-lg sm:text-xl font-extrabold text-[var(--x-text)] tracking-tight">
+                          Solutions & Explanations Review
+                        </h3>
+                        <p className="text-xs text-[var(--x-subtext)]">
+                          Inspect each question, your chosen option, the verified answer, and explanations.
+                        </p>
+                      </div>
+                      <span className="text-xs font-bold text-[#0A84FF] px-3 py-1 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                        {activeQuizToTake.questions?.length || 0} Questions
+                      </span>
+                    </div>
+
+                    <div className="space-y-6">
+                      {activeQuizToTake.questions?.map((q, qIdx) => {
+                        const userChoice = quizAnswers[q.id] ?? (quizResult.answers ? quizResult.answers[q.id] : undefined);
+                        const correctChoice = q.correct_option_index ?? (q.correct_index !== undefined ? q.correct_index : (typeof q.correct_answer === 'number' ? q.correct_answer : undefined));
+                        const isAnswered = userChoice !== undefined;
+                        const isCorrect = isAnswered && (userChoice === correctChoice);
+
+                        return (
+                          <div key={q.id || qIdx} className="p-5 rounded-2xl bg-[var(--x-bg)] border border-[var(--x-border)] space-y-4">
+                            <div className="flex items-center justify-between gap-3">
+                              <span className="text-xs font-bold text-[#0A84FF] uppercase tracking-wider">
+                                Question {qIdx + 1}
+                              </span>
+                              {isAnswered ? (
+                                isCorrect ? (
+                                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-500 text-xs font-bold flex items-center gap-1">
+                                    <CheckCircle2 className="w-3.5 h-3.5" /> Correct (+4)
+                                  </span>
+                                ) : (
+                                  <span className="px-2.5 py-0.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-500 text-xs font-bold flex items-center gap-1">
+                                    <XCircle className="w-3.5 h-3.5" /> Incorrect (-1)
+                                  </span>
+                                )
+                              ) : (
+                                <span className="px-2.5 py-0.5 rounded-full bg-[var(--x-surface-hover)] border border-[var(--x-border)] text-[var(--x-subtext)] text-xs font-bold">
+                                  Unattempted (0)
+                                </span>
+                              )}
+                            </div>
+
+                            <p className="text-sm font-semibold text-[var(--x-text)] leading-relaxed">
+                              {q.question || q.question_text}
+                            </p>
+
+                            <div className="space-y-2 pt-1">
+                              {q.options.map((opt, oIdx) => {
+                                const isSelectedByUser = userChoice === oIdx;
+                                const isTheCorrectOption = correctChoice === oIdx;
+
+                                let optStyle = 'bg-[var(--x-surface)] border-[var(--x-border)] text-[var(--x-text)]';
+                                if (isTheCorrectOption) {
+                                  optStyle = 'bg-emerald-500/15 border-emerald-500 text-emerald-600 dark:text-emerald-300 font-semibold';
+                                } else if (isSelectedByUser && !isCorrect) {
+                                  optStyle = 'bg-rose-500/15 border-rose-500 text-rose-600 dark:text-rose-300 font-semibold';
+                                }
+
+                                return (
+                                  <div key={oIdx} className={`w-full p-3.5 rounded-xl border text-xs flex items-center justify-between gap-3 ${optStyle}`}>
+                                    <div className="flex items-center gap-3">
+                                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                                        isTheCorrectOption ? 'bg-emerald-500 text-white' : isSelectedByUser ? 'bg-rose-500 text-white' : 'bg-[var(--x-surface-hover)] text-[var(--x-subtext)]'
+                                      }`}>
+                                        {['A', 'B', 'C', 'D'][oIdx]}
+                                      </div>
+                                      <span>{opt}</span>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                      {isSelectedByUser && (
+                                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-black/20 text-current">
+                                          Your Answer
+                                        </span>
+                                      )}
+                                      {isTheCorrectOption && (
+                                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-emerald-500 text-white">
+                                          Correct Answer ✓
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+
+                            {q.explanation && (
+                              <div className="p-3.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs text-[var(--x-text)] space-y-1">
+                                <span className="font-bold text-[#0A84FF] block">💡 Explanation:</span>
+                                <p className="leading-relaxed whitespace-pre-line text-[var(--x-subtext)]">{q.explanation}</p>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div className="pt-4 flex justify-center">
+                      <button
+                        onClick={handleCloseQuiz}
+                        className="px-6 py-2.5 rounded-xl bg-[#0A84FF] text-white text-xs font-bold cursor-pointer btn-keep-white shadow-lg active:scale-95"
+                      >
+                        Return to Classroom Assessments
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* ═════════════════════════════════════════════════════════════
+                   ACTIVE TEST SESSION: QUESTIONS & PALETTE
+                ═════════════════════════════════════════════════════════════ */
+                <div className="flex-1 flex">
+                  <div className="flex-1 p-6 sm:p-8 space-y-6 overflow-y-auto max-w-4xl mx-auto">
+                    {activeQuizToTake.questions && activeQuizToTake.questions[currentQIndex] && (
+                      <div className="space-y-6">
+                        <div className="flex items-center justify-between pb-3 border-b border-[var(--x-border)]">
+                          <span className="text-xs text-[#0A84FF] font-bold uppercase tracking-wider">
+                            Question {currentQIndex + 1} of {activeQuizToTake.questions.length}
+                          </span>
+                          <span className="text-xs text-[var(--x-subtext)] font-mono">
+                            Marking: +4 / -1
+                          </span>
+                        </div>
+
+                        <h4 className="text-base sm:text-lg font-semibold text-[var(--x-text)] leading-relaxed">
+                          {activeQuizToTake.questions[currentQIndex].question || activeQuizToTake.questions[currentQIndex].question_text}
+                        </h4>
+
+                        <div className="space-y-3 pt-2">
+                          {activeQuizToTake.questions[currentQIndex].options.map((opt, oIdx) => {
+                            const qId = activeQuizToTake.questions[currentQIndex].id;
+                            const isSelected = quizAnswers[qId] === oIdx;
+
+                            return (
+                              <button
+                                key={oIdx}
+                                onClick={() => setQuizAnswers((prev) => ({ ...prev, [qId]: oIdx }))}
+                                className={`w-full p-4 rounded-2xl text-xs sm:text-sm font-medium text-left flex items-center gap-3.5 transition-all cursor-pointer ${
+                                  isSelected
+                                    ? 'bg-[#0A84FF]/15 border-2 border-[#0A84FF] text-[var(--x-text)] shadow-md'
+                                    : 'bg-[var(--x-surface)] border border-[var(--x-border)] text-[var(--x-text)] hover:bg-[var(--x-surface-hover)]'
+                                }`}
+                              >
+                                <div
+                                  className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                                    isSelected ? 'bg-[#0A84FF] text-white btn-keep-white' : 'bg-[var(--x-surface-hover)] text-[var(--x-subtext)]'
+                                  }`}
+                                >
+                                  {['A', 'B', 'C', 'D'][oIdx]}
+                                </div>
+                                <span className="leading-relaxed">{opt}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* Navigation controls */}
+                        <div className="flex items-center justify-between pt-6 border-t border-[var(--x-border)]">
+                          <button
+                            onClick={() => setCurrentQIndex((prev) => Math.max(0, prev - 1))}
+                            disabled={currentQIndex === 0}
+                            className="px-4 py-2 rounded-xl bg-[var(--x-surface-hover)] hover:bg-[var(--x-surface)] border border-[var(--x-border)] text-xs font-bold text-[var(--x-text)] disabled:opacity-40 cursor-pointer flex items-center gap-1.5"
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                            <span>Previous</span>
+                          </button>
+
+                          <button
+                            onClick={() => setCurrentQIndex((prev) => Math.min((activeQuizToTake.questions?.length || 1) - 1, prev + 1))}
+                            disabled={currentQIndex >= (activeQuizToTake.questions?.length || 1) - 1}
+                            className="px-4 py-2 rounded-xl bg-[var(--x-surface-hover)] hover:bg-[var(--x-surface)] border border-[var(--x-border)] text-xs font-bold text-[var(--x-text)] disabled:opacity-40 cursor-pointer flex items-center gap-1.5"
+                          >
+                            <span>Next Question</span>
+                            <ChevronRight className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Question Palette Sidebar */}
+                  <div className="w-64 border-l border-[var(--x-border)] bg-[var(--x-surface)] p-5 space-y-4 hidden md:flex flex-col">
+                    <div>
+                      <span className="text-xs font-bold text-[var(--x-text)] block">Question Palette</span>
+                      <p className="text-[11px] text-[var(--x-subtext)] mt-0.5">Jump directly to any problem</p>
+                    </div>
+
+                    <div className="grid grid-cols-4 gap-2 overflow-y-auto flex-1">
+                      {activeQuizToTake.questions?.map((q, idx) => {
+                        const isAnswered = quizAnswers[q.id] !== undefined;
+                        const isCurrent = idx === currentQIndex;
+
+                        return (
+                          <button
+                            key={q.id}
+                            onClick={() => setCurrentQIndex(idx)}
+                            className={`h-9 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+                              isCurrent
+                                ? 'ring-2 ring-blue-500 bg-[#0A84FF] text-white btn-keep-white shadow-md'
+                                : isAnswered
+                                ? 'bg-emerald-600 text-white btn-keep-white'
+                                : 'bg-[var(--x-bg)] border border-[var(--x-border)] text-[var(--x-subtext)] hover:text-[var(--x-text)] hover:bg-[var(--x-surface-hover)]'
+                            }`}
+                          >
+                            {idx + 1}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Legend */}
+                    <div className="pt-3 border-t border-[var(--x-border)] space-y-2 text-[11px] text-[var(--x-subtext)]">
+                      <div className="flex items-center gap-2">
+                        <span className="w-3 h-3 rounded-md bg-[#0A84FF]" />
+                        <span>Current</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="w-3 h-3 rounded-md bg-emerald-600" />
+                        <span>Answered</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="w-3 h-3 rounded-md bg-[var(--x-bg)] border border-[var(--x-border)]" />
+                        <span>Not Answered</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </AnimatePresence>
 
-      {/* ── STUDENT CODING RUNNER MODAL ── */}
+      {/* ── STUDENT CODING RUNNER MODAL (FULLSCREEN CODE LAB ARENA) ── */}
       <AnimatePresence>
         {activeProblemToSolve && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 dark:bg-black/90 backdrop-blur-xl"
-            />
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-6xl h-[88vh] rounded-[32px] bg-[var(--x-surface)] border border-[var(--x-border)] text-[var(--x-text)] flex flex-col overflow-hidden shadow-2xl z-10"
-            >
-              {/* Top Modal Header */}
-              <div className="px-6 py-4 border-b border-[var(--x-border)] bg-[var(--x-surface)] flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-blue-500/15 border border-blue-500/25 flex items-center justify-center text-[#0A84FF]">
-                    <Code2 className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-extrabold text-[var(--x-text)]">{activeProblemToSolve.title}</h3>
-                    <p className="text-xs text-[var(--x-subtext)]">{activeProblemToSolve.category} • {activeProblemToSolve.difficulty}</p>
-                  </div>
+          <div className="fixed inset-0 z-[70] bg-[var(--x-bg)] text-[var(--x-text)] flex flex-col overflow-hidden">
+            {/* Auto-Exit 15s Countdown Banner */}
+            {codeAutoExitSeconds !== null && !codeAutoExitCancelled && (
+              <div className="w-full bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 text-white px-4 py-2 text-xs font-bold flex items-center justify-between z-50 shadow-md flex-shrink-0">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 animate-spin" />
+                  <span>Exiting to Classroom challenges in {codeAutoExitSeconds}s...</span>
                 </div>
-
-                <div className="flex items-center gap-2 sm:gap-2.5">
-                  <select
-                    value={problemLang}
-                    onChange={(e: any) => {
-                      const newLang = e.target.value;
-                      setProblemLang(newLang);
-                      const t = activeProblemToSolve.starter_templates?.[newLang] || (newLang === 'cpp' ? '#include <iostream>\nusing namespace std;\n\nint main() {\n    return 0;\n}\n' : newLang === 'java' ? 'public class Solution {\n    public static void main(String[] args) {\n    }\n}\n' : '# Write your solution here\n');
-                      setProblemCode(t);
-                    }}
-                    className="px-3 py-1.5 rounded-xl bg-[var(--x-bg)] border border-[var(--x-border)] text-xs font-bold text-[var(--x-text)] focus:outline-none cursor-pointer"
-                  >
-                    <option value="python">Python 3</option>
-                    <option value="javascript">JavaScript (Node.js)</option>
-                    <option value="cpp">C++ (G++ 17)</option>
-                    <option value="java">Java (OpenJDK 17)</option>
-                  </select>
-
+                <div className="flex items-center gap-2">
                   <button
-                    onClick={handleRunCode}
-                    disabled={isRunningCode || isSubmittingCode}
-                    className="px-3.5 sm:px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 active:scale-95 shadow-md btn-keep-white"
+                    onClick={() => setCodeAutoExitCancelled(true)}
+                    className="px-2.5 py-1 rounded bg-black/30 hover:bg-black/50 text-white text-[11px] font-semibold cursor-pointer transition-colors"
                   >
-                    <Play className="w-3.5 h-3.5 fill-current" />
-                    <span>{isRunningCode ? 'Running...' : 'Run Code'}</span>
+                    Stay & Review
                   </button>
-
                   <button
-                    onClick={handleSubmitProblemCode}
-                    disabled={isRunningCode || isSubmittingCode}
-                    className="px-3.5 sm:px-4 py-1.5 rounded-xl bg-[#0A84FF] hover:bg-[#0071e3] text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 active:scale-95 shadow-md shadow-blue-500/30 btn-keep-white"
+                    onClick={handleCloseProblem}
+                    className="px-2.5 py-1 rounded bg-white text-black hover:bg-neutral-200 text-[11px] font-bold cursor-pointer transition-colors"
                   >
-                    <Send className="w-3.5 h-3.5" />
-                    <span>{isSubmittingCode ? 'Judging...' : 'Submit Solution'}</span>
-                  </button>
-
-                  <button
-                    onClick={() => setActiveProblemToSolve(null)}
-                    className="p-1.5 rounded-full text-[var(--x-subtext)] hover:text-[var(--x-text)]"
-                  >
-                    <X className="w-4 h-4" />
+                    Exit Now
                   </button>
                 </div>
               </div>
+            )}
 
-              {/* Split Body */}
-              <div className="flex-1 flex overflow-hidden">
-                {/* Left Problem Statement */}
-                <div className="w-1/2 p-6 border-r border-[var(--x-border)] overflow-y-auto space-y-4">
-                  <div className="space-y-2">
-                    <h4 className="text-xs font-bold text-[#0A84FF] uppercase tracking-wider">Description</h4>
-                    <p className="text-xs text-[var(--x-text)] leading-relaxed whitespace-pre-line">
-                      {activeProblemToSolve.description}
-                    </p>
-                  </div>
+            {/* Top Modal Header */}
+            <div className="px-6 py-3.5 border-b border-[var(--x-border)] bg-[var(--x-surface)] flex items-center justify-between flex-shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-blue-500/15 border border-blue-500/25 flex items-center justify-center text-[#0A84FF]">
+                  <Code2 className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-[var(--x-text)] leading-tight">{activeProblemToSolve.title}</h3>
+                  <p className="text-xs text-[var(--x-subtext)] flex items-center gap-2 mt-0.5">
+                    <span>{activeProblemToSolve.category}</span>
+                    <span>•</span>
+                    <span className="font-semibold">{activeProblemToSolve.difficulty}</span>
+                    {codeSubmitted ? (
+                      <span className="text-emerald-500 font-semibold flex items-center gap-1">
+                        • Solution Submitted (Review Mode)
+                      </span>
+                    ) : (
+                      <span className="text-emerald-500 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                        • 🛡️ Zero-Tolerance Proctoring Active
+                      </span>
+                    )}
+                  </p>
+                </div>
+              </div>
 
-                  {activeProblemToSolve.constraints && (
-                    <div className="space-y-1.5 pt-2 border-t border-[var(--x-border)]">
-                      <h4 className="text-xs font-bold text-[#0A84FF] uppercase tracking-wider">Constraints</h4>
-                      <p className="text-xs text-[var(--x-subtext)] font-mono">{activeProblemToSolve.constraints}</p>
-                    </div>
-                  )}
+              <div className="flex items-center gap-2 sm:gap-3">
+                <select
+                  value={problemLang}
+                  disabled={codeSubmitted}
+                  onChange={(e: any) => {
+                    const newLang = e.target.value;
+                    setProblemLang(newLang);
+                    const t =
+                      activeProblemToSolve.starter_templates?.[newLang] ||
+                      (newLang === 'cpp'
+                        ? '#include <iostream>\nusing namespace std;\n\nint main() {\n    return 0;\n}\n'
+                        : newLang === 'java'
+                        ? 'public class Solution {\n    public static void main(String[] args) {\n    }\n}\n'
+                        : '# Write your solution here\n');
+                    setProblemCode(t);
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-[var(--x-bg)] border border-[var(--x-border)] text-xs font-bold text-[var(--x-text)] focus:outline-none cursor-pointer disabled:opacity-60"
+                >
+                  <option value="python">Python 3</option>
+                  <option value="javascript">JavaScript (Node.js)</option>
+                  <option value="cpp">C++ (G++ 17)</option>
+                  <option value="java">Java (OpenJDK 17)</option>
+                </select>
 
-                  {activeProblemToSolve.sample_cases && (
-                    <div className="space-y-2 pt-2 border-t border-[var(--x-border)]">
-                      <h4 className="text-xs font-bold text-[#0A84FF] uppercase tracking-wider">Sample Cases</h4>
-                      {activeProblemToSolve.sample_cases.map((sc, scIdx) => (
-                        <div key={scIdx} className="p-3 rounded-xl bg-[var(--x-bg)] border border-[var(--x-border)] space-y-2 text-xs font-mono">
-                          <div>
-                            <span className="text-[var(--x-subtext)] block">Input:</span>
-                            <pre className="text-[var(--x-text)]">{sc.input}</pre>
-                          </div>
-                          <div>
-                            <span className="text-[var(--x-subtext)] block">Output:</span>
-                            <pre className="text-emerald-600 dark:text-emerald-400 font-semibold">{sc.output}</pre>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                {!codeSubmitted ? (
+                  <>
+                    <button
+                      onClick={handleRunCode}
+                      disabled={isRunningCode || isSubmittingCode}
+                      className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 active:scale-95 shadow-md btn-keep-white"
+                    >
+                      <Play className="w-3.5 h-3.5 fill-current" />
+                      <span>{isRunningCode ? 'Running...' : 'Run Code'}</span>
+                    </button>
+
+                    <button
+                      onClick={() => handleSubmitProblemCode()}
+                      disabled={isRunningCode || isSubmittingCode}
+                      className="px-4 py-2 rounded-xl bg-[#0A84FF] hover:bg-[#0071e3] text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 active:scale-95 shadow-md shadow-blue-500/30 btn-keep-white"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                      <span>{isSubmittingCode ? 'Judging...' : 'Submit Solution'}</span>
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={handleCloseProblem}
+                    className="px-4 py-2 rounded-xl bg-[var(--x-surface-hover)] hover:bg-[var(--x-surface)] border border-[var(--x-border)] text-xs font-bold text-[var(--x-text)] transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <span>Return to Challenges</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Split Body: Problem Statement on Left, Editor & Console on Right */}
+            <div className="flex-1 flex overflow-hidden">
+              {/* Left Problem Statement */}
+              <div className="w-1/2 p-6 sm:p-8 border-r border-[var(--x-border)] overflow-y-auto space-y-5">
+                <div className="space-y-2">
+                  <h4 className="text-xs font-bold text-[#0A84FF] uppercase tracking-wider">Problem Description</h4>
+                  <p className="text-xs sm:text-sm text-[var(--x-text)] leading-relaxed whitespace-pre-line">
+                    {activeProblemToSolve.description}
+                  </p>
                 </div>
 
-                {/* Right Editor & Console Output */}
-                <div className="w-1/2 flex flex-col">
-                  {/* Monaco Editor */}
-                  <div className="flex-1 relative">
-                    <Editor
-                      height="100%"
-                      language={problemLang}
-                      theme={theme === 'light' ? 'vs' : 'vs-dark'}
-                      value={problemCode}
-                      onChange={(val) => setProblemCode(val || '')}
-                      options={{
-                        minimap: { enabled: false },
-                        fontSize: 13,
-                        scrollBeyondLastLine: false,
-                        automaticLayout: true,
-                        padding: { top: 12 }
-                      }}
-                    />
+                {activeProblemToSolve.constraints && (
+                  <div className="space-y-1.5 pt-3 border-t border-[var(--x-border)]">
+                    <h4 className="text-xs font-bold text-[#0A84FF] uppercase tracking-wider">Constraints</h4>
+                    <p className="text-xs text-[var(--x-subtext)] font-mono">{activeProblemToSolve.constraints}</p>
+                  </div>
+                )}
+
+                {activeProblemToSolve.sample_cases && (
+                  <div className="space-y-3 pt-3 border-t border-[var(--x-border)]">
+                    <h4 className="text-xs font-bold text-[#0A84FF] uppercase tracking-wider">Sample Test Cases</h4>
+                    {activeProblemToSolve.sample_cases.map((sc, scIdx) => (
+                      <div key={scIdx} className="p-3.5 rounded-xl bg-[var(--x-surface)] border border-[var(--x-border)] space-y-2 text-xs font-mono">
+                        <div>
+                          <span className="text-[var(--x-subtext)] block font-semibold">Input:</span>
+                          <pre className="text-[var(--x-text)] mt-0.5">{sc.input}</pre>
+                        </div>
+                        <div>
+                          <span className="text-[var(--x-subtext)] block font-semibold">Output:</span>
+                          <pre className="text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5">{sc.output}</pre>
+                        </div>
+                        {sc.explanation && (
+                          <div>
+                            <span className="text-[var(--x-subtext)] block font-semibold">Explanation:</span>
+                            <p className="text-[var(--x-subtext)] text-[11px] font-sans mt-0.5">{sc.explanation}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Right Editor & Console Output */}
+              <div className="w-1/2 flex flex-col">
+                {/* Monaco Editor */}
+                <div className="flex-1 relative">
+                  <Editor
+                    height="100%"
+                    language={problemLang}
+                    theme={theme === 'light' ? 'vs' : 'vs-dark'}
+                    value={problemCode}
+                    onChange={(val) => {
+                      if (!codeSubmitted) setProblemCode(val || '');
+                    }}
+                    options={{
+                      readOnly: codeSubmitted,
+                      minimap: { enabled: false },
+                      fontSize: 13,
+                      scrollBeyondLastLine: false,
+                      automaticLayout: true,
+                      padding: { top: 12 }
+                    }}
+                  />
+                </div>
+
+                {/* Bottom Console Panel */}
+                <div className="h-64 border-t border-[var(--x-border)] bg-[var(--x-bg)] p-4 overflow-y-auto font-mono text-xs">
+                  <div className="flex items-center justify-between pb-2 border-b border-[var(--x-border)] text-[11px] text-[var(--x-subtext)]">
+                    <span className="font-bold uppercase tracking-wider">Execution Verdict & Console</span>
+                    {codeRunResult && (
+                      <span
+                        className={`font-black uppercase ${
+                          codeRunResult.verdict === 'Accepted'
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : 'text-rose-600 dark:text-rose-400'
+                        }`}
+                      >
+                        {codeRunResult.verdict} ({codeRunResult.passed_count}/{codeRunResult.total_count} Passed)
+                      </span>
+                    )}
                   </div>
 
-                  {/* Bottom Console Panel */}
-                  <div className="h-44 border-t border-[var(--x-border)] bg-[var(--x-bg)] p-3 overflow-y-auto font-mono text-xs">
-                    <div className="flex items-center justify-between pb-2 border-b border-[var(--x-border)] text-[11px] text-[var(--x-subtext)]">
-                      <span>Console & Execution Verdict</span>
-                      {codeRunResult && (
-                        <span
-                          className={`font-bold uppercase ${
-                            codeRunResult.verdict === 'Accepted'
-                              ? 'text-emerald-600 dark:text-emerald-400'
-                              : 'text-rose-600 dark:text-rose-400'
-                          }`}
-                        >
-                          {codeRunResult.verdict} ({codeRunResult.passed_count}/{codeRunResult.total_count} Passed)
-                        </span>
-                      )}
-                    </div>
+                  <div className="pt-3 space-y-3">
+                    {/* Disqualification / Violation Notice */}
+                    {codeRunResult?.violation_reason && (
+                      <div className="p-3 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-500 text-xs flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                        <div>
+                          <span className="font-bold uppercase block">Disqualified (Proctor Violation)</span>
+                          <span className="text-[11px] text-[var(--x-text)]">{codeRunResult.violation_reason}</span>
+                        </div>
+                      </div>
+                    )}
 
-                    <div className="pt-2 text-xs">
-                      {isRunningCode ? (
-                        <p className="text-[#0A84FF] animate-pulse">Running solution against compiler sandbox...</p>
-                      ) : codeRunResult ? (
-                        <div className="space-y-1.5">
-                          {codeRunResult.results.map((r, rIdx) => (
-                            <div key={rIdx} className="space-y-0.5">
-                              <p className={r.passed ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-rose-600 dark:text-rose-400 font-semibold'}>
-                                Test Case #{r.case_number}: {r.passed ? 'PASSED' : 'FAILED'}
-                              </p>
-                              {!r.passed && (
-                                <div className="text-[11px] text-[var(--x-subtext)] pl-2">
-                                  <p>Expected: {r.expected_output}</p>
-                                  <p>Actual: {r.actual_output}</p>
-                                </div>
+                    {/* Complexity Insights Card */}
+                    {codeRunResult?.complexity && (
+                      <div className="p-3.5 rounded-xl bg-[var(--x-surface)] border border-[var(--x-border)] space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-bold text-[#0A84FF] uppercase tracking-wider flex items-center gap-1.5 font-sans">
+                            <Cpu className="w-3.5 h-3.5" />
+                            <span>Algorithmic Complexity & Benchmark</span>
+                          </span>
+                          {(codeRunResult.complexity.runtime_percentile !== undefined || codeRunResult.complexity.beats_runtime_pct !== undefined) && (
+                            <span className="text-xs font-black text-amber-500 flex items-center gap-1 font-sans">
+                              <Zap className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                              <span>Beats {codeRunResult.complexity.runtime_percentile ?? codeRunResult.complexity.beats_runtime_pct}%</span>
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div className="p-2 rounded-lg bg-[var(--x-bg)] border border-[var(--x-border)]">
+                            <span className="text-[10px] text-[var(--x-subtext)] block font-sans font-medium">Time Complexity O(T)</span>
+                            <span className="font-mono font-black text-emerald-500 text-sm">
+                              {codeRunResult.complexity.time_complexity || 'O(N)'}
+                            </span>
+                          </div>
+                          <div className="p-2 rounded-lg bg-[var(--x-bg)] border border-[var(--x-border)]">
+                            <span className="text-[10px] text-[var(--x-subtext)] block font-sans font-medium">Space Complexity O(S)</span>
+                            <span className="font-mono font-black text-[#0A84FF] text-sm">
+                              {codeRunResult.complexity.space_complexity || 'O(1)'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {codeRunResult.complexity.explanation && (
+                          <p className="text-[11px] text-[var(--x-subtext)] leading-relaxed font-sans pt-0.5">
+                            {codeRunResult.complexity.explanation}
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Test Case Runs */}
+                    {isRunningCode ? (
+                      <p className="text-[#0A84FF] animate-pulse">Running solution against compiler sandbox...</p>
+                    ) : codeRunResult ? (
+                      <div className="space-y-2">
+                        {codeRunResult.results?.map((r, rIdx) => (
+                          <div key={rIdx} className="p-2.5 rounded-lg bg-[var(--x-surface)] border border-[var(--x-border)] space-y-1">
+                            <div className="flex items-center justify-between">
+                              <span className={r.passed ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-rose-600 dark:text-rose-400 font-bold'}>
+                                Test Case #{r.case_number}: {r.passed ? 'PASSED ✓' : 'FAILED ✗'}
+                              </span>
+                              {r.execution_time_ms !== undefined && (
+                                <span className="text-[10px] text-[var(--x-subtext)]">{r.execution_time_ms} ms</span>
                               )}
                             </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-[var(--x-subtext)]">Run code to see sandbox evaluation.</p>
-                      )}
-                    </div>
+                            {!r.passed && (
+                              <div className="text-[11px] text-[var(--x-subtext)] pl-2 pt-1 border-t border-[var(--x-border)] space-y-0.5">
+                                <p><span className="text-[var(--x-text)] font-semibold">Expected:</span> {r.expected_output}</p>
+                                <p><span className="text-[var(--x-text)] font-semibold">Actual:</span> {r.actual_output}</p>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-[var(--x-subtext)]">Run code or submit solution to see sandbox evaluation & complexity benchmark.</p>
+                    )}
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
         )}
       </AnimatePresence>

@@ -170,6 +170,47 @@ def test_unified_dsa_engine():
     print("[PASS] UnifiedDSAEngine integration tests succeeded.")
 
 
+def test_rate_limiter():
+    from dsa_engine import rate_limiter
+    key = "test_client_ip"
+    rate_limiter.reset(key)
+
+    # Allow up to 3 requests
+    assert rate_limiter.is_allowed(key, max_requests=3, window_seconds=10.0) is True
+    assert rate_limiter.is_allowed(key, max_requests=3, window_seconds=10.0) is True
+    assert rate_limiter.is_allowed(key, max_requests=3, window_seconds=10.0) is True
+    # 4th request must be blocked
+    assert rate_limiter.is_allowed(key, max_requests=3, window_seconds=10.0) is False
+
+    print("[PASS] SlidingWindowRateLimiter tests succeeded.")
+
+
+def test_academic_ranking():
+    post_high = {
+        "id": "p_high",
+        "post_type": "youtube_course",
+        "likes_count": 50,
+        "reposts_count": 10,
+        "comments_count": 20,
+        "created_at": time.time()
+    }
+    post_low = {
+        "id": "p_low",
+        "post_type": "tweet",
+        "likes_count": 1,
+        "reposts_count": 0,
+        "comments_count": 0,
+        "created_at": time.time() - 7200 # 2 hours old
+    }
+    score_high = PriorityFeedRanker.compute_academic_score(post_high)
+    score_low = PriorityFeedRanker.compute_academic_score(post_low)
+    assert score_high > score_low, f"Expected score_high ({score_high}) > score_low ({score_low})"
+
+    ranked = PriorityFeedRanker.top_k([post_low, post_high], 2, score_fn=lambda p: PriorityFeedRanker.compute_academic_score(p))
+    assert ranked[0]["id"] == "p_high"
+    print("[PASS] Academic feed ranking calculation succeeded.")
+
+
 if __name__ == "__main__":
     test_prefix_trie()
     test_inverted_index()
@@ -177,4 +218,7 @@ if __name__ == "__main__":
     test_priority_feed_ranker()
     test_peer_graph()
     test_unified_dsa_engine()
+    test_rate_limiter()
+    test_academic_ranking()
     print("\nALL INTERNAL DSA ENGINE TESTS PASSED PERFECTLY!")
+

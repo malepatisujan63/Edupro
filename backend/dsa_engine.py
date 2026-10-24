@@ -347,6 +347,52 @@ class PriorityFeedRanker:
         return result
 
 
+    @staticmethod
+
+    def compute_academic_score(
+        post: Dict[str, Any],
+        viewer_id: Optional[str] = None,
+        peer_graph: Optional["PeerGraph"] = None
+    ) -> float:
+        """
+        Computes high-yield academic ranking score based on:
+        - Content type weights: youtube_course (1.5x), hackathon (1.3x), tweet/notes (1.0x)
+        - Peer engagement: likes * 2.0 + reposts * 3.0 + comments * 2.5
+        - 1st-degree studymate author boost (+15.0) and 2nd-degree mutual boost (+7.5)
+        - Classic time-decay curve: base_score / ((hours_since_creation + 2) ** 1.15)
+        """
+        post_type = str(post.get("post_type", "tweet"))
+        type_weight = 1.5 if post_type == "youtube_course" else (1.3 if post_type == "hackathon" else 1.0)
+
+        likes = float(post.get("likes_count", 0) or 0)
+        reposts = float(post.get("reposts_count", 0) or 0)
+        comments = float(post.get("comments_count", 0) or 0)
+
+        raw_engagement = (likes * 2.0) + (reposts * 3.0) + (comments * 2.5) + 5.0  # base 5.0
+        weighted_score = raw_engagement * type_weight
+
+        # Peer network social boost
+        author_id = str(post.get("user_id", ""))
+        if viewer_id and author_id and peer_graph:
+            if peer_graph.are_connected(viewer_id, author_id):
+                weighted_score += 15.0
+            elif len(peer_graph.get_mutual_peers(viewer_id, author_id)) > 0:
+                weighted_score += 7.5
+
+        # Time decay
+        try:
+            created_at = float(post.get("created_at", time.time()))
+        except Exception:
+            created_at = time.time()
+
+        elapsed_hours = max(0.0, (time.time() - created_at) / 3600.0)
+        decayed_score = weighted_score / ((elapsed_hours + 2.0) ** 1.15)
+
+        return round(decayed_score, 4)
+
+
+
+
 # ────────────────────────────────────────────────────────────────────
 # 5. SOCIAL CONNECTION GRAPH (Adjacency List & BFS)
 # ────────────────────────────────────────────────────────────────────
@@ -388,6 +434,10 @@ class PeerGraph:
         """O(1) returns copy of user u's connected peers."""
         with self._lock:
             return set(self._adj.get(u, set()))
+
+    def get_neighbors(self, u: str) -> Set[str]:
+        """Alias for get_peers in standard graph traversal."""
+        return self.get_peers(u)
 
     def get_mutual_peers(self, u: str, v: str) -> Set[str]:
         """Compute intersection of peers in O(min(deg(u), deg(v)))."""
@@ -590,8 +640,8 @@ class UnifiedDSAEngine:
                 for cr in classrooms:
                     self.index_entity("classrooms", dict(cr), ["name", "subject_code", "department", "university", "description"])
 
-                # 6. People / Users
-                people = conn.execute("SELECT id, name, handle, role, college FROM users").fetchall()
+                # 6. People / Users (Excluding admin accounts)
+                people = conn.execute("SELECT id, name, handle, role, college FROM users WHERE role != 'admin'").fetchall()
                 for u in people:
                     self.index_entity("people", dict(u), ["name", "handle", "college", "role"])
 
@@ -608,6 +658,82 @@ class UnifiedDSAEngine:
             # Safe non-fatal fallback
             pass
 
+    # ── Real-Time Synchronization Helpers ──
 
-# Singleton instance
+    def sync_post(self, post_dict: Dict[str, Any]) -> None:
+        """Indexes or updates a post in the in-memory search trie and clears search cache."""
+        self.index_entity("posts", post_dict, ["title", "content", "user_name"])
+        self.search_cache.clear()
+
+    def sync_delete_post(self, post_id: str) -> None:
+        """Removes a post from in-memory engine and clears search cache."""
+        self.remove_entity("posts", post_id)
+
+    def sync_quiz(self, quiz_dict: Dict[str, Any]) -> None:
+        self.index_entity("quizzes", quiz_dict, ["title", "description", "exam_type"])
+        self.search_cache.clear()
+
+    def sync_problem(self, problem_dict: Dict[str, Any]) -> None:
+        self.index_entity("problems", problem_dict, ["title", "category", "slug"])
+        self.search_cache.clear()
+
+    def sync_community(self, comm_dict: Dict[str, Any]) -> None:
+        self.index_entity("communities", comm_dict, ["name", "description", "category"])
+        self.search_cache.clear()
+
+    def sync_classroom(self, class_dict: Dict[str, Any]) -> None:
+        self.index_entity("classrooms", class_dict, ["name", "subject_code", "department", "university", "description"])
+        self.search_cache.clear()
+
+    def sync_connection(self, user_a: str, user_b: str) -> None:
+        self.peer_graph.add_edge(user_a, user_b)
+        self.profile_cache.invalidate(user_a)
+        self.profile_cache.invalidate(user_b)
+
+    def sync_disconnection(self, user_a: str, user_b: str) -> None:
+        self.peer_graph.remove_edge(user_a, user_b)
+        self.profile_cache.invalidate(user_a)
+        self.profile_cache.invalidate(user_b)
+
+
+# ────────────────────────────────────────────────────────────────────
+# 7. SLIDING-WINDOW IN-MEMORY RATE LIMITER
+# ────────────────────────────────────────────────────────────────────
+
+from collections import deque
+
+class SlidingWindowRateLimiter:
+    """
+    Thread-safe, sub-millisecond in-memory sliding window rate limiter.
+    Maintains timestamp deques per client identifier (IP or user ID).
+    """
+
+    def __init__(self):
+        self._windows: Dict[str, deque] = defaultdict(deque)
+        self._lock = threading.RLock()
+
+    def is_allowed(self, key: str, max_requests: int = 30, window_seconds: float = 60.0) -> bool:
+        """
+        Returns True if the request is permitted within the rate window, False otherwise.
+        Automatically evicts expired timestamps in O(1) amortized time.
+        """
+        now = time.time()
+        threshold = now - window_seconds
+        with self._lock:
+            q = self._windows[key]
+            while q and q[0] < threshold:
+                q.popleft()
+            if len(q) < max_requests:
+                q.append(now)
+                return True
+            return False
+
+    def reset(self, key: str) -> None:
+        with self._lock:
+            self._windows.pop(key, None)
+
+
+# Singleton instances
 engine = UnifiedDSAEngine()
+rate_limiter = SlidingWindowRateLimiter()
+

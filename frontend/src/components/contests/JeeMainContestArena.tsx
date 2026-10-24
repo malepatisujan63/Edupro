@@ -18,7 +18,11 @@ import {
   Plus,
   HelpCircle,
   Send,
-  BookOpen
+  BookOpen,
+  ArrowLeft,
+  BarChart3,
+  Trophy,
+  Users
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { Quiz, QuizQuestion, QuizSubmissionResult } from '../../types';
@@ -29,12 +33,14 @@ type QuestionStatus = 'answered' | 'not_answered' | 'not_visited' | 'marked_revi
 
 interface JeeMainContestArenaProps {
   onExamStateChange?: (isWriting: boolean) => void;
+  onBackToChallenges?: () => void;
   initialQuizId?: string | null;
   hideHeader?: boolean;
 }
 
 export const JeeMainContestArena: React.FC<JeeMainContestArenaProps> = ({
   onExamStateChange,
+  onBackToChallenges,
   initialQuizId,
   hideHeader = false,
 }) => {
@@ -67,6 +73,46 @@ export const JeeMainContestArena: React.FC<JeeMainContestArenaProps> = ({
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
   const [ratingSubmitted, setRatingSubmitted] = useState(false);
 
+  // 15-second Auto-exit countdown for Results/Review view
+  const [autoExitSeconds, setAutoExitSeconds] = useState<number | null>(null);
+  const [autoExitCancelled, setAutoExitCancelled] = useState(false);
+
+  // Handle Clean Return to Challenges Hub
+  const handleReturnToHub = async () => {
+    if (document.fullscreenElement) {
+      try {
+        await document.exitFullscreen();
+      } catch {}
+    }
+    setAutoExitSeconds(null);
+    setAutoExitCancelled(false);
+    setExamResult(null);
+    setIsExamMode(false);
+    setSelectedQuiz(null);
+    onExamStateChange?.(false);
+    onBackToChallenges?.();
+  };
+
+  useEffect(() => {
+    if (!examResult || autoExitCancelled) {
+      setAutoExitSeconds(null);
+      return;
+    }
+    setAutoExitSeconds(15);
+    const timer = setInterval(() => {
+      setAutoExitSeconds((prev) => {
+        if (prev === null) return null;
+        if (prev <= 1) {
+          clearInterval(timer);
+          handleReturnToHub();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [examResult, autoExitCancelled]);
+
   const arenaRef = useRef<HTMLDivElement>(null);
   const userAnswersRef = useRef(userAnswers);
   const selectedQuizRef = useRef(selectedQuiz);
@@ -83,6 +129,68 @@ export const JeeMainContestArena: React.FC<JeeMainContestArenaProps> = ({
   useEffect(() => {
     secondsRemainingRef.current = secondsRemaining;
   }, [secondsRemaining]);
+
+  // Invisible proctoring notepad & command violation tracking
+  const invisibleNotepadRef = useRef<string[]>([]);
+  const violationTriggeredRef = useRef<boolean>(false);
+
+  // ── INVISIBLE PROCTOR NOTEPAD & ZERO-KEYBOARD FULLSCREEN LOCKDOWN ──
+  useEffect(() => {
+    if (!isExamMode || !selectedQuiz || examResult) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // STRICT RULE: No keyboard buttons should work while exam is in session
+      e.preventDefault();
+      e.stopPropagation();
+
+      const timestamp = new Date().toLocaleTimeString();
+      const keyName = e.key;
+      const isEscape = keyName === 'Escape' || e.code === 'Escape' || e.keyCode === 27;
+      const isModifierCombo = e.ctrlKey || e.altKey || (e.shiftKey && keyName !== 'Shift') || e.metaKey;
+
+      // Note every single blocked key press into the invisible proctor notepad
+      const entry = `[${timestamp}] Blocked Key: '${keyName}' | Code: ${e.code} | Modifiers: ${e.ctrlKey ? 'Ctrl ' : ''}${e.altKey ? 'Alt ' : ''}${e.shiftKey ? 'Shift ' : ''}${e.metaKey ? 'Meta ' : ''}`.trim();
+      invisibleNotepadRef.current.push(entry);
+
+      // Rule 1: Pressing ESC auto-submits immediately
+      if (isEscape) {
+        if (!violationTriggeredRef.current) {
+          violationTriggeredRef.current = true;
+          const violationReason = 'Escape Key Violation: Candidate pressed Escape during fullscreen exam. Exam auto-submitted.';
+          invisibleNotepadRef.current.push(`[${timestamp}] 🚨 VIOLATION: ${violationReason}`);
+          handleSubmitExam(undefined, violationReason);
+        }
+        return;
+      }
+
+      // Rule 2: Pressing commands using Ctrl, Alt, Shift, Meta auto-submits immediately
+      if (isModifierCombo) {
+        if (!violationTriggeredRef.current) {
+          violationTriggeredRef.current = true;
+          const combo = `${e.ctrlKey ? 'Ctrl+' : ''}${e.altKey ? 'Alt+' : ''}${e.shiftKey ? 'Shift+' : ''}${e.metaKey ? 'Meta+' : ''}${keyName}`;
+          const violationReason = `Command Violation [${combo}]: Keyboard commands prohibited in CBT exam. Exam auto-submitted.`;
+          invisibleNotepadRef.current.push(`[${timestamp}] 🚨 VIOLATION: ${violationReason}`);
+          handleSubmitExam(undefined, violationReason);
+        }
+        return;
+      }
+    };
+
+    const preventKeyboardAction = (e: KeyboardEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    window.addEventListener('keydown', handleKeyDown, true);
+    window.addEventListener('keypress', preventKeyboardAction, true);
+    window.addEventListener('keyup', preventKeyboardAction, true);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown, true);
+      window.removeEventListener('keypress', preventKeyboardAction, true);
+      window.removeEventListener('keyup', preventKeyboardAction, true);
+    };
+  }, [isExamMode, selectedQuiz, examResult]);
 
   const fetchQuizzes = async () => {
     try {
@@ -109,30 +217,87 @@ export const JeeMainContestArena: React.FC<JeeMainContestArenaProps> = ({
     }
   }, [initialQuizId]);
 
-  // Sync contest writing state with parent (so navigation bar is hidden while writing)
+  // Sync contest active state with parent (so navigation bar is hidden while in quiz or reviewing)
   useEffect(() => {
-    const isWriting = isExamMode && !examResult;
-    onExamStateChange?.(isWriting);
+    const isInQuiz = !!selectedQuiz;
+    onExamStateChange?.(isInQuiz);
     return () => {
       onExamStateChange?.(false);
     };
-  }, [isExamMode, examResult, onExamStateChange]);
+  }, [selectedQuiz, onExamStateChange]);
 
-  // Listen for fullscreen exits during exam
+  // Listen for fullscreen exits during exam (exiting fullscreen auto-submits exam)
   useEffect(() => {
     const handleFullscreenChange = () => {
       const inFull = !!document.fullscreenElement;
       setIsFullscreen(inFull);
       if (isExamMode && !inFull && !examResult) {
-        setFullscreenWarning(true);
-      } else {
-        setFullscreenWarning(false);
+        if (!violationTriggeredRef.current) {
+          violationTriggeredRef.current = true;
+          const violationReason = 'Escape / Fullscreen Exit Violation: Exam auto-submitted because fullscreen mode was interrupted or exited.';
+          invisibleNotepadRef.current.push(`[${new Date().toLocaleTimeString()}] 🚨 VIOLATION: ${violationReason}`);
+          handleSubmitExam(undefined, violationReason);
+        }
       }
     };
 
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, [isExamMode, examResult]);
+
+  // ── STRICT ZERO-TOLERANCE TAB SWITCH & WINDOW BLUR DETECTOR (ALL DEVICES: MOBILE, TABLET, DESKTOP) ──
+  useEffect(() => {
+    if (!isExamMode || !selectedQuiz || examResult) return;
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden' && !examResult && !violationTriggeredRef.current) {
+        violationTriggeredRef.current = true;
+        const violationReason = 'Tab Switch Violation: Candidate navigated away to another tab, application, or website. Exam auto-submitted.';
+        invisibleNotepadRef.current.push(`[${new Date().toLocaleTimeString()}] 🚨 VIOLATION: ${violationReason}`);
+        handleSubmitExam(undefined, violationReason);
+      }
+    };
+
+    const handleWindowBlur = () => {
+      if (!examResult && !violationTriggeredRef.current) {
+        violationTriggeredRef.current = true;
+        const violationReason = 'Window Focus Lost: Candidate switched focus away from the CBT examination window. Exam auto-submitted.';
+        invisibleNotepadRef.current.push(`[${new Date().toLocaleTimeString()}] 🚨 VIOLATION: ${violationReason}`);
+        handleSubmitExam(undefined, violationReason);
+      }
+    };
+
+    const handleClipboardViolation = (e: ClipboardEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!examResult && !violationTriggeredRef.current) {
+        violationTriggeredRef.current = true;
+        const violationReason = 'Clipboard Violation: External copy or paste operation intercepted during examination. Exam auto-submitted.';
+        invisibleNotepadRef.current.push(`[${new Date().toLocaleTimeString()}] 🚨 VIOLATION: ${violationReason}`);
+        handleSubmitExam(undefined, violationReason);
+      }
+    };
+
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('blur', handleWindowBlur);
+    window.addEventListener('copy', handleClipboardViolation, true);
+    window.addEventListener('paste', handleClipboardViolation, true);
+    window.addEventListener('cut', handleClipboardViolation, true);
+    document.addEventListener('contextmenu', handleContextMenu);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('blur', handleWindowBlur);
+      window.removeEventListener('copy', handleClipboardViolation, true);
+      window.removeEventListener('paste', handleClipboardViolation, true);
+      window.removeEventListener('cut', handleClipboardViolation, true);
+      document.removeEventListener('contextmenu', handleContextMenu);
+    };
+  }, [isExamMode, selectedQuiz, examResult]);
 
   // Countdown timer
   useEffect(() => {
@@ -175,12 +340,37 @@ export const JeeMainContestArena: React.FC<JeeMainContestArenaProps> = ({
   }, [isExamMode, examResult, selectedQuiz, userAnswers, questionStatuses, secondsRemaining, currentQIndex, activeSection]);
 
   const startQuiz = async (quizId: string) => {
+    // Eagerly request fullscreen right on user click gesture if not already fullscreen
     try {
-      const res = await fetch(`/api/quizzes/${quizId}`);
+      if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+        await document.documentElement.requestFullscreen();
+      }
+    } catch (e) {
+      console.warn('Initial fullscreen gesture request blocked:', e);
+    }
+
+    try {
+      const res = await authFetch(`/api/quizzes/${quizId}`);
       const data = await res.json();
       if (data.success && data.quiz) {
         const fullQuiz = data.quiz as Quiz;
         setSelectedQuiz(fullQuiz);
+
+        // If candidate already attempted, display results directly! Cannot be re-given!
+        if (fullQuiz.already_attempted && fullQuiz.latest_result) {
+          setExamResult(fullQuiz.latest_result);
+          setIsExamMode(false);
+          setAutoExitCancelled(false);
+          setAutoExitSeconds(15);
+          try {
+            if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+              await document.documentElement.requestFullscreen();
+            }
+          } catch (e) {
+            console.warn('Fullscreen request blocked', e);
+          }
+          return;
+        }
 
         // Initialize question statuses
         const initialStatus: Record<string, QuestionStatus> = {};
@@ -218,6 +408,10 @@ export const JeeMainContestArena: React.FC<JeeMainContestArenaProps> = ({
         setExamResult(null);
         setRatingSubmitted(false);
         setIsExamMode(true);
+        invisibleNotepadRef.current = [
+          `[${new Date().toLocaleTimeString()}] CBT Exam session initialized. Mouse-only navigation strictly enforced.`
+        ];
+        violationTriggeredRef.current = false;
 
         // Enter Fullscreen mode automatically
         try {
@@ -229,6 +423,13 @@ export const JeeMainContestArena: React.FC<JeeMainContestArenaProps> = ({
         } catch {
           console.warn('Fullscreen auto-request blocked by browser gesture rules');
         }
+
+        // Lock keyboard if supported (Chromium API) to capture Escape directly
+        if ('keyboard' in navigator && (navigator as any).keyboard?.lock) {
+          try {
+            await (navigator as any).keyboard.lock(['Escape']);
+          } catch {}
+        }
       }
     } catch (err) {
       console.error('Failed to start quiz:', err);
@@ -237,10 +438,12 @@ export const JeeMainContestArena: React.FC<JeeMainContestArenaProps> = ({
 
   const reEnterFullscreen = async () => {
     try {
-      if (document.documentElement.requestFullscreen) {
+      if (arenaRef.current?.requestFullscreen) {
+        await arenaRef.current.requestFullscreen();
+      } else if (document.documentElement.requestFullscreen) {
         await document.documentElement.requestFullscreen();
-        setFullscreenWarning(false);
       }
+      setFullscreenWarning(false);
     } catch (e) {
       console.error('Fullscreen request failed', e);
     }
@@ -325,7 +528,7 @@ export const JeeMainContestArena: React.FC<JeeMainContestArenaProps> = ({
     }
   };
 
-  const handleSubmitExam = async (overrideAnswers?: Record<string, number>) => {
+  const handleSubmitExam = async (overrideAnswers?: Record<string, number>, violationReason?: string) => {
     const quiz = selectedQuizRef.current || selectedQuiz;
     if (!quiz) return;
     setShowSubmitModal(false);
@@ -340,6 +543,8 @@ export const JeeMainContestArena: React.FC<JeeMainContestArenaProps> = ({
         body: JSON.stringify({
           answers: answersToSend,
           time_taken_seconds: Math.max(0, totalSecondsTaken),
+          proctor_notepad: invisibleNotepadRef.current.join('\n'),
+          violation_reason: violationReason || null,
         }),
       });
 
@@ -349,14 +554,16 @@ export const JeeMainContestArena: React.FC<JeeMainContestArenaProps> = ({
           localStorage.removeItem(`koinexa_exam_${selectedQuiz.id}`);
         } catch {}
         setExamResult(data);
+        setAutoExitCancelled(false);
+        setAutoExitSeconds(15);
         setQuizzes((prev) =>
           prev.map((q) => (q.id === quiz.id ? { ...q, is_solved: true } : q))
         );
         confetti({ particleCount: 90, spread: 75, origin: { y: 0.6 } });
-        // Exit full screen
-        if (document.fullscreenElement) {
+        // Release keyboard lock (fullscreen remains active to review solutions & leaderboard)
+        if ('keyboard' in navigator && (navigator as any).keyboard?.unlock) {
           try {
-            await document.exitFullscreen();
+            (navigator as any).keyboard.unlock();
           } catch {}
         }
       }
@@ -409,19 +616,132 @@ export const JeeMainContestArena: React.FC<JeeMainContestArenaProps> = ({
     answered_marked: Object.values(questionStatuses).filter((s) => s === 'answered_marked').length,
   };
 
+
   // ──────────────────────────────────────────────────────────────────
   // VIEW 1: RESULTS & DETAILED REVIEW VIEW (Glossy Apple Card)
   // ──────────────────────────────────────────────────────────────────
   if (examResult && selectedQuiz) {
+    const isDisqualified = examResult.integrity_status?.includes('VIOLATION') || examResult.integrity_status?.includes('DISQUALIFIED');
     return (
-      <div className="max-w-5xl mx-auto py-8 px-4 sm:px-6 space-y-8">
+      <div className="fixed inset-0 z-[70] overflow-y-auto bg-[var(--x-bg)] text-[var(--x-text)]">
+        <div className="max-w-5xl mx-auto py-8 px-4 sm:px-6 space-y-8">
+          {/* 15-SECOND AUTO EXIT COUNTDOWN BANNER */}
+          {!autoExitCancelled && autoExitSeconds !== null && autoExitSeconds > 0 && (
+            <div className="p-4 sm:p-5 rounded-[24px] bg-gradient-to-r from-blue-600/15 via-indigo-600/15 to-purple-600/15 border border-blue-500/40 backdrop-blur-xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-2xl bg-[#0A84FF] text-white font-mono font-black text-base flex items-center justify-center shadow-lg shadow-blue-500/30 flex-shrink-0">
+                  {autoExitSeconds}s
+                </div>
+                <div>
+                  <div className="text-xs sm:text-sm font-bold text-[var(--x-text)] flex items-center gap-1.5">
+                    <Clock className="w-4 h-4 text-[#0A84FF]" />
+                    <span>Auto-exiting to Challenges Hub in {autoExitSeconds} seconds</span>
+                  </div>
+                  <p className="text-[11px] text-[var(--x-subtext)] mt-0.5">
+                    Review your answers, leaderboard rank, and score distribution below.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2.5 w-full sm:w-auto flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setAutoExitCancelled(true)}
+                  className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-[var(--x-surface)] hover:bg-[var(--x-surface-hover)] border border-[var(--x-border)] text-xs font-bold text-[var(--x-text)] transition-all cursor-pointer shadow-sm"
+                >
+                  Stay & Review
+                </button>
+                <button
+                  type="button"
+                  onClick={handleReturnToHub}
+                  className="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-[#0A84FF] hover:bg-[#0071e3] text-white text-xs font-bold shadow-md shadow-blue-500/25 transition-all cursor-pointer btn-keep-white flex items-center justify-center gap-1.5"
+                >
+                  <span>Exit Now</span>
+                  <ArrowLeft className="w-3.5 h-3.5 rotate-180" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* TOP RETURN TO CHALLENGES BAR */}
+          <div className="flex items-center justify-between gap-4 pb-2">
+            <button
+              onClick={handleReturnToHub}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#0A84FF] hover:bg-[#0071e3] text-white text-xs font-bold shadow-lg shadow-blue-500/25 transition-all cursor-pointer btn-keep-white"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Return to Challenges Hub</span>
+            </button>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-[var(--x-subtext)] font-mono">
+                {isDisqualified ? 'Disqualification Recorded' : 'Evaluation Complete'}
+              </span>
+              {!isFullscreen && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      if (document.documentElement.requestFullscreen) {
+                        await document.documentElement.requestFullscreen();
+                      }
+                    } catch (e) {
+                      console.error('Fullscreen request failed', e);
+                    }
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold bg-[var(--x-surface)] border-[var(--x-border)] text-[var(--x-text)] hover:bg-[var(--x-surface-hover)] transition-all cursor-pointer shadow-sm"
+                >
+                  <Maximize className="w-3.5 h-3.5 text-[#0A84FF]" />
+                  <span>Enter Fullscreen</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+        {isDisqualified && (
+          <div className="p-5 sm:p-6 rounded-[24px] bg-[#FF453A]/15 border border-[#FF453A]/40 text-[#FF453A] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg backdrop-blur-xl">
+            <div className="flex items-start gap-4">
+              <AlertTriangle className="w-6 h-6 flex-shrink-0 mt-0.5 text-[#FF453A]" />
+              <div>
+                <h3 className="text-base font-extrabold uppercase tracking-wide">
+                  CBT Proctor Security Notice: Exam Auto-Submitted & Disqualified
+                </h3>
+                <p className="text-xs text-[var(--x-text)] mt-1 leading-relaxed">
+                  {(examResult as any).violation_reason || 'A security violation (tab switch, window blur, Escape key, or unauthorized keyboard command) occurred during CBT exam mode.'}
+                </p>
+                <div className="mt-2 text-[11px] font-mono text-[#FF453A] font-bold">
+                  Integrity Flag: {examResult.integrity_status}
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={handleReturnToHub}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#FF453A] hover:bg-[#e0382d] text-white text-xs font-bold shadow-md cursor-pointer transition-all flex-shrink-0 btn-keep-white"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Return to Challenges</span>
+            </button>
+          </div>
+        )}
+
         {/* Result Score Banner */}
         <div className="ios-glass p-7 sm:p-9 rounded-[32px] border border-[var(--x-border)] bg-[var(--x-surface)] text-[var(--x-text)] shadow-glass-card relative overflow-hidden">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="space-y-2 text-center sm:text-left">
-              <span className="px-3.5 py-1 rounded-full bg-[#30D158]/20 text-[#30D158] text-xs font-extrabold uppercase tracking-wider border border-[#30D158]/35 shadow-[0_0_12px_rgba(48,209,88,0.2)]">
-                Evaluation Complete
-              </span>
+              <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
+                <span className="px-3.5 py-1 rounded-full bg-[#30D158]/20 text-[#30D158] text-xs font-extrabold uppercase tracking-wider border border-[#30D158]/35 shadow-[0_0_12px_rgba(48,209,88,0.2)]">
+                  Evaluation Complete
+                </span>
+                {examResult.top_percentile && (
+                  <span className="px-3.5 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-500 dark:text-amber-400 text-xs font-black uppercase tracking-wider border border-amber-500/40 flex items-center gap-1.5 shadow-sm">
+                    <Trophy className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                    <span>{examResult.top_percentile}</span>
+                  </span>
+                )}
+                {examResult.rank !== undefined && (
+                  <span className="px-3 py-1 rounded-full bg-[var(--x-surface-hover)] text-[var(--x-subtext)] text-xs font-mono font-bold border border-[var(--x-border)]">
+                    Rank #{examResult.rank} of {examResult.total_cohort || 1}
+                  </span>
+                )}
+              </div>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-[var(--x-text)] tracking-tight">
                 {selectedQuiz.title}
               </h2>
@@ -491,6 +811,200 @@ export const JeeMainContestArena: React.FC<JeeMainContestArenaProps> = ({
             </button>
           </div>
         </div>
+
+        {/* ── COHORT BENCHMARK & PERCENTAGE BINS DISTRIBUTION GRAPH ── */}
+        <div className="p-6 sm:p-8 rounded-[32px] border border-[var(--x-border)] bg-[var(--x-surface)] shadow-glass-card space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[var(--x-border)]">
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/15 border border-blue-500/30 text-[#0A84FF] text-xs font-bold tracking-wide mb-1.5">
+                <BarChart3 className="w-3.5 h-3.5" />
+                <span>PERCENTILE BENCHMARK & COHORT DISTRIBUTION</span>
+              </div>
+              <h3 className="text-xl font-extrabold text-[var(--x-text)] tracking-tight">
+                Average Bar Graph & Score Bins
+              </h3>
+              <p className="text-xs text-[var(--x-subtext)]">
+                Compare your percentage and score against the live cohort of all test-takers.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="px-4 py-2.5 rounded-2xl bg-[var(--x-surface-hover)] border border-[var(--x-border)] text-center">
+                <span className="text-[10px] text-[var(--x-subtext)] font-bold uppercase tracking-wider block">Cohort Average</span>
+                <span className="text-base font-black text-[var(--x-text)] font-mono">
+                  {examResult.cohort_avg_score !== undefined ? examResult.cohort_avg_score : '—'} pts
+                  <span className="text-xs font-semibold text-[#0A84FF] ml-1">
+                    ({examResult.cohort_avg_percentage || 0}%)
+                  </span>
+                </span>
+              </div>
+              <div className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500/15 to-orange-500/15 border border-amber-500/35 text-center">
+                <span className="text-[10px] text-amber-500 dark:text-amber-400 font-bold uppercase tracking-wider block">Your Percentile</span>
+                <span className="text-base font-black text-amber-500 dark:text-amber-400 font-mono">
+                  {examResult.top_percentile || `Rank #${examResult.rank}`}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Bins Frequency Bar Chart */}
+          {examResult.percentage_bins && examResult.percentage_bins.length > 0 && (
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between text-xs text-[var(--x-subtext)] font-medium">
+                <span>Cohort Distribution by Percentage Bins</span>
+                <div className="flex items-center gap-3">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded bg-gradient-to-t from-blue-600 to-[#0A84FF] inline-block shadow-sm" />
+                    <span className="text-[var(--x-text)] font-bold">Your Score Bin</span>
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-3 h-3 rounded bg-[var(--x-surface-hover)] border border-[var(--x-border)] inline-block" />
+                    <span>Other Candidates</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Graphical Chart Bars */}
+              {(() => {
+                const maxCount = Math.max(...examResult.percentage_bins!.map((b) => b.count), 1);
+                return (
+                  <div className="h-52 pt-10 pb-2 px-3 sm:px-6 rounded-2xl bg-[var(--x-bg)] border border-[var(--x-border)] flex items-end justify-between gap-2 sm:gap-4 relative overflow-hidden">
+                    {/* Background Grid Lines */}
+                    <div className="absolute inset-x-0 top-1/4 border-b border-[var(--x-border)]/30 pointer-events-none" />
+                    <div className="absolute inset-x-0 top-2/4 border-b border-[var(--x-border)]/30 pointer-events-none" />
+                    <div className="absolute inset-x-0 top-3/4 border-b border-[var(--x-border)]/30 pointer-events-none" />
+
+                    {examResult.percentage_bins!.map((bin, idx) => {
+                      const heightPct = Math.max((bin.count / maxCount) * 100, 8);
+                      return (
+                        <div key={idx} className="flex-1 flex flex-col items-center h-full justify-end group relative z-10">
+                          {/* "You" Indicator Pin */}
+                          {bin.is_user_bin && (
+                            <div className="absolute -top-8 z-20 px-2.5 py-0.5 rounded-full bg-[#0A84FF] text-white text-[10px] font-black shadow-lg shadow-blue-500/40 whitespace-nowrap animate-bounce flex items-center gap-1">
+                              <span>You</span>
+                              <span className="opacity-80">({bin.count})</span>
+                            </div>
+                          )}
+
+                          {/* Hover Tooltip for Count */}
+                          {!bin.is_user_bin && (
+                            <span className="text-[10px] font-mono text-[var(--x-subtext)] mb-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              {bin.count} {bin.count === 1 ? 'student' : 'students'}
+                            </span>
+                          )}
+
+                          {/* Bar column */}
+                          <div
+                            style={{ height: `${heightPct}%` }}
+                            className={`w-full max-w-[56px] rounded-t-xl transition-all duration-500 ${
+                              bin.is_user_bin
+                                ? 'bg-gradient-to-t from-blue-600 to-[#0A84FF] shadow-lg shadow-blue-500/30 border-t-2 border-blue-300 ring-2 ring-blue-500/20'
+                                : 'bg-[var(--x-surface-hover)] hover:bg-slate-600/30 border-t border-white/10'
+                            }`}
+                          />
+
+                          {/* Bin Percentage Label */}
+                          <span
+                            className={`text-[10px] sm:text-xs font-mono mt-2.5 truncate max-w-full ${
+                              bin.is_user_bin ? 'font-extrabold text-[#0A84FF]' : 'text-[var(--x-subtext)]'
+                            }`}
+                          >
+                            {bin.bin_label}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+            </div>
+          )}
+        </div>
+
+        {/* ── QUIZ LEADERBOARD CARD ── */}
+        {examResult.leaderboard && examResult.leaderboard.length > 0 && (
+          <div className="p-6 sm:p-8 rounded-[32px] border border-[var(--x-border)] bg-[var(--x-surface)] shadow-glass-card space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[var(--x-border)]">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-500 text-xs font-bold tracking-wide mb-1">
+                  <Trophy className="w-3.5 h-3.5" />
+                  <span>CONTEST LEADERBOARD</span>
+                </div>
+                <h3 className="text-xl font-extrabold text-[var(--x-text)] tracking-tight">
+                  Top Rankers & Standings
+                </h3>
+              </div>
+              <span className="text-xs text-[var(--x-subtext)] font-mono px-3 py-1.5 rounded-xl bg-[var(--x-surface-hover)] border border-[var(--x-border)]">
+                {examResult.total_cohort || examResult.leaderboard.length} Total Submissions
+              </span>
+            </div>
+
+            <div className="overflow-x-auto rounded-2xl border border-[var(--x-border)]">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[var(--x-surface-hover)] text-[var(--x-subtext)] font-bold uppercase tracking-wider text-[10px] border-b border-[var(--x-border)]">
+                  <tr>
+                    <th className="py-3 px-4">Rank</th>
+                    <th className="py-3 px-4">Candidate</th>
+                    <th className="py-3 px-4 text-center">Score</th>
+                    <th className="py-3 px-4 text-center">Accuracy</th>
+                    <th className="py-3 px-4 text-right">Time Taken</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--x-border)]">
+                  {examResult.leaderboard.map((entry) => (
+                    <tr
+                      key={entry.rank + entry.user_id}
+                      className={`transition-colors ${
+                        entry.is_current_user
+                          ? 'bg-blue-500/10 font-bold border-l-4 border-l-[#0A84FF]'
+                          : 'hover:bg-[var(--x-surface-hover)]/60'
+                      }`}
+                    >
+                      <td className="py-3 px-4 font-mono">
+                        {entry.rank === 1 ? (
+                          <span className="inline-flex items-center gap-1 text-amber-500 font-black">
+                            🥇 #1
+                          </span>
+                        ) : entry.rank === 2 ? (
+                          <span className="inline-flex items-center gap-1 text-slate-400 font-black">
+                            🥈 #2
+                          </span>
+                        ) : entry.rank === 3 ? (
+                          <span className="inline-flex items-center gap-1 text-amber-700 font-black">
+                            🥉 #3
+                          </span>
+                        ) : (
+                          <span className="text-[var(--x-subtext)]">#{entry.rank}</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[var(--x-text)] font-medium">
+                            {entry.user_name}
+                          </span>
+                          {entry.is_current_user && (
+                            <span className="px-2 py-0.5 rounded-full bg-[#0A84FF] text-white text-[10px] font-black">
+                              You
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-center font-mono font-bold text-[var(--x-text)]">
+                        {entry.score}
+                      </td>
+                      <td className="py-3 px-4 text-center font-mono text-emerald-500 font-bold">
+                        {entry.accuracy}%
+                      </td>
+                      <td className="py-3 px-4 text-right font-mono text-[var(--x-subtext)]">
+                        {formatTimer(entry.time_taken_seconds)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
         {/* Detailed Solutions & Explanations Key */}
         <div className="space-y-4">
@@ -580,17 +1094,14 @@ export const JeeMainContestArena: React.FC<JeeMainContestArenaProps> = ({
           ))}
         </div>
 
-        {/* Back to Quizzes button */}
+        {/* Back to Challenges Hub button */}
         <div className="text-center pt-4">
           <button
-            onClick={() => {
-              setExamResult(null);
-              setIsExamMode(false);
-              setSelectedQuiz(null);
-            }}
-            className="ios-btn-glass px-6 py-2.5 rounded-[16px] text-xs font-bold text-[var(--x-text)] transition-all cursor-pointer"
+            onClick={handleReturnToHub}
+            className="ios-btn-glass px-6 py-2.5 rounded-[16px] text-xs font-bold text-[var(--x-text)] transition-all cursor-pointer inline-flex items-center gap-2 mx-auto"
           >
-            ← Return to Contest Hub
+            <ArrowLeft className="w-4 h-4" />
+            <span>Return to Challenges Hub</span>
           </button>
         </div>
 
@@ -663,6 +1174,7 @@ export const JeeMainContestArena: React.FC<JeeMainContestArenaProps> = ({
             </div>
           )}
         </AnimatePresence>
+        </div>
       </div>
     );
   }
@@ -674,7 +1186,7 @@ export const JeeMainContestArena: React.FC<JeeMainContestArenaProps> = ({
     return (
       <div
         ref={arenaRef}
-        className="fixed inset-0 z-50 bg-[var(--x-bg)] text-[var(--x-text)] flex flex-col select-none overflow-hidden"
+        className="fixed inset-0 z-[70] bg-[var(--x-bg)] text-[var(--x-text)] flex flex-col select-none overflow-hidden"
       >
         {/* Fullscreen Warning Modal if student exited */}
         {fullscreenWarning && (
@@ -745,8 +1257,8 @@ export const JeeMainContestArena: React.FC<JeeMainContestArenaProps> = ({
         </header>
 
         {/* ── SECTION TABS BAR ── */}
-        <div className="h-12 bg-[var(--x-surface-hover)] border-b border-[var(--x-border)] px-6 flex items-center justify-between flex-shrink-0">
-          <div className="flex items-center gap-2">
+        <div className="h-12 bg-[var(--x-surface-hover)] border-b border-[var(--x-border)] px-4 sm:px-6 flex items-center justify-between flex-shrink-0 overflow-x-auto scrollbar-none">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <span className="text-xs font-bold text-[var(--x-subtext)] uppercase tracking-wider mr-1">Sections:</span>
             {selectedQuiz.sections.map((sec) => (
               <button
@@ -756,7 +1268,7 @@ export const JeeMainContestArena: React.FC<JeeMainContestArenaProps> = ({
                   const firstInSec = currentQuestions.findIndex((q) => q.section === sec.name);
                   if (firstInSec !== -1) jumpToQuestion(firstInSec);
                 }}
-                className={`px-4 py-1.5 rounded-[12px] text-xs font-bold transition-all cursor-pointer ${
+                className={`px-4 py-1.5 rounded-[12px] text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                   activeSection === sec.name
                     ? 'bg-[#0A84FF] text-white shadow-md shadow-[#0A84FF]/30 border border-white/20'
                     : 'text-[var(--x-subtext)] hover:text-[var(--x-text)] hover:bg-white/[0.04]'
@@ -767,7 +1279,7 @@ export const JeeMainContestArena: React.FC<JeeMainContestArenaProps> = ({
             ))}
           </div>
 
-          <div className="flex items-center gap-2 text-xs font-mono">
+          <div className="flex items-center gap-2 text-xs font-mono flex-shrink-0 ml-4">
             <span className="text-[#30D158] font-black">+4.0</span> / <span className="text-[#FF453A] font-black">-1.0</span>
           </div>
         </div>
@@ -836,7 +1348,7 @@ export const JeeMainContestArena: React.FC<JeeMainContestArenaProps> = ({
                 </button>
                 <button
                   onClick={handleMarkForReviewAndNext}
-                  className="px-4 py-2.5 rounded-[14px] bg-[#BF5AF2]/85 hover:bg-[#BF5AF2] text-[var(--x-text)] text-xs font-bold transition-all cursor-pointer shadow-md"
+                  className="px-4 py-2.5 rounded-[14px] bg-[#BF5AF2] hover:bg-[#ab49dd] text-white font-bold text-xs transition-all cursor-pointer shadow-md btn-keep-white"
                 >
                   Mark for Review & Next
                 </button>
@@ -891,7 +1403,7 @@ export const JeeMainContestArena: React.FC<JeeMainContestArenaProps> = ({
                   <span>Not Answered</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-[8px] bg-slate-700 text-[var(--x-subtext)] flex items-center justify-center font-bold text-[10px]">
+                  <span className="w-5 h-5 rounded-[8px] bg-slate-600 text-white flex items-center justify-center font-bold text-[10px]">
                     {statusCounts.not_visited}
                   </span>
                   <span>Not Visited</span>
@@ -985,7 +1497,7 @@ export const JeeMainContestArena: React.FC<JeeMainContestArenaProps> = ({
                     <span>Not Answered</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-[8px] bg-slate-700 text-[var(--x-subtext)] flex items-center justify-center font-bold text-[10px]">
+                    <span className="w-5 h-5 rounded-[8px] bg-slate-600 text-white flex items-center justify-center font-bold text-[10px]">
                       {statusCounts.not_visited}
                     </span>
                     <span>Not Visited</span>
@@ -1233,7 +1745,7 @@ export const JeeMainContestArena: React.FC<JeeMainContestArenaProps> = ({
                   onClick={() => startQuiz(quiz.id)}
                   className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#0A84FF] hover:bg-[#0071e3] text-white text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-blue-500/20 active:scale-95 btn-keep-white"
                 >
-                  <span>Open</span>
+                  <span>{quiz.is_solved ? 'Review Solutions & Leaderboard' : 'Start CBT Test'}</span>
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
@@ -11,15 +11,17 @@ import {
   AlertCircle,
   Eye,
   EyeOff,
-  CheckCircle2
+  CheckCircle2,
+  ShieldCheck,
+  RefreshCw
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { FlowingBorderGlow } from '../common/FlowingBorderGlow';
 
 export const AuthModal: React.FC = () => {
-  const { isAuthModalOpen, closeAuthModal, authModalMode, login, commitUser, register, registerMentor } = useAuth();
+  const { isAuthModalOpen, closeAuthModal, authModalMode, login, verifyLoginOtp, resendLoginOtp, commitUser, register, registerMentor } = useAuth();
 
-  const [mode, setMode] = useState<'login' | 'register'>(authModalMode);
+  const [mode, setMode] = useState<'login' | 'register' | 'login_otp'>(authModalMode);
   const [roleTab, setRoleTab] = useState<'faculty' | 'student'>('faculty');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -33,6 +35,22 @@ export const AuthModal: React.FC = () => {
   // Login Form
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+
+  // ─── LOGIN OTP STATE (MANDATORY 2-STEP VERIFICATION) ───
+  const [otpIdentifier, setOtpIdentifier] = useState('');
+  const [maskedContactEmail, setMaskedContactEmail] = useState('');
+  const [loginOtpCode, setLoginOtpCode] = useState('');
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [isResending, setIsResending] = useState(false);
+
+  // Cooldown countdown timer
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
 
   // Register Form
   const [regFullName, setRegFullName] = useState('');
@@ -53,6 +71,7 @@ export const AuthModal: React.FC = () => {
     setSuccess(null);
     setIsAuthenticatingGlow(false);
     setIsExiting(false);
+    setLoginOtpCode('');
   }, [authModalMode, isAuthModalOpen]);
 
   if (!isAuthModalOpen) return null;
@@ -96,8 +115,19 @@ export const AuthModal: React.FC = () => {
       true
     );
 
+    setIsSubmitting(false);
+
+    if (res.success && res.requires_otp) {
+      setOtpIdentifier(res.identifier || emailClean);
+      setMaskedContactEmail(res.masked_contact_email || 'your registered contact email');
+      setLoginOtpCode('');
+      setResendCooldown(60);
+      setMode('login_otp');
+      setSuccess(res.message || 'Verification code sent to your contact email.');
+      return;
+    }
+
     if (res.success && res.user && res.token) {
-      setIsSubmitting(false);
       setIsAuthenticatingGlow(true);
 
       setTimeout(() => {
@@ -109,8 +139,67 @@ export const AuthModal: React.FC = () => {
         closeAuthModal();
       }, 5200);
     } else {
-      setIsSubmitting(false);
       setError(res.error || 'Failed to log in');
+    }
+  };
+
+  const handleLoginOtpSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isAuthenticatingGlow || isSubmitting) return;
+    setError(null);
+    setSuccess(null);
+
+    const cleanCode = loginOtpCode.trim();
+    if (!cleanCode || cleanCode.length < 6) {
+      setError('Please enter the 6-digit verification code sent to your contact email.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await verifyLoginOtp(otpIdentifier || loginEmail.trim().toLowerCase(), cleanCode, true);
+      if (res.success && res.user && res.token) {
+        setIsSubmitting(false);
+        setIsAuthenticatingGlow(true);
+
+        setTimeout(() => {
+          setIsExiting(true);
+        }, 4700);
+
+        setTimeout(() => {
+          commitUser(res.user!, res.token!);
+          closeAuthModal();
+        }, 5200);
+      } else {
+        setIsSubmitting(false);
+        setError(res.error || 'Invalid verification code. Please check and try again.');
+      }
+    } catch {
+      setIsSubmitting(false);
+      setError('Unable to reach server. Please check your connection.');
+    }
+  };
+
+  const handleResendLoginOtp = async () => {
+    if (isResending || resendCooldown > 0) return;
+    setIsResending(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const res = await resendLoginOtp(otpIdentifier || loginEmail.trim().toLowerCase());
+      if (res.success) {
+        setSuccess('A fresh 6-digit verification code has been dispatched to your contact email.');
+        if (res.masked_contact_email) {
+          setMaskedContactEmail(res.masked_contact_email);
+        }
+        setResendCooldown(60);
+      } else {
+        setError(res.error || 'Failed to resend verification code');
+      }
+    } catch {
+      setError('Network error while requesting code.');
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -264,7 +353,7 @@ export const AuthModal: React.FC = () => {
               <div>
                 <h2 className="text-base font-bold text-neutral-900 dark:text-white tracking-tight leading-none">KOINEXA</h2>
                 <span className="text-[10px] text-neutral-500 dark:text-neutral-400 font-medium tracking-wide">
-                  {mode === 'login' ? 'Authentication Portal' : 'Register New Account'}
+                  {mode === 'login' ? 'Authentication Portal' : mode === 'login_otp' ? 'Two-Factor Verification' : 'Register New Account'}
                 </span>
               </div>
             </div>
@@ -277,50 +366,60 @@ export const AuthModal: React.FC = () => {
             </button>
           </div>
 
-          {/* Role Toggle: Mentor & Faculty vs Student */}
-          <div className="relative p-1 rounded-2xl bg-neutral-100 dark:bg-white/[0.05] border border-neutral-200 dark:border-neutral-800 flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => {
-                setRoleTab('faculty');
-                setError(null);
-              }}
-              className={`relative z-10 flex-1 py-2 px-2.5 rounded-xl flex items-center justify-center gap-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer select-none ${
-                roleTab === 'faculty' ? 'text-neutral-900 dark:text-white font-bold' : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
-              }`}
-            >
-              {roleTab === 'faculty' && (
-                <motion.div
-                  layoutId="activeModalRolePill"
-                  className="absolute inset-0 rounded-xl bg-white dark:bg-[#1f2228] border border-neutral-200/80 dark:border-neutral-700/60 shadow-sm -z-10"
-                  transition={{ type: 'spring', stiffness: 440, damping: 32, mass: 0.8 }}
-                />
-              )}
-              <GraduationCap className="w-3.5 h-3.5 text-[#12BEF9]" />
-              <span>Mentor</span>
-            </button>
+          {/* Role Toggle: Mentor & Faculty vs Student (or 2FA banner if verifying login) */}
+          {mode === 'login_otp' ? (
+            <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl bg-[#12BEF9]/10 border border-[#12BEF9]/25 text-[#12BEF9]">
+              <ShieldCheck className="w-4 h-4 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-bold tracking-wide text-neutral-900 dark:text-white leading-tight">Security Check</div>
+                <div className="text-[10px] text-neutral-500 dark:text-neutral-400 leading-tight">Two-Factor OTP Verification</div>
+              </div>
+            </div>
+          ) : (
+            <div className="relative p-1 rounded-2xl bg-neutral-100 dark:bg-white/[0.05] border border-neutral-200 dark:border-neutral-800 flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setRoleTab('faculty');
+                  setError(null);
+                }}
+                className={`relative z-10 flex-1 py-2 px-2.5 rounded-xl flex items-center justify-center gap-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer select-none ${
+                  roleTab === 'faculty' ? 'text-neutral-900 dark:text-white font-bold' : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
+                }`}
+              >
+                {roleTab === 'faculty' && (
+                  <motion.div
+                    layoutId="activeModalRolePill"
+                    className="absolute inset-0 rounded-xl bg-white dark:bg-[#1f2228] border border-neutral-200/80 dark:border-neutral-700/60 shadow-sm -z-10"
+                    transition={{ type: 'spring', stiffness: 440, damping: 32, mass: 0.8 }}
+                  />
+                )}
+                <GraduationCap className="w-3.5 h-3.5 text-[#12BEF9]" />
+                <span>Mentor</span>
+              </button>
 
-            <button
-              type="button"
-              onClick={() => {
-                setRoleTab('student');
-                setError(null);
-              }}
-              className={`relative z-10 flex-1 py-2 px-2.5 rounded-xl flex items-center justify-center gap-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer select-none ${
-                roleTab === 'student' ? 'text-neutral-900 dark:text-white font-bold' : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
-              }`}
-            >
-              {roleTab === 'student' && (
-                <motion.div
-                  layoutId="activeModalRolePill"
-                  className="absolute inset-0 rounded-xl bg-white dark:bg-[#1f2228] border border-neutral-200/80 dark:border-neutral-700/60 shadow-sm -z-10"
-                  transition={{ type: 'spring', stiffness: 440, damping: 32, mass: 0.8 }}
-                />
-              )}
-              <UserIcon className="w-3.5 h-3.5 text-[#BC5AFC]" />
-              <span>Student</span>
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setRoleTab('student');
+                  setError(null);
+                }}
+                className={`relative z-10 flex-1 py-2 px-2.5 rounded-xl flex items-center justify-center gap-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer select-none ${
+                  roleTab === 'student' ? 'text-neutral-900 dark:text-white font-bold' : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
+                }`}
+              >
+                {roleTab === 'student' && (
+                  <motion.div
+                    layoutId="activeModalRolePill"
+                    className="absolute inset-0 rounded-xl bg-white dark:bg-[#1f2228] border border-neutral-200/80 dark:border-neutral-700/60 shadow-sm -z-10"
+                    transition={{ type: 'spring', stiffness: 440, damping: 32, mass: 0.8 }}
+                  />
+                )}
+                <UserIcon className="w-3.5 h-3.5 text-[#BC5AFC]" />
+                <span>Student</span>
+              </button>
+            </div>
+          )}
 
           {/* Error / Success Feedback */}
           {error && (
@@ -337,7 +436,84 @@ export const AuthModal: React.FC = () => {
           )}
 
           {/* Form */}
-          {mode === 'login' ? (
+          {mode === 'login_otp' ? (
+            <form onSubmit={handleLoginOtpSubmit} className="space-y-4">
+              <div className="p-3.5 rounded-2xl bg-neutral-50 dark:bg-black/40 border border-neutral-200/80 dark:border-neutral-800">
+                <p className="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed mb-2">
+                  Enter the 6-digit security code sent to your registered contact email:
+                </p>
+                <div className="text-xs font-semibold text-neutral-900 dark:text-white font-mono break-all bg-neutral-100 dark:bg-neutral-900/80 px-2.5 py-1.5 rounded-xl border border-neutral-200 dark:border-neutral-700/60 inline-flex items-center gap-1.5">
+                  <Mail className="w-3.5 h-3.5 text-[#12BEF9]" />
+                  <span>{maskedContactEmail}</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-neutral-700 dark:text-neutral-300 mb-1.5">
+                  Verification Code (6 Digits)
+                </label>
+                <input
+                  type="text"
+                  required
+                  maxLength={6}
+                  autoFocus
+                  disabled={isSubmitting || isAuthenticatingGlow}
+                  placeholder="••••••"
+                  value={loginOtpCode}
+                  onChange={(e) => setLoginOtpCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+                  className="w-full px-4 py-3 rounded-2xl bg-neutral-50 dark:bg-black/60 border border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700 focus:border-[#0A84FF] focus:bg-white dark:focus:bg-black/80 text-center font-mono text-xl tracking-[0.5em] font-bold text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-600 focus:outline-none transition-all shadow-sm"
+                />
+              </div>
+
+              <div className="flex items-center justify-between text-xs pt-1">
+                <button
+                  type="button"
+                  disabled={isSubmitting || isAuthenticatingGlow}
+                  onClick={() => {
+                    setMode('login');
+                    setLoginOtpCode('');
+                    setError(null);
+                    setSuccess(null);
+                  }}
+                  className="text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors cursor-pointer"
+                >
+                  ← Back to Login
+                </button>
+
+                <button
+                  type="button"
+                  disabled={resendCooldown > 0 || isResending || isSubmitting || isAuthenticatingGlow}
+                  onClick={handleResendLoginOtp}
+                  className="text-[#0A84FF] hover:underline font-semibold disabled:opacity-40 disabled:no-underline cursor-pointer"
+                >
+                  {isResending
+                    ? 'Sending...'
+                    : resendCooldown > 0
+                    ? `Resend in ${resendCooldown}s`
+                    : 'Resend Code'}
+                </button>
+              </div>
+
+              <motion.button
+                type="submit"
+                disabled={isSubmitting || isAuthenticatingGlow || loginOtpCode.length < 6}
+                whileHover={!isAuthenticatingGlow ? { scale: 1.01 } : {}}
+                whileTap={!isAuthenticatingGlow ? { scale: 0.985 } : {}}
+                className="relative group overflow-hidden w-full py-3.5 rounded-full bg-neutral-900 hover:bg-black text-white dark:bg-black dark:hover:bg-neutral-950 dark:text-white dark:border dark:border-white/20 font-bold text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all duration-150 cursor-pointer disabled:opacity-50 select-none btn-keep-white mt-2"
+              >
+                {isSubmitting || isAuthenticatingGlow ? (
+                  <div className="relative z-10 flex items-center justify-center gap-2">
+                    <RefreshCw className="w-4 h-4 animate-spin text-white" />
+                    <span className="font-bold text-white">Verifying Code...</span>
+                  </div>
+                ) : (
+                  <span className="relative z-10 font-bold flex items-center gap-2 text-white">
+                    Verify & Sign In <ArrowRight className="w-4 h-4" />
+                  </span>
+                )}
+              </motion.button>
+            </form>
+          ) : mode === 'login' ? (
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div className="relative">
                 <input
@@ -347,7 +523,7 @@ export const AuthModal: React.FC = () => {
                   onChange={(e) => setLoginEmail(e.target.value)}
                   placeholder={
                     roleTab === 'faculty'
-                      ? 'Account Email (@bloom.com) or Admin Identifier'
+                      ? 'Faculty Account Email (@bloom.com)'
                       : 'Student Email (@bloom.com)'
                   }
                   className="w-full px-4 py-3 rounded-2xl bg-neutral-50 dark:bg-black/60 border border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700 focus:border-[#0A84FF] focus:bg-white dark:focus:bg-black/80 text-sm text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none transition-all shadow-sm"
@@ -377,12 +553,12 @@ export const AuthModal: React.FC = () => {
                 disabled={isSubmitting || isAuthenticatingGlow}
                 whileHover={!isAuthenticatingGlow ? { scale: 1.01 } : {}}
                 whileTap={!isAuthenticatingGlow ? { scale: 0.985 } : {}}
-                className="relative group overflow-hidden w-full py-3.5 rounded-full bg-neutral-900 hover:bg-black text-white dark:bg-white dark:hover:bg-neutral-200 dark:text-neutral-900 font-bold text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all duration-150 cursor-pointer disabled:opacity-50 select-none btn-keep-white"
+                className="relative group overflow-hidden w-full py-3.5 rounded-full bg-neutral-900 hover:bg-black text-white dark:bg-black dark:hover:bg-neutral-950 dark:text-white dark:border dark:border-white/20 font-bold text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all duration-150 cursor-pointer disabled:opacity-50 select-none btn-keep-white"
               >
-                <span className="relative z-10 font-bold">
+                <span className="relative z-10 font-bold text-white">
                   {isSubmitting || isAuthenticatingGlow ? 'Signing In...' : 'Login'}
                 </span>
-                <ArrowRight className="w-4 h-4 relative z-10" />
+                <ArrowRight className="w-4 h-4 relative z-10 text-white" />
               </motion.button>
 
               <div className="pt-2 text-center space-y-2">
@@ -587,12 +763,12 @@ export const AuthModal: React.FC = () => {
                 disabled={isSubmitting}
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.985 }}
-                className="relative group overflow-hidden w-full py-3.5 rounded-full bg-neutral-900 hover:bg-black text-white dark:bg-white dark:hover:bg-neutral-200 dark:text-neutral-900 font-bold text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all duration-150 cursor-pointer disabled:opacity-50 mt-2 select-none btn-keep-white"
+                className="relative group overflow-hidden w-full py-3.5 rounded-full bg-neutral-900 hover:bg-black text-white dark:bg-black dark:hover:bg-neutral-950 dark:text-white dark:border dark:border-white/20 font-bold text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all duration-150 cursor-pointer disabled:opacity-50 mt-2 select-none btn-keep-white"
               >
-                <span className="relative z-10 font-bold">
+                <span className="relative z-10 font-bold text-white">
                   {isSubmitting ? 'Processing...' : 'Register'}
                 </span>
-                <ArrowRight className="w-4 h-4 relative z-10" />
+                <ArrowRight className="w-4 h-4 relative z-10 text-white" />
               </motion.button>
 
               <div className="pt-2 text-center">

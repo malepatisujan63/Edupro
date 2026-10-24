@@ -12,7 +12,9 @@ import {
   Trophy,
   Send,
   Play,
-  Share2
+  Share2,
+  Trash2,
+  Bell
 } from 'lucide-react';
 import { Post, Comment, User } from '../../types';
 import { YoutubeIcon } from '../icons/YoutubeIcon';
@@ -29,7 +31,15 @@ const extractYouTubeVideoId = (url?: string | null): string | null => {
   return match ? match[1] : null;
 };
 
-export const HomeFeed: React.FC = () => {
+interface HomeFeedProps {
+  onOpenNotifications?: () => void;
+  unreadNotificationsCount?: number;
+}
+
+export const HomeFeed: React.FC<HomeFeedProps> = ({
+  onOpenNotifications,
+  unreadNotificationsCount = 0,
+}) => {
   const { user, authFetch, openAuthModal } = useAuth();
   const { theme } = useTheme();
   const [posts, setPosts] = useState<Post[]>([]);
@@ -93,6 +103,32 @@ export const HomeFeed: React.FC = () => {
       }
     } catch (err) {
       console.error('Studymate request failed:', err);
+    }
+  };
+
+  const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
+
+  const handleDeletePost = async (postId: string) => {
+    if (!user) return;
+    const confirmDelete = window.confirm("Are you sure you want to delete this post? This cannot be undone.");
+    if (!confirmDelete) return;
+
+    try {
+      setDeletingPostId(postId);
+      const res = await authFetch(`/api/posts/${postId}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (data.success) {
+        setPosts((prev) => prev.filter((p) => p.id !== postId));
+      } else {
+        alert(data.error || "Failed to delete post");
+      }
+    } catch (err) {
+      console.error("Delete post error:", err);
+      alert("Failed to delete post. Please try again.");
+    } finally {
+      setDeletingPostId(null);
     }
   };
 
@@ -223,8 +259,29 @@ export const HomeFeed: React.FC = () => {
           </h1>
         </div>
 
-        {/* Top Right of Viewport: Post Button Only */}
-        <div>
+        {/* Top Right of Viewport: Notifications & Post Button */}
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          {user && (
+            <button
+              onClick={() => {
+                if (onOpenNotifications) {
+                  onOpenNotifications();
+                } else {
+                  window.dispatchEvent(new CustomEvent('open-notifications'));
+                }
+              }}
+              title={unreadNotificationsCount > 0 ? `${unreadNotificationsCount} Unread Notifications` : 'Notifications'}
+              className="relative p-2 rounded-full hover:bg-[var(--x-surface-hover)] text-[var(--x-subtext)] hover:text-[var(--x-text)] transition-all cursor-pointer flex items-center justify-center border border-[var(--x-border)] active:scale-95"
+            >
+              <Bell className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+              {unreadNotificationsCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-[#0A84FF] text-white text-[10px] font-black flex items-center justify-center ring-2 ring-[var(--x-bg)]">
+                  {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
+                </span>
+              )}
+            </button>
+          )}
+
           <button
             onClick={() => {
               if (!user) {
@@ -369,6 +426,21 @@ export const HomeFeed: React.FC = () => {
                                 <span>Connect</span>
                               </>
                             )}
+                          </button>
+                        )}
+
+                        {/* Delete Button for Author or Faculty */}
+                        {(post.is_self || post.user_id === user?.id || user?.role === 'university') && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeletePost(post.id);
+                            }}
+                            disabled={deletingPostId === post.id}
+                            title="Delete this post"
+                            className="p-1.5 rounded-full text-neutral-400 hover:text-rose-500 hover:bg-rose-500/10 active:scale-90 transition-all cursor-pointer select-none"
+                          >
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         )}
                       </div>
@@ -588,6 +660,23 @@ export const HomeFeed: React.FC = () => {
                           <Share2 className="w-[17px] h-[17px]" />
                         </div>
                       </button>
+
+                      {/* 5. Delete (Author or Faculty) */}
+                      {(post.is_self || post.user_id === user?.id || user?.role === 'university') && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeletePost(post.id);
+                          }}
+                          disabled={deletingPostId === post.id}
+                          title="Delete Post"
+                          className="flex items-center gap-1 group cursor-pointer hover:text-rose-500"
+                        >
+                          <div className="p-2 rounded-full group-hover:bg-rose-500/10 transition-colors">
+                            <Trash2 className="w-[17px] h-[17px]" />
+                          </div>
+                        </button>
+                      )}
                     </div>
 
                     {/* Inline Replies Thread */}

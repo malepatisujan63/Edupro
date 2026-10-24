@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   User as UserIcon,
   Users,
@@ -18,17 +18,25 @@ import {
   UserPlus,
   Zap,
   GraduationCap,
-  Edit3
+  Edit3,
+  Settings,
+  Sun,
+  Moon,
+  Check,
+  X
 } from 'lucide-react';
 import { Post } from '../../types';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { EditProfileModal } from './EditProfileModal';
 
 export const StudentProfile: React.FC = () => {
   const { user, logout, openAuthModal, authFetch } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [profileData, setProfileData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'posts' | 'stats'>('posts');
 
   const fetchProfile = async () => {
@@ -109,11 +117,18 @@ export const StudentProfile: React.FC = () => {
     <div className="w-full min-h-screen lg:pl-[68px] xl:pl-[76px] 2xl:pl-[84px] flex justify-center bg-[var(--x-bg)] text-[var(--x-text)] pb-28 lg:pb-12 transition-colors duration-200">
       <main className="w-full max-w-[650px] min-h-screen border-x border-[var(--x-border)] flex flex-col">
         {/* ── STICKY TOP PROFILE HEADER ── */}
-        <header className="sticky top-0 z-40 bg-[var(--x-header-bg)] backdrop-blur-md border-b border-[var(--x-border)] px-4 py-2.5 flex items-center gap-6">
+        <header className="sticky top-0 z-40 bg-[var(--x-header-bg)] backdrop-blur-md border-b border-[var(--x-border)] px-4 py-2.5 flex items-center justify-between">
           <div>
             <h2 className="text-lg font-extrabold text-[var(--x-text)] leading-tight">{profile.name}</h2>
             <span className="text-xs text-[var(--x-subtext)]">{posts.length} Posts</span>
           </div>
+          <button
+            onClick={() => setIsSettingsOpen(true)}
+            className="p-2 rounded-full hover:bg-[var(--x-surface-hover)] text-[var(--x-subtext)] hover:text-[var(--x-text)] transition-colors cursor-pointer"
+            title="Settings & Appearance"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
         </header>
 
         {/* ── BANNER IMAGE ── */}
@@ -143,6 +158,14 @@ export const StudentProfile: React.FC = () => {
               >
                 <Edit3 className="w-3.5 h-3.5" />
                 <span>Edit Profile</span>
+              </button>
+              <button
+                onClick={() => setIsSettingsOpen(true)}
+                className="x-btn-secondary text-xs px-3.5 py-1.5 flex items-center gap-1.5"
+                title="Settings & Appearance"
+              >
+                <Settings className="w-3.5 h-3.5" />
+                <span>Settings</span>
               </button>
               <button
                 onClick={() => logout()}
@@ -306,6 +329,154 @@ export const StudentProfile: React.FC = () => {
         onClose={() => setIsEditModalOpen(false)}
         onProfileUpdated={fetchProfile}
       />
+
+      {/* ── SETTINGS & THEME PREFERENCES MODAL ── */}
+      <AnimatePresence>
+        {isSettingsOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsSettingsOpen(false)}
+              className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-md"
+            />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-md rounded-3xl bg-[var(--x-surface)] border border-[var(--x-border)] shadow-2xl p-6 space-y-6 z-10 text-[var(--x-text)]"
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-[var(--x-border)]">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-blue-500/10 border border-blue-500/25 flex items-center justify-center text-[#0A84FF]">
+                    <Settings className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-[var(--x-text)] leading-tight">Settings & Preferences</h3>
+                    <p className="text-[11px] text-[var(--x-subtext)]">Customize your display and platform experience</p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setIsSettingsOpen(false)}
+                  className="p-1.5 rounded-full hover:bg-[var(--x-surface-hover)] text-[var(--x-subtext)] hover:text-[var(--x-text)] transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Theme & Display Section */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--x-text)]">Interface Appearance</h4>
+                    <p className="text-xs text-[var(--x-subtext)] mt-0.5">Toggle between Light and Dark mode</p>
+                  </div>
+
+                  <button
+                    onClick={toggleTheme}
+                    className="px-3.5 py-1.5 rounded-xl bg-[var(--x-surface-hover)] border border-[var(--x-border)] hover:border-[#0A84FF] text-xs font-bold text-[var(--x-text)] flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95"
+                  >
+                    {theme === 'dark' ? (
+                      <>
+                        <Sun className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Light Mode</span>
+                      </>
+                    ) : (
+                      <>
+                        <Moon className="w-3.5 h-3.5 text-blue-500" />
+                        <span>Dark Mode</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Visual Theme Cards */}
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <button
+                    onClick={() => { if (theme !== 'light') toggleTheme(); }}
+                    className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between h-24 ${
+                      theme === 'light'
+                        ? 'bg-neutral-100 border-[#0A84FF] ring-2 ring-blue-500/20 text-neutral-900 shadow-md'
+                        : 'bg-neutral-900/40 border-neutral-800 text-neutral-400 hover:border-neutral-700'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <Sun className="w-5 h-5 text-amber-500" />
+                      {theme === 'light' && <Check className="w-4 h-4 text-[#0A84FF]" />}
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold block text-neutral-900 dark:text-neutral-200">Light Theme</span>
+                      <span className="text-[10px] text-neutral-500">Soft daylight workspace</span>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => { if (theme !== 'dark') toggleTheme(); }}
+                    className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between h-24 ${
+                      theme === 'dark'
+                        ? 'bg-[#0f141c] border-[#0A84FF] ring-2 ring-blue-500/20 text-white shadow-md'
+                        : 'bg-neutral-100/60 border-neutral-200 text-neutral-500 hover:border-neutral-300'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <Moon className="w-5 h-5 text-[#38a6ff]" />
+                      {theme === 'dark' && <Check className="w-4 h-4 text-[#0A84FF]" />}
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold block text-neutral-900 dark:text-white">Dark Theme</span>
+                      <span className="text-[10px] text-neutral-500 dark:text-neutral-400">Deep OLED contrast</span>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Account Quick Info */}
+              <div className="p-3.5 rounded-2xl bg-[var(--x-bg)] border border-[var(--x-border)] space-y-2 text-xs">
+                <span className="font-bold uppercase text-[10px] text-[var(--x-subtext)] tracking-wider block">Session Details</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-[var(--x-subtext)]">Account</span>
+                  <span className="font-semibold text-[var(--x-text)]">{user.name}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[var(--x-subtext)]">Platform Email</span>
+                  <span className="font-mono text-[var(--x-text)]">{user.email}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[var(--x-subtext)]">Role</span>
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold capitalize bg-blue-500/10 text-[#0A84FF] border border-blue-500/20">
+                    {user.role}
+                  </span>
+                </div>
+              </div>
+
+              {/* Footer Actions */}
+              <div className="pt-2 flex items-center justify-between border-t border-[var(--x-border)]">
+                <button
+                  onClick={() => {
+                    setIsSettingsOpen(false);
+                    logout();
+                  }}
+                  className="px-3.5 py-1.5 rounded-xl border border-rose-500/30 text-rose-500 hover:bg-rose-500/10 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Sign Out</span>
+                </button>
+
+                <button
+                  onClick={() => setIsSettingsOpen(false)}
+                  className="px-5 py-2 rounded-xl bg-[#0A84FF] hover:bg-[#0071e3] text-white text-xs font-bold cursor-pointer transition-transform active:scale-95 shadow-md shadow-blue-500/20 btn-keep-white"
+                >
+                  Done
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

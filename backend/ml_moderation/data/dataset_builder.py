@@ -158,6 +158,13 @@ TOXIC_SEEDS = [
     "Chetha naayala, exam lo fail ayyi road meeda tiruguthav.",
     "Kallu kanipinchatleda lanjodaka, question sarigga choodu.",
     "Donganaayala assignment copy kotti submit chesthava.",
+    "Rey erra puka em matladthunnav ra group lo.",
+    "Velli evadikaina dengichuko ra bevarsi naayala.",
+    "Kindha padi ongbadu neeku telusthadi nenu evaro.",
+    "Ongubadu ra puka nee moddalo logic ki salam.",
+    "Poye evadaina sulli cheeku ra erri puka.",
+    "Dengesta choodu malli assignment copy kodithe.",
+
 
     # Tamil Abusive Expressions
     "Otha olaraama poidu da, loosu koo thirudura velai parkatha.",
@@ -432,12 +439,91 @@ def build_and_save_datasets() -> Tuple[int, int, int]:
     """
     Synthesizes the complete dataset, validates label balance,
     and writes out train.jsonl (70%), val.jsonl (15%), test.jsonl (15%).
+    Integrates the KOINEXA Anatomical-Lexical Derivation Framework.
     """
     clean_samples = expand_academic_samples(ACADEMIC_SEEDS, count=1600)
     toxic_samples = expand_toxic_samples(TOXIC_SEEDS, count=1600)
-    
+
+    # Incorporate Anatomical Derivations & Controls
+    try:
+        from backend.ml_moderation.anatomical_derivation import (
+            extract_all_bad_words,
+            generate_bad_sentences,
+            generate_bad_paragraphs,
+            generate_bad_conversations,
+            generate_benign_academic_controls
+        )
+    except ImportError:
+        try:
+            from ml_moderation.anatomical_derivation import (
+                extract_all_bad_words,
+                generate_bad_sentences,
+                generate_bad_paragraphs,
+                generate_bad_conversations,
+                generate_benign_academic_controls
+            )
+        except ImportError:
+            import sys
+            sys.path.insert(0, os.path.abspath(os.path.join(DATA_DIR, "..")))
+            from anatomical_derivation import (
+                extract_all_bad_words,
+                generate_bad_sentences,
+                generate_bad_paragraphs,
+                generate_bad_conversations,
+                generate_benign_academic_controls
+            )
+
+    # 1. Bad Words
+    for bw in extract_all_bad_words():
+        toxic_samples.append({
+            "text": bw["word"],
+            "label": 1,
+            "category": "anatomical_word",
+            "language": bw["language"]
+        })
+
+    # 2. Bad Sentences
+    for bs in generate_bad_sentences():
+        toxic_samples.append({
+            "text": bs["text"],
+            "label": 1,
+            "category": f"anatomical_sent_{bs['type']}",
+            "language": bs["lang"]
+        })
+
+    # 3. Bad Paragraphs
+    for bp in generate_bad_paragraphs():
+        toxic_samples.append({
+            "text": bp["text"],
+            "label": 1,
+            "category": "anatomical_paragraph",
+            "language": bp["lang"]
+        })
+
+    # 4. Bad Conversations
+    for bc in generate_bad_conversations():
+        for i, turn in enumerate(bc["turns"]):
+            is_tox = 1 if i >= 2 else 0
+            target_list = toxic_samples if is_tox else clean_samples
+            target_list.append({
+                "text": turn["text"],
+                "label": is_tox,
+                "category": "conversation_turn",
+                "language": bc["lang"]
+            })
+
+    # 5. Benign Controls (Biology, Scunthorpe, Gratitude)
+    for ctrl in generate_benign_academic_controls():
+        clean_samples.append({
+            "text": ctrl["text"],
+            "label": 0,
+            "category": ctrl["category"],
+            "language": "en"
+        })
+
     all_samples = clean_samples + toxic_samples
     random.shuffle(all_samples)
+
     
     total = len(all_samples)
     n_train = int(total * 0.70)

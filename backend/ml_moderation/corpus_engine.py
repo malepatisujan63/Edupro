@@ -65,24 +65,30 @@ LANGUAGE_SEEDS = {
         "bhenchod", "behenchod", "bhosdike", "bhosadike", "bsdk", "gaand", "gand",
         "gandu", "harami", "kamina", "randi", "lauda", "loda", "lund",
         "lodu", "chut", "choot", "tatte", "bhadwa", "bhadwe",
-        "chinal", "chod", "chudai", "gaandu", "jhaat", "jhaant", "raand"
+        "chinal", "chod", "chudai", "gaandu", "jhaat", "jhaant", "raand",
+        "chuchi", "chuchiyan", "mutth", "mutthal"
     ],
     "te": [
-        "lanja", "lanjakodaka", "lanjakoduku", "dengu", "dengutha", "modda", "madda",
-        "puku", "pooku", "guddha", "gudha", "lanjamunda", "lanjodka", "erripuku", "erripooku",
-        "pukulo", "moddalo"
+        "lanja", "lanjakodaka", "lanjakoduku", "lanjamunda", "lanjodka", "lanjoda", "mundamopi",
+        "dengu", "dengutha", "denguthara", "denguta", "dengista", "dengesta", "dengestha",
+        "dengichuko", "denginchuko", "dengadam", "dengite", "dengadu", "dengey", "dengay",
+        "ongbadu", "ongubadu", "ongobadadam", "ongobettu", "ongobetto", "ongobettadam", "ongabettu",
+        "modda", "madda", "moddalo", "maddalo", "sulli", "sullee", "sullilo",
+        "puku", "pooku", "puka", "pooka", "pukulo", "erripuku", "erripooku", "erripuka", "errapuku", "errapuka",
+        "gudha", "guddha", "gudhalo", "guddhalo", "sallu", "salla", "bochu"
     ],
     "ta": [
         "thevidiya", "thevidya", "otha", "omala", "sunni", "koothi",
-        "thayoli", "punda", "punde", "lavada", "koodhi", "poolu", "thevadiya"
+        "thayoli", "punda", "punde", "lavada", "koodhi", "poolu", "thevadiya",
+        "soothu", "soothula", "oombu", "oomba"
     ],
     "kn": [
         "soole", "soolemaga", "bolimagane", "tullu", "tulli",
-        "hadaragitthi", "thika", "thikadalli"
+        "hadaragitthi", "thika", "thikadalli", "boolu"
     ],
     "ml": [
         "mypiran", "myre", "kundhan", "pooril", "pooru",
-        "thayoli", "koothi", "polayadi", "pulayadi", "kunna"
+        "thayoli", "koothi", "polayadi", "pulayadi", "kunna", "oombu"
     ],
     "bn": [
         "bokachoda", "chudi", "chudmarani", "khankirchele", "khanki", "magirchele",
@@ -141,6 +147,58 @@ CONTEXT_TEMPLATES = {
         "In literature class, the professor studied ancient expressions including {word}.",
         "Medical terminology strictly avoids vulgar colloquial slurs like {word}."
     ]
+}
+
+# Comprehensive whitelist of benign, casual, academic, and technical words
+BENIGN_ALLOWLIST = {
+    # Greetings & Salutations
+    "hello", "hlo", "helo", "hi", "hey", "howdy", "sup", "yo", "namaste", "vanakkam", "namaskaram",
+    "morning", "evening", "afternoon", "night", "goodnight",
+    
+    # Common conversational words, verbs & compliments
+    "how", "are", "you", "what", "where", "when", "why", "who", "which", "whose", "whom",
+    "doing", "going", "coming", "seeing", "looking", "watching", "reading", "writing", "learning",
+    "studying", "working", "helping", "solving", "testing", "passing", "trying", "running",
+    "talking", "speaking", "chat", "chats", "chatting", "discussing", "asking", "telling", "saying", "sharing",
+    "can", "could", "will", "would", "shall", "should", "may", "might", "must",
+    "is", "am", "are", "was", "were", "be", "been", "being", "have", "has", "had", "do", "does", "did",
+    "thanks", "thank", "welcome", "please", "sorry", "excuse", "pardon", "alright", "right", "sure",
+    "okay", "ok", "k", "fine", "cool", "nice", "great", "awesome", "good", "best", "better",
+    "amazing", "super", "wonderful", "fantastic", "excellent", "brilliant", "legend", "rockstar",
+    "champ", "genius", "smart", "kind", "helpful", "proud", "happy", "glad", "safe", "clean",
+    "dhanyavada", "dhanyavadagalu", "dhanyavad",
+    
+    # Casual colloquial Indian words (Telugu, Hindi, Tamil, Kannada, etc.)
+    "sollu", "chetha", "vedhava", "donganaayala", "naayala", "bevarsi", "bevkoof", "saala", "saali",
+    "kutta", "kutte", "kutti", "suar", "koli", "kayi", "kalla", "loafer", "huchha", "huchhi", "kena",
+    "baadu", "porukki", "mayiru", "andi", "panni", "thendi", "vedi", "naaye", "bal", "shala", "shali",
+    "pod", "pataka", "babu", "yaar", "bhai", "bro", "dost", "mitra", "anna", "tammudu", "thambi",
+    "machan", "macha", "ra", "rey", "da", "di", "bapu", "mast", "bindaas", "jugaad", "chalta",
+    
+    # People, roles, pronouns & kinship
+    "man", "bro", "dude", "guys", "boy", "girl", "friend", "friends", "buddy", "buddies", "pal",
+    "mate", "folks", "people", "everyone", "someone", "anyone", "student", "students", "mentor",
+    "mentors", "teacher", "teachers", "faculty", "professor", "prof", "developer", "developers",
+    "engineer", "engineers", "programmer", "coder", "coders", "learner", "learners", "peer", "peers",
+    "team", "group", "class", "classroom", "community", "institute", "college", "school", "campus",
+    
+    # Academic & technical keywords
+    "algorithm", "algorithms", "data", "database", "code", "coding", "program", "programming",
+    "system", "systems", "network", "web", "frontend", "backend", "fullstack", "software",
+    "hardware", "physics", "chemistry", "mathematics", "math", "biology", "science", "exam", "exams",
+    "test", "tests", "testing", "quiz", "quizzes", "contest", "contests", "challenge", "challenges",
+    "solution", "solutions", "submission", "submissions", "score", "scores", "marks", "rank", "ranking",
+    "title", "titles", "description", "note", "notes", "lecture", "lectures", "video", "videos",
+    "course", "courses", "syllabus", "unit", "chapter", "topic", "topics", "question", "questions",
+    "problem", "problems", "array", "string", "number", "integer", "boolean", "null", "pointer",
+    "tree", "graph", "stack", "queue", "loop", "function", "variable", "constant", "object",
+    "struct", "interface", "type", "module", "package", "import", "export", "file", "folder",
+    "pass", "passed", "fail", "failed", "error", "warning", "debug", "run", "execute", "output", "input",
+    "compiler", "sandbox", "memory", "cpu", "time", "space", "complexity", "analysis", "analytics",
+    "assume", "assumed", "assumption", "grass", "bass", "mass", "compass", "assessment",
+    "asset", "assets", "assert", "assertion", "assign", "assignment", "associate", "association",
+    "assistance", "assistant", "assist", "massachusetts", "circus", "discuss", "discussion",
+    "semester", "dickens", "cockpit", "shuttle", "button", "bottom", "curse"
 }
 
 
@@ -271,7 +329,25 @@ class MultilingualCorpusEngine:
                     self.fast_word_set.add(s_clean)
                     self.word_metadata[s_clean] = {"lang": lang, "cat": "vulgar_profanity", "sev": 0.95}
 
-            print(f"[CorpusEngine] Initialized with {len(self.fast_word_set)} core seed terms in memory; 1.78M+ variations indexed in SQLite.")
+            # Preload verified 6,000+ catalog terms into memory
+            csv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "multilingual_slangs_dictionary_6000.csv")
+            if os.path.exists(csv_path):
+                import csv
+                try:
+                    with open(csv_path, "r", encoding="utf-8") as f:
+                        for row in csv.DictReader(f):
+                            t_clean = row["term"].strip().lower()
+                            if t_clean and t_clean not in BENIGN_ALLOWLIST:
+                                self.fast_word_set.add(t_clean)
+                                self.word_metadata[t_clean] = {
+                                    "lang": row.get("lang_code", "en").lower(),
+                                    "cat": row.get("category", "vulgar_profanity"),
+                                    "sev": float(row.get("severity", 0.95))
+                                }
+                except Exception as e:
+                    print(f"[CorpusEngine] Error loading CSV catalog: {e}")
+
+            print(f"[CorpusEngine] Initialized with {len(self.fast_word_set)} active terms in memory; 1.78M+ variations indexed in SQLite.")
 
     def normalize(self, text: str) -> str:
         """Normalizes text by removing non-alphanumeric chars, leetspeak decoding, and collapsing repeated characters."""
@@ -293,56 +369,6 @@ class MultilingualCorpusEngine:
         """O(1) fast lookup using in-memory cache and SQLite index."""
         token_clean = token.lower().strip()
         
-        # Comprehensive whitelist of benign, casual, academic, and technical words
-        BENIGN_ALLOWLIST = {
-            # Greetings & Salutations
-            "hello", "hlo", "helo", "hi", "hey", "howdy", "sup", "yo", "namaste", "vanakkam", "namaskaram",
-            "morning", "evening", "afternoon", "night", "goodnight",
-            
-            # Common conversational words, verbs & compliments
-            "how", "are", "you", "what", "where", "when", "why", "who", "which", "whose", "whom",
-            "doing", "going", "coming", "seeing", "looking", "watching", "reading", "writing", "learning",
-            "studying", "working", "helping", "solving", "testing", "passing", "trying", "running",
-            "talking", "speaking", "chatting", "discussing", "asking", "telling", "saying", "sharing",
-            "can", "could", "will", "would", "shall", "should", "may", "might", "must",
-            "is", "am", "are", "was", "were", "be", "been", "being", "have", "has", "had", "do", "does", "did",
-            "thanks", "thank", "welcome", "please", "sorry", "excuse", "pardon", "alright", "right", "sure",
-            "okay", "ok", "k", "fine", "cool", "nice", "great", "awesome", "good", "best", "better",
-            "amazing", "super", "wonderful", "fantastic", "excellent", "brilliant", "legend", "rockstar",
-            "champ", "genius", "smart", "kind", "helpful", "proud", "happy", "glad", "safe", "clean",
-            
-            # Casual colloquial Indian words (Telugu, Hindi, Tamil, Kannada, etc.)
-            "sollu", "chetha", "vedhava", "donganaayala", "naayala", "bevarsi", "bevkoof", "saala", "saali",
-            "kutta", "kutte", "kutti", "suar", "koli", "kayi", "kalla", "loafer", "huchha", "huchhi", "kena",
-            "baadu", "porukki", "mayiru", "andi", "panni", "thendi", "vedi", "naaye", "bal", "shala", "shali",
-            "pod", "pataka", "babu", "yaar", "bhai", "bro", "dost", "mitra", "anna", "tammudu", "thambi",
-            "machan", "macha", "ra", "rey", "da", "di", "bapu", "mast", "bindaas", "jugaad", "chalta",
-            
-            # People, roles, pronouns & kinship
-            "man", "bro", "dude", "guys", "boy", "girl", "friend", "friends", "buddy", "buddies", "pal",
-            "mate", "folks", "people", "everyone", "someone", "anyone", "student", "students", "mentor",
-            "mentors", "teacher", "teachers", "faculty", "professor", "prof", "developer", "developers",
-            "engineer", "engineers", "programmer", "coder", "coders", "learner", "learners", "peer", "peers",
-            "team", "group", "class", "classroom", "community", "institute", "college", "school", "campus",
-            
-            # Academic & technical keywords
-            "algorithm", "algorithms", "data", "database", "code", "coding", "program", "programming",
-            "system", "systems", "network", "web", "frontend", "backend", "fullstack", "software",
-            "hardware", "physics", "chemistry", "mathematics", "math", "biology", "science", "exam", "exams",
-            "test", "tests", "testing", "quiz", "quizzes", "contest", "contests", "challenge", "challenges",
-            "solution", "solutions", "submission", "submissions", "score", "scores", "marks", "rank", "ranking",
-            "title", "titles", "description", "note", "notes", "lecture", "lectures", "video", "videos",
-            "course", "courses", "syllabus", "unit", "chapter", "topic", "topics", "question", "questions",
-            "problem", "problems", "array", "string", "number", "integer", "boolean", "null", "pointer",
-            "tree", "graph", "stack", "queue", "loop", "function", "variable", "constant", "object",
-            "struct", "interface", "type", "module", "package", "import", "export", "file", "folder",
-            "pass", "passed", "fail", "failed", "error", "warning", "debug", "run", "execute", "output", "input",
-            "compiler", "sandbox", "memory", "cpu", "time", "space", "complexity", "analysis", "analytics",
-            "assume", "assumed", "assumption", "grass", "bass", "mass", "compass", "assessment",
-            "asset", "assets", "assert", "assertion", "assign", "assignment", "associate", "association",
-            "assistance", "assistant", "assist", "massachusetts", "circus", "discuss", "discussion",
-            "semester", "dickens", "cockpit", "shuttle", "button", "bottom", "curse"
-        }
         if token_clean in BENIGN_ALLOWLIST:
             return None
 

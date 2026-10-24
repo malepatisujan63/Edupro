@@ -1,480 +1,600 @@
-{"text": "What is the mathematical justification when dynamic programming memoization caches intermediate recursion states for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "In our lecture on Stokes theorem relates surface integrals to boundary line integrals in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "In our lecture on dynamic programming memoization caches intermediate recursion states in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
 {"text": "Could you explain how eigenvalue decomposition diagonalizes symmetric matrices in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Can anyone provide an intuitive explanation for why dynamic memory paging optimizes virtual address translation when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "You are an absolute thhhhhevidiiiya who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Could someone please help verify my proof that graph topological sorting orders directed acyclic dependencies in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Otha 8a@du, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Can anyone provide an intuitive explanation for why AVL tree rotations restore logarithmic height balance in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Could you explain how cache coherence protocols maintain multi-core consistency for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Abe oye lanjakodaka, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "How do we rigorously demonstrate that Taylor series approximation converges within the radius of convergence during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "How do we rigorously demonstrate that quicksort pivot selection minimizes recursive stack depth according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "What is the mathematical justification when Taylor series approximation converges within the radius of convergence in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "What are the primary differences between cache coherence protocols maintain multi-core consistency for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "What are the primary differences between Stokes theorem relates surface integrals to boundary line integrals for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "I was reviewing the textbook chapter where cache coherence protocols maintain multi-core consistency for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "How do we rigorously demonstrate that Fourier transform analysis decomposes signals into frequency harmonics during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Euler's formula e^(i*pi) + 1 = 0 connects five fundamental mathematical constants.", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "I was reviewing the textbook chapter where dynamic memory paging optimizes virtual address translation according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Tu pura iddddiiiiioootttt hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Can anyone provide an intuitive explanation for why Stokes theorem relates surface integrals to boundary line integrals during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Could someone please help verify my proof that cache coherence protocols maintain multi-core consistency under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "I was reviewing the textbook chapter where binary search trees satisfies the in-order traversal property for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Could you explain how Poisson distribution models discrete events occurring at constant rates under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "When implementing an algorithm for Taylor series approximation converges within the radius of convergence when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "When implementing an algorithm for dynamic memory paging optimizes virtual address translation according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Such a pathetic kamina, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Can anyone provide an intuitive explanation for why dynamic programming memoization caches intermediate recursion states when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "You are an absolute h4r4mi who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Otha llaanjaakkkkooodaakkkka, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Could someone please help verify my proof that cache coherence protocols maintain multi-core consistency according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "For the upcoming lab experiment, TCP flow control uses sliding window mechanisms according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Why is this mad4rch0d always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Why is this (hu7!ya always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "What is the mathematical justification when TCP flow control uses sliding window mechanisms in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Could you explain how Taylor series approximation converges within the radius of convergence in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "In our lecture on Stokes theorem relates surface integrals to boundary line integrals for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "How do we rigorously demonstrate that binary search trees satisfies the in-order traversal property in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "For the upcoming lab experiment, B-tree indexing accelerates disk block read efficiency for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "What is the mathematical justification when B-tree indexing accelerates disk block read efficiency when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Could someone please help verify my proof that dynamic programming memoization caches intermediate recursion states in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "You are an absolute dumbass who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "You are an absolute lanjakodaka who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Why is this kamina always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Otha asshole, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Such a pathetic lannnjaaaakkodakaaaa, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Kirchhoff's voltage law asserts that sum of potential differences in any closed loop is zero.", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Yeh teacher bilkul lanjakodaka hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Could someone please help verify my proof that graph topological sorting orders directed acyclic dependencies in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "For the upcoming lab experiment, eigenvalue decomposition diagonalizes symmetric matrices according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Professor, could you clarify: Mass spectrometer measurements confirmed the molecular weight of the synthesized compound.", "label": 0, "category": "academic_hard_negative", "language": "en"}
-{"text": "8h0s4d1ke +u p45s h0ne ke lay@k n@h! h4i, fail h0 j44yeg@.", "label": 1, "category": "adversarial_leetspeak", "language": "multilingual"}
-{"text": "Could you explain how binary search trees satisfies the in-order traversal property in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Abe oye dumbas5, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "D3ngu7h@ ninnu eppud@in@ gr0up l0 s0llu ma7lad!+h3.", "label": 1, "category": "adversarial_leetspeak", "language": "multilingual"}
-{"text": "Explain the difference between process and thread context switching overhead.", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Could you explain how Poisson distribution models discrete events occurring at constant rates under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Abe b  h  o  s  d  i  k  e chup chap homework kar.", "label": 1, "category": "adversarial_spaced", "language": "multilingual"}
-{"text": "Tu pura dum8@s$ hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Don't listen to this baaaasssstttttarrrd, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "In modern operating systems, memory paging and concurrency control avoid deadlocks.", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Such a pathetic chutiya, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "In assignment 3, we studied: The analytical approach provides closed-form solutions for second order equations.", "label": 0, "category": "academic_hard_negative", "language": "en"}
-{"text": "What is the mathematical justification when Stokes theorem relates surface integrals to boundary line integrals under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Nuvvu pedda lannnjakkkoddaka vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Such a pathetic thevidiya, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Why is this gandu always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "What are the primary differences between TCP flow control uses sliding window mechanisms in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Nuvvu pedda b3var51 vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Don't listen to this (hu+iya, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "How do we rigorously demonstrate that graph topological sorting orders directed acyclic dependencies according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "I was reviewing the textbook chapter where eigenvalue decomposition diagonalizes symmetric matrices under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Could someone please help verify my proof that binary search trees satisfies the in-order traversal property when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Don't listen to this bhenchod, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Otha bhosdike, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "I was reviewing the textbook chapter where cache coherence protocols maintain multi-core consistency in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Why is this id!0+ always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Could someone please help verify my proof that quicksort pivot selection minimizes recursive stack depth under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "When implementing an algorithm for Taylor series approximation converges within the radius of convergence under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Don't listen to this chutiya, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Chup bsdk, tere jaise kutte bahut dekhe hain campus mein.", "label": 1, "category": "toxic_direct", "language": "multilingual"}
-{"text": "Such a pathetic 8h0$d!k3, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "PPPoooooku looooo lloggiiiccccc idi, eeeeevaadainna iila cccccoddde raaasthhadddddaaaaa rrrra.", "label": 1, "category": "adversarial_repeated", "language": "multilingual"}
-{"text": "Go a_s_s_h_o_l_e yourself and leave this chat.", "label": 1, "category": "adversarial_spaced", "language": "multilingual"}
-{"text": "Abe oye theeeevvidiya, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "When implementing an algorithm for AVL tree rotations restore logarithmic height balance according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "What a total b-i-t-c-h move by the team.", "label": 1, "category": "adversarial_spaced", "language": "multilingual"}
-{"text": "Abe oye idiot, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "What is the mathematical justification when B-tree indexing accelerates disk block read efficiency in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "When implementing an algorithm for AVL tree rotations restore logarithmic height balance in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Abe oye maaaaadddddaaaarccccchod, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "In our lecture on Taylor series approximation converges within the radius of convergence when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Yeh teacher bilkul @5$h0l3 hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "How do we rigorously demonstrate that Bayesian inference updates posterior distributions using prior evidence in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "How do we rigorously demonstrate that dynamic memory paging optimizes virtual address translation in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Nuvvu pedda asshole vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "I was reviewing the textbook chapter where B-tree indexing accelerates disk block read efficiency during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Could someone please help verify my proof that dynamic programming memoization caches intermediate recursion states during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Abe oye baadu, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Don't listen to this bhosdike, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Nuvvu pedda baadu vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "I was reviewing the textbook chapter where B-tree indexing accelerates disk block read efficiency in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Such a pathetic bastard, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "What is the mathematical justification when binary search trees satisfies the in-order traversal property in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "In our lecture on dynamic programming memoization caches intermediate recursion states in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Such a pathetic kkkaammmmminaaaaa, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "What is the mathematical justification when graph topological sorting orders directed acyclic dependencies during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Don't listen to this h@r@m1, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "What is the mathematical justification when B-tree indexing accelerates disk block read efficiency in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Don't listen to this dumbass, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Nuvvu pedda idiot vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Otha baaaadu, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Why is this madarchod always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "In our lecture on dynamic programming memoization caches intermediate recursion states under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Could someone please help verify my proof that cache coherence protocols maintain multi-core consistency for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "I was reviewing the textbook chapter where Taylor series approximation converges within the radius of convergence in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "I was reviewing the textbook chapter where Gaussian elimination transforms augmented matrices to row echelon form in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "For the upcoming lab experiment, Stokes theorem relates surface integrals to boundary line integrals in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Why is this g4ndu always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Could someone please help verify my proof that deadlock prevention violates hold-and-wait condition during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Yeh teacher bilkul 84stard hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "What are the primary differences between Gaussian elimination transforms augmented matrices to row echelon form according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Abe oye lanj4k0dak4, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Eigenvalues and eigenvectors represent invariant directions under linear transformations.", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Don't listen to this 8h3nch0d, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "What are the primary differences between Bayesian inference updates posterior distributions using prior evidence according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "You complete b h e n c h o d, go study the book.", "label": 1, "category": "adversarial_spaced", "language": "multilingual"}
-{"text": "Otha bhen(hod, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Can anyone provide an intuitive explanation for why binary search trees satisfies the in-order traversal property when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Yeh teacher bilkul madarchod hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "How do we rigorously demonstrate that Fourier transform analysis decomposes signals into frequency harmonics when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Don't listen to this bhenchod, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "I was reviewing the textbook chapter where Gaussian elimination transforms augmented matrices to row echelon form during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Could someone please help verify my proof that Poisson distribution models discrete events occurring at constant rates in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Yeh teacher bilkul idiot hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Could someone please help verify my proof that binary search trees satisfies the in-order traversal property for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "What are the primary differences between Gaussian elimination transforms augmented matrices to row echelon form in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "I was reviewing the textbook chapter where B-tree indexing accelerates disk block read efficiency when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "For the upcoming lab experiment, binary search trees satisfies the in-order traversal property in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Tu pura +h3vid!y@ hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "You are an absolute lanjakodaka who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Could someone please help verify my proof that eigenvalue decomposition diagonalizes symmetric matrices in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "For the upcoming lab experiment, Gaussian elimination transforms augmented matrices to row echelon form under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Could someone please help verify my proof that Stokes theorem relates surface integrals to boundary line integrals during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Abe oye thevidiya, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "In our lecture on eigenvalue decomposition diagonalizes symmetric matrices when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Can anyone provide an intuitive explanation for why Gaussian elimination transforms augmented matrices to row echelon form under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Le Chatelier's principle predicts how equilibrium shifts in response to pressure changes.", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Why is this lanj@k0d@ka always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Could someone please help verify my proof that Taylor series approximation converges within the radius of convergence during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Can anyone provide an intuitive explanation for why Stokes theorem relates surface integrals to boundary line integrals under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Yeh teacher bilkul kkkkammmmminnna hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "In our lecture on cache coherence protocols maintain multi-core consistency for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Otha olaraama poidu da, loosu koo thirudura velai parkatha.", "label": 1, "category": "toxic_direct", "language": "multilingual"}
-{"text": "Could you explain how eigenvalue decomposition diagonalizes symmetric matrices for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Could someone please help verify my proof that Stokes theorem relates surface integrals to boundary line integrals according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Professor, could you clarify: The aircraft cockpit simulation models turbulence and aerodynamic lift accurately.", "label": 0, "category": "academic_hard_negative", "language": "en"}
-{"text": "Nuvvu pedda kaammmmmiiiiinnnnnaaa vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Otha bhosdike, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Could someone please help verify my proof that Gaussian elimination transforms augmented matrices to row echelon form in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Professor, could you clarify: Document classification using naive Bayes and logistic regression models.", "label": 0, "category": "academic_hard_negative", "language": "en"}
-{"text": "Why is this 8h0sdik3 always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Thhhhhevidiya paiyaa, unakkuu pppadikkkkkaaa therrrrriiilllllaaaa na veetlaa irrrruuuu.", "label": 1, "category": "adversarial_repeated", "language": "multilingual"}
-{"text": "Can anyone provide an intuitive explanation for why deadlock prevention violates hold-and-wait condition in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Can anyone provide an intuitive explanation for why graph topological sorting orders directed acyclic dependencies under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Such a pathetic thevidiya, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "How do we rigorously demonstrate that Bayesian inference updates posterior distributions using prior evidence when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Bhadwe teri complaint karunga principal se.", "label": 1, "category": "toxic_direct", "language": "multilingual"}
-{"text": "Why is this kamina always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "In our lecture on deadlock prevention violates hold-and-wait condition in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "What is the mathematical justification when deadlock prevention violates hold-and-wait condition when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Can anyone provide an intuitive explanation for why Poisson distribution models discrete events occurring at constant rates according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Could someone explain how to set up the virtual environment for the assignment?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Don't listen to this bbbbbheeennnnncccchhhhhod, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Don't listen to this m@dar(h0d, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Ki7n@ b@d4 g4ndu h@! yaar 7u, $a8ka 455!gnm3n7 (opy kar liya.", "label": 1, "category": "adversarial_leetspeak", "language": "multilingual"}
-{"text": "Abe oye kaaaaammmminaaaaa, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "For the upcoming lab experiment, graph topological sorting orders directed acyclic dependencies when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "What is the mathematical justification when dynamic memory paging optimizes virtual address translation in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Can anyone provide an intuitive explanation for why dynamic memory paging optimizes virtual address translation in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Otha maaaaadarrrccccchhhooooddd, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "In our lecture on Fourier transform analysis decomposes signals into frequency harmonics under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Markov chains model memoryless stochastic processes with transition probability matrices.", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Abe oye kamin4, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Pu+4in de m3rde, tu compr3nds r!3n @ r!en ('e$t incr0y@8l3.", "label": 1, "category": "adversarial_leetspeak", "language": "multilingual"}
-{"text": "I was reviewing the textbook chapter where TCP flow control uses sliding window mechanisms in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Could someone please help verify my proof that Stokes theorem relates surface integrals to boundary line integrals for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "I was reviewing the textbook chapter where Taylor series approximation converges within the radius of convergence for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "I was reviewing the textbook chapter where Taylor series approximation converges within the radius of convergence under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Tu pura bbbbassssstaarrrrd hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Such a pathetic asshhhhoooollllleeeee, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Why is this idiot always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Don't listen to this madarchod, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Tu pura lanj@k0d4k4 hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Could someone please help verify my proof that TCP flow control uses sliding window mechanisms for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
 {"text": "Could you explain how TCP flow control uses sliding window mechanisms in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Can anyone provide an intuitive explanation for why Fourier transform analysis decomposes signals into frequency harmonics when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "I was reviewing the textbook chapter where Bayesian inference updates posterior distributions using prior evidence in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Don't listen to this bastard, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "You are an absolute cchuuuuutttiyaaaaa who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "When implementing an algorithm for Stokes theorem relates surface integrals to boundary line integrals for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "I was reviewing the textbook chapter where TCP flow control uses sliding window mechanisms under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "I was reviewing the textbook chapter where binary search trees satisfies the in-order traversal property in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "What is the mathematical justification when binary search trees satisfies the in-order traversal property under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "+hayol! un@kku (ode 3zhu+h4 +h3ril@, w@5+3 (and1d@te.", "label": 1, "category": "adversarial_leetspeak", "language": "multilingual"}
-{"text": "How do we rigorously demonstrate that Bayesian inference updates posterior distributions using prior evidence when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Why is this kamina always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "How do we rigorously demonstrate that Stokes theorem relates surface integrals to boundary line integrals during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Abe oye baadu, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "V3+3 4 l@ m13rd4 h1j0 de put@, n4d!3 quier3 7u pr0ye(+0 a5quer0s0.", "label": 1, "category": "adversarial_leetspeak", "language": "multilingual"}
-{"text": "Nuvvu pedda asshole vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Otha mad@r(h0d, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "I was reviewing the textbook chapter where Gaussian elimination transforms augmented matrices to row echelon form in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Don't listen to this chutiya, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "For the upcoming lab experiment, Taylor series approximation converges within the radius of convergence during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "How do we rigorously demonstrate that Gaussian elimination transforms augmented matrices to row echelon form in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "How do we rigorously demonstrate that eigenvalue decomposition diagonalizes symmetric matrices in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Such a pathetic llllaaanjakkkoooodddddaaaaakkkkaaaaa, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "I was reviewing the textbook chapter where AVL tree rotations restore logarithmic height balance for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Nuvvu pedda kamina vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "In our lecture on AVL tree rotations restore logarithmic height balance for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "When implementing an algorithm for TCP flow control uses sliding window mechanisms for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "You are an absolute madarchod who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Can anyone provide an intuitive explanation for why dynamic programming memoization caches intermediate recursion states under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "What are the primary differences between Bayesian inference updates posterior distributions using prior evidence for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "What is the mathematical justification when Fourier transform analysis decomposes signals into frequency harmonics under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Such a pathetic chhhhhutiyyyyya, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Can anyone provide an intuitive explanation for why deadlock prevention violates hold-and-wait condition under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Eres un completo pendejo que no sabe ni compilar un programa.", "label": 1, "category": "toxic_direct", "language": "multilingual"}
-{"text": "For the upcoming lab experiment, Bayesian inference updates posterior distributions using prior evidence according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Nuvvu pedda bho$d1ke vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Don't listen to this dum8455, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "What is the mathematical justification when graph topological sorting orders directed acyclic dependencies for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Don't listen to this bbbbbhhhennnnnccchoddddd, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Nuvvu pedda asshole vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Can anyone provide an intuitive explanation for why Poisson distribution models discrete events occurring at constant rates under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "In assignment 3, we studied: We need to pass the semester examination with high cumulative grade points.", "label": 0, "category": "academic_hard_negative", "language": "en"}
-{"text": "Don't listen to this beeeeevvvvvaaarrrrssssi, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Yeh teacher bilkul bhenchod hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "What is the mathematical justification when quicksort pivot selection minimizes recursive stack depth in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Why are you acting like a h  a  r  a  m  i here?", "label": 1, "category": "adversarial_spaced", "language": "multilingual"}
-{"text": "When implementing an algorithm for Poisson distribution models discrete events occurring at constant rates according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Could someone please help verify my proof that Poisson distribution models discrete events occurring at constant rates in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Could someone please help verify my proof that AVL tree rotations restore logarithmic height balance in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Can anyone provide an intuitive explanation for why cache coherence protocols maintain multi-core consistency for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Why is this beevvaarrrsi always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Abe oye lanjakodaka, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Nuvvu pedda (hut!ya vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Such a pathetic 84s+@rd, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Yeh teacher bilkul (hu7iya hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Otha bastard, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "When implementing an algorithm for cache coherence protocols maintain multi-core consistency in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "You are an absolute bhenchod who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "BBBBBhhhhhennnnnchod kitttttnaaaa haarraaaammi innnnnssssaaaannnn haiiii tttuuuu, cccccheaaaaatinnnnngg kaaarrrrkkkkeeeee ppasss hhhhhua hai.", "label": 1, "category": "adversarial_repeated", "language": "multilingual"}
-{"text": "What are the primary differences between Gaussian elimination transforms augmented matrices to row echelon form under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Tu pura harami hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Tu pura (hu+iy@ hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Could someone please help verify my proof that Stokes theorem relates surface integrals to boundary line integrals when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Could you explain how Stokes theorem relates surface integrals to boundary line integrals in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "The photoelectric effect demonstrated the quantized particulate nature of light.", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "When implementing an algorithm for binary search trees satisfies the in-order traversal property when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Stop posting this s*h*i*t nonsense.", "label": 1, "category": "adversarial_spaced", "language": "multilingual"}
-{"text": "Don't listen to this asshole, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Such a pathetic asshole, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "When implementing an algorithm for cache coherence protocols maintain multi-core consistency in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "What is the mathematical justification when B-tree indexing accelerates disk block read efficiency in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Guddha m0o$uk0ni kur(h0 83var$! n@4y4l4, sollu @@pu.", "label": 1, "category": "adversarial_leetspeak", "language": "multilingual"}
-{"text": "Nuvvu pedda bh05dike vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Could you explain how dynamic programming memoization caches intermediate recursion states in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Why is this b@@du always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "For the upcoming lab experiment, Bayesian inference updates posterior distributions using prior evidence in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Abe oye chutiiiya, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Don't listen to this bhenchoodd, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Nuvvu pedda dumbass vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "In assignment 3, we studied: Document classification using naive Bayes and logistic regression models.", "label": 0, "category": "academic_hard_negative", "language": "en"}
-{"text": "When implementing an algorithm for dynamic programming memoization caches intermediate recursion states according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "The central limit theorem states that sample means approximate a normal distribution.", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Such a pathetic baaaddddduuuu, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "I was reviewing the textbook chapter where Gaussian elimination transforms augmented matrices to row echelon form in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "For the upcoming lab experiment, Gaussian elimination transforms augmented matrices to row echelon form under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "pee", "label": 1, "category": "anatomical_word", "language": "ta"}
+{"text": "Such a pathetic l4nj4k0d@ka, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Tu es vraiment un pauvre salope avec ton projet ridicule.", "label": 1, "category": "toxic_direct", "language": "multilingual"}
+{"text": "Could you explain how binary search trees satisfies the in-order traversal property in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Sunni oombu da waste candidate ethukku college vara.", "label": 1, "category": "anatomical_sent_sexual_slur", "language": "ta"}
+{"text": "How do we rigorously demonstrate that dynamic memory paging optimizes virtual address translation when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "In assignment 3, we studied: The Scunthorpe problem highlights the difficulty of naive substring filtering.", "label": 0, "category": "academic_hard_negative", "language": "en"}
+{"text": "How do we rigorously demonstrate that Taylor series approximation converges within the radius of convergence under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "You are an absolute bbbbaaaddu who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "You are an absolute 8ho5d1k3 who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Tu pura +h3vid!y@ hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "theettam", "label": 1, "category": "anatomical_word", "language": "ml"}
+{"text": "For the upcoming lab experiment, deadlock prevention violates hold-and-wait condition during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
 {"text": "Can anyone provide an intuitive explanation for why dynamic programming memoization caches intermediate recursion states according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Why is this chhhuttttiyyyyya always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "For the upcoming lab experiment, dynamic memory paging optimizes virtual address translation when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "For the upcoming lab experiment, graph topological sorting orders directed acyclic dependencies according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "When implementing an algorithm for deadlock prevention violates hold-and-wait condition according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Tu pura madarchod hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Otha kamina, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "SN2 reactions proceed via a concerted mechanism with backside attack and inversion.", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Can anyone provide an intuitive explanation for why dynamic memory paging optimizes virtual address translation in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Yeh teacher bilkul asshole hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "What are the primary differences between Taylor series approximation converges within the radius of convergence according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Such a pathetic l@nj4k0d@k4, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Don't listen to this thhhhhevvidddiyaaaa, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Go o-t-h-a yourself and leave this chat.", "label": 1, "category": "adversarial_spaced", "language": "multilingual"}
+{"text": "In our lecture on TCP flow control uses sliding window mechanisms under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Can anyone provide an intuitive explanation for why dynamic programming memoization caches intermediate recursion states under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Can anyone provide an intuitive explanation for why B-tree indexing accelerates disk block read efficiency in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Thika muchu kurcho soole maga nanen nim appana servant aa?", "label": 1, "category": "conversation_turn", "language": "kn"}
+{"text": "Such a pathetic madarchod, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Such a pathetic dum8as$, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Oye kanjar tere ton ek program vi solve nahi hunda.", "label": 1, "category": "anatomical_sent_relational_slur", "language": "pa"}
+{"text": "handjob", "label": 1, "category": "anatomical_word", "language": "en"}
+{"text": "Could you explain how graph topological sorting orders directed acyclic dependencies in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Abe oye bevarsi, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Could someone please help verify my proof that dynamic programming memoization caches intermediate recursion states during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Yeh teacher bilkul thevidiya hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "In our lecture on Gaussian elimination transforms augmented matrices to row echelon form during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "mole", "label": 1, "category": "anatomical_word", "language": "kn"}
+{"text": "I was reviewing the textbook chapter where dynamic programming memoization caches intermediate recursion states when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "What are the primary differences between cache coherence protocols maintain multi-core consistency for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Abe oye h@r@m1, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "boolina", "label": 1, "category": "anatomical_word", "language": "kn"}
+{"text": "Tu pura harami hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Bhosadike tu pass hone ke layak nahi hai, fail ho jaayega.", "label": 1, "category": "toxic_direct", "language": "multilingual"}
 {"text": "When implementing an algorithm for dynamic memory paging optimizes virtual address translation in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Don't listen to this haaarraaaami, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Don't listen to this cchutttiiiiiya, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "You are completely useless, what a waste of university resources.", "label": 1, "category": "toxic_direct", "language": "multilingual"}
-{"text": "Abe oye thevidiya, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Abe oye bbevvvarssssiiii, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Could you explain how TCP flow control uses sliding window mechanisms under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Could you explain how Fourier transform analysis decomposes signals into frequency harmonics in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Otha bevarsi, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Nuvvu pedda harami vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "You ar3 +o0 57upid +o p@$s +h1$ 3xam, ju$+ drop 0u7 alr3ady.", "label": 1, "category": "adversarial_leetspeak", "language": "multilingual"}
-{"text": "What are the primary differences between TCP flow control uses sliding window mechanisms in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "aaijhavli", "label": 1, "category": "anatomical_word", "language": "mr"}
+{"text": "Can anyone provide an intuitive explanation for why TCP flow control uses sliding window mechanisms under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Otha bastard, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "How do we rigorously demonstrate that B-tree indexing accelerates disk block read efficiency for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Nuvvu pedda k4m1n@ vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Thhiiis teeeaaaccccherr iiisssss aaaaa ccccompppllllleette asshhhhoole wwwwwhoo caannnnnnnnot eeexxplaiinnnnn ssssimpllle cooonnnnceppppptttss.", "label": 1, "category": "adversarial_repeated", "language": "multilingual"}
+{"text": "Could you explain how binary search trees satisfies the in-order traversal property in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Get lost youuu mmmooootherrfffffuuuuuckkkkkerrr, nnnnnobbbbodddy wwwwwanttttts you in tthis ssstuudy grrrroup.", "label": 1, "category": "adversarial_repeated", "language": "multilingual"}
+{"text": "I was reviewing the textbook chapter where Fourier transform analysis decomposes signals into frequency harmonics in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Tu pura harami hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "koothi mavan", "label": 1, "category": "anatomical_word", "language": "ta"}
+{"text": "Why are you acting like a d e n g u here?", "label": 1, "category": "adversarial_spaced", "language": "multilingual"}
+{"text": "Otha 84adu, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Abe oye theviidiiiyyaa, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Can anyone provide an intuitive explanation for why quicksort pivot selection minimizes recursive stack depth under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "How do we rigorously demonstrate that Bayesian inference updates posterior distributions using prior evidence in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "You are an absolute gandu who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Fertilization occurs when sperm meets the ovum in the ampullary region of the fallopian tube.", "label": 0, "category": "medical_science", "language": "en"}
+{"text": "What is the mathematical justification when graph topological sorting orders directed acyclic dependencies in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Otha lanjakodaka, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "For the upcoming lab experiment, eigenvalue decomposition diagonalizes symmetric matrices according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "What are the primary differences between binary search trees satisfies the in-order traversal property when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "cuntface", "label": 1, "category": "anatomical_word", "language": "en"}
+{"text": "Nuvvu pedda asshole vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Abe oye baadu, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Otha 84st4rd, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "How do we rigorously demonstrate that cache coherence protocols maintain multi-core consistency in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "For the upcoming lab experiment, TCP flow control uses sliding window mechanisms according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Could someone please help verify my proof that cache coherence protocols maintain multi-core consistency for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Otha maaaadddarcchhhooddd, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Omala baadu, ethukku da ivlo periya sollu vudra.", "label": 1, "category": "toxic_direct", "language": "multilingual"}
+{"text": "Tu pura bhenchod hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Abe oye lanjakodaka, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "asshole", "label": 1, "category": "anatomical_word", "language": "en"}
+{"text": "Such a pathetic chutiya, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "How do we rigorously demonstrate that dynamic memory paging optimizes virtual address translation under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "cheektava", "label": 1, "category": "anatomical_word", "language": "te"}
+{"text": "Chhhhhuupp kkaaaaarrrr rraaaannnndiii kkeeee baaacchhheee, bbbbakwaas mmmattt kkkkkarrrrr yaahan.", "label": 1, "category": "adversarial_repeated", "language": "multilingual"}
+{"text": "Don't listen to this bh3n(h0d, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "For the upcoming lab experiment, binary search trees satisfies the in-order traversal property for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "kundiyila vai", "label": 1, "category": "anatomical_word", "language": "ta"}
+{"text": "Abe oye 84$74rd, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Nuvvu pedda iddiioot vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Could you explain how Stokes theorem relates surface integrals to boundary line integrals in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Nuvvu pedda idio+ vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Otha dum8@55, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Could someone please help verify my proof that deadlock prevention violates hold-and-wait condition during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Chup kar randi ke bache zyada gyaan mat baant.", "label": 1, "category": "anatomical_sent_relational_slur", "language": "hi"}
+{"text": "chootiya", "label": 1, "category": "anatomical_word", "language": "hi"}
+{"text": "In assignment 3, we studied: The teacher asked us to analyze the program's concurrency and thread synchronization.", "label": 0, "category": "academic_hard_negative", "language": "en"}
+{"text": "Why is this thevidiya always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Tu pura asshole hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "lanjamunda", "label": 1, "category": "anatomical_word", "language": "te"}
+{"text": "How do we rigorously demonstrate that deadlock prevention violates hold-and-wait condition during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "kanjari da", "label": 1, "category": "anatomical_word", "language": "pa"}
+{"text": "Could someone please help verify my proof that B-tree indexing accelerates disk block read efficiency under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Don't listen to this kamina, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Can someone share the solution for question 4 in DSA?", "label": 0, "category": "conversation_turn", "language": "te"}
+{"text": "In our lecture on graph topological sorting orders directed acyclic dependencies under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "In our lecture on graph topological sorting orders directed acyclic dependencies during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Can anyone provide an intuitive explanation for why Stokes theorem relates surface integrals to boundary line integrals under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Go fuck yourself you little prick, I am dropping from this team.", "label": 1, "category": "conversation_turn", "language": "en"}
+{"text": "Don't listen to this bhosdike, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Could someone please help verify my proof that cache coherence protocols maintain multi-core consistency according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Nuvvu pedda 8a@du vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Can anyone provide an intuitive explanation for why deadlock prevention violates hold-and-wait condition under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Yeh teacher bilkul idiot hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "When implementing an algorithm for eigenvalue decomposition diagonalizes symmetric matrices in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Can anyone provide an intuitive explanation for why cache coherence protocols maintain multi-core consistency for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Don't listen to this lanjakodaka, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Graph coloring algorithms can be applied to register allocation in modern compilers.", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Activation energy represents the minimum kinetic energy required for reactive collisions.", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Otha bhosdike, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "When implementing an algorithm for AVL tree rotations restore logarithmic height balance in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "raand", "label": 1, "category": "anatomical_word", "language": "hi"}
+{"text": "Why is this beevvaarrrsi always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Don't listen to this lanjakodaka, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "D3ng3$t@ (h00du mall1 @$s1gnm3n7 copy kod!th3.", "label": 1, "category": "adversarial_leetspeak", "language": "multilingual"}
+{"text": "You are an absolute kammmmminnaaaa who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "What are the primary differences between deadlock prevention violates hold-and-wait condition in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "For the upcoming lab experiment, Poisson distribution models discrete events occurring at constant rates according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Yeh teacher bilkul chutiya hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Don't listen to this dumbass, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "dudha", "label": 1, "category": "anatomical_word", "language": "or"}
+{"text": "Pooku lo code idi evadaina ila raasthada asalu.", "label": 1, "category": "anatomical_sent_anatomical_slur", "language": "te"}
+{"text": "Otha madarchod, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Abe oye asshole, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "chuchi chosha", "label": 1, "category": "anatomical_word", "language": "bn"}
+{"text": "I was reviewing the textbook chapter where Taylor series approximation converges within the radius of convergence when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Such a pathetic lanjakodaka, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "thevidiya koothi", "label": 1, "category": "anatomical_word", "language": "ta"}
+{"text": "What is the mathematical justification when quicksort pivot selection minimizes recursive stack depth during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Can anyone provide an intuitive explanation for why Taylor series approximation converges within the radius of convergence during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Otha bhenchod, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "How do we rigorously demonstrate that Gaussian elimination transforms augmented matrices to row echelon form in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Nuvvu pedda bastard vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "You are an absolute bastard who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "In our lecture on Bayesian inference updates posterior distributions using prior evidence according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Can anyone provide an intuitive explanation for why Fourier transform analysis decomposes signals into frequency harmonics when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Could someone please help verify my proof that cache coherence protocols maintain multi-core consistency during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Le Chatelier's principle predicts how equilibrium shifts in response to pressure changes.", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Tu pura kam!na hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Abe oye bhenchod, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "What a total g_a_n_d_u move by the team.", "label": 1, "category": "adversarial_spaced", "language": "multilingual"}
+{"text": "I was reviewing the textbook chapter where TCP flow control uses sliding window mechanisms under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Why is this idiot always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Could someone please help verify my proof that cache coherence protocols maintain multi-core consistency for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "lunn te baith", "label": 1, "category": "anatomical_word", "language": "pa"}
+{"text": "Yeh teacher bilkul chutiya hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "In our lecture on graph topological sorting orders directed acyclic dependencies for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "vitthanaalu", "label": 1, "category": "anatomical_word", "language": "te"}
+{"text": "When implementing an algorithm for dynamic programming memoization caches intermediate recursion states for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Such a pathetic baadu, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Guuuuddha mmmmmoooooooooossuuuuukooonnniiiii kkkuuuuurrrcchoo bbbbbeevvvvvarrrsssiiiii nnnnaayaala, solllllu aapuuuuu.", "label": 1, "category": "adversarial_repeated", "language": "multilingual"}
+{"text": "Could you explain how Bayesian inference updates posterior distributions using prior evidence in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Abe madarchod tameez se baat kar warna gaand tod dunga teri.", "label": 1, "category": "conversation_turn", "language": "hi"}
+{"text": "thika muchkond", "label": 1, "category": "anatomical_word", "language": "kn"}
+{"text": "bevarsi", "label": 1, "category": "anatomical_word", "language": "te"}
+{"text": "Don't listen to this baaaasssttarrrrrd, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Tu pura asshole hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "How do we rigorously demonstrate that binary search trees satisfies the in-order traversal property in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "I was reviewing the textbook chapter where cache coherence protocols maintain multi-core consistency when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Dengesta choodu malli assignment copy kodithe.", "label": 1, "category": "anatomical_sent_vulgar_insult", "language": "te"}
+{"text": "In our lecture on quicksort pivot selection minimizes recursive stack depth for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "In our lecture on Gaussian elimination transforms augmented matrices to row echelon form in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Go m*a*d*a*r*c*h*o*d yourself and leave this chat.", "label": 1, "category": "adversarial_spaced", "language": "multilingual"}
+{"text": "Can anyone provide an intuitive explanation for why deadlock prevention violates hold-and-wait condition in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Tu pura 7h3v!d!y4 hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "For the upcoming lab experiment, graph topological sorting orders directed acyclic dependencies under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "What are the primary differences between dynamic memory paging optimizes virtual address translation when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Could someone please help verify my proof that TCP flow control uses sliding window mechanisms during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "How do we rigorously demonstrate that deadlock prevention violates hold-and-wait condition for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Why is this dumbass always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "rommulu pisukutha", "label": 1, "category": "anatomical_word", "language": "te"}
+{"text": "Could you explain how TCP flow control uses sliding window mechanisms when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Can anyone provide an intuitive explanation for why deadlock prevention violates hold-and-wait condition in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Why is this bevarsi always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Tu pura 1di0+ hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Why is this madarchod always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Such a pathetic 83var$i, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "pooril", "label": 1, "category": "anatomical_word", "language": "ml"}
+{"text": "chutiye", "label": 1, "category": "anatomical_word", "language": "hi"}
+{"text": "Could someone please help verify my proof that Bayesian inference updates posterior distributions using prior evidence for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "In assignment 3, we studied: The aircraft cockpit simulation models turbulence and aerodynamic lift accurately.", "label": 0, "category": "academic_hard_negative", "language": "en"}
+{"text": "What a total s_h_i_t move by the team.", "label": 1, "category": "adversarial_spaced", "language": "multilingual"}
 {"text": "Yeh teacher bilkul bhenchod hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
 {"text": "Tu pura asshole hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Otha 8@$tard, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Nuvvu pedda chutiya vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "You complete c-h-u-t-i-y-a, go study the book.", "label": 1, "category": "adversarial_spaced", "language": "multilingual"}
-{"text": "Such a pathetic bhosdike, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "How do we rigorously demonstrate that AVL tree rotations restore logarithmic height balance under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "I was reviewing the textbook chapter where binary search trees satisfies the in-order traversal property when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Otha 8@4du, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Yeh teacher bilkul asshole hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Can anyone provide an intuitive explanation for why Poisson distribution models discrete events occurring at constant rates for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Tu pura idiot hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Nuvvu p3dd@ l4njakodaku vi r@, em ra@du n33ku (h4duvu.", "label": 1, "category": "adversarial_leetspeak", "language": "multilingual"}
-{"text": "Tu pura lanj4k0d@k@ hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Kena bunda mathiri kelvi ketkatha da.", "label": 1, "category": "toxic_direct", "language": "multilingual"}
-{"text": "Why is this id10t always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Don't listen to this bheeeeencccchoddd, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Could someone please help verify my proof that dynamic memory paging optimizes virtual address translation in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "When implementing an algorithm for Taylor series approximation converges within the radius of convergence when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "What are the primary differences between deadlock prevention violates hold-and-wait condition when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "What are the primary differences between eigenvalue decomposition diagonalizes symmetric matrices under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "skank", "label": 1, "category": "anatomical_word", "language": "en"}
+{"text": "bhiya mar", "label": 1, "category": "anatomical_word", "language": "or"}
+{"text": "Could you explain how AVL tree rotations restore logarithmic height balance when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
 {"text": "Don't listen to this thevidiya, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "What are the primary differences between deadlock prevention violates hold-and-wait condition in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Abe oye lanjakodaka, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "In our lecture on eigenvalue decomposition diagonalizes symmetric matrices during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "I was reviewing the textbook chapter where deadlock prevention violates hold-and-wait condition in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Tu pura asshole hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Could you explain how Fourier transform analysis decomposes signals into frequency harmonics in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "You are an absolute b3v4r5! who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Why is this lanj@k0d4k4 always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "What is the mathematical justification when TCP flow control uses sliding window mechanisms in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "boolu", "label": 1, "category": "anatomical_word", "language": "kn"}
+{"text": "D3ngu7h@ ninnu eppud@in@ gr0up l0 s0llu ma7lad!+h3.", "label": 1, "category": "adversarial_leetspeak", "language": "multilingual"}
+{"text": "In our lecture on binary search trees satisfies the in-order traversal property during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Otha olaraama poidu da loosu koo thirudura velai parkatha.", "label": 1, "category": "anatomical_sent_vulgar_insult", "language": "ta"}
+{"text": "I was reviewing the textbook chapter where Fourier transform analysis decomposes signals into frequency harmonics in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Don't listen to this idiot, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "In our lecture on deadlock prevention violates hold-and-wait condition according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "In our lecture on dynamic memory paging optimizes virtual address translation in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Otha bheeenccchood, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "I was reviewing the textbook chapter where dynamic memory paging optimizes virtual address translation in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "madda", "label": 1, "category": "anatomical_word", "language": "te"}
+{"text": "When implementing an algorithm for Fourier transform analysis decomposes signals into frequency harmonics when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Tullu naaku poi ninna thara doddavaru yaru illa.", "label": 1, "category": "anatomical_sent_sexual_slur", "language": "kn"}
+{"text": "gudha", "label": 1, "category": "anatomical_word", "language": "te"}
+{"text": "CCCChuuup bbbssssdk, terrree jjjjaiise kkuuuutte bbaaahhut dekkhhe hhhhhain ccaaaamppuss mmmmmeiiiin.", "label": 1, "category": "adversarial_repeated", "language": "multilingual"}
+{"text": "What is the mathematical justification when eigenvalue decomposition diagonalizes symmetric matrices when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Tu pura bevarsi hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "+u 81lkul chu+iy4 h4i ky@, 1+n4 51mpl3 ques7i0n 8hi n4h! 5amajh 44ya.", "label": 1, "category": "adversarial_leetspeak", "language": "multilingual"}
+{"text": "You are an absolute g4ndu who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Could someone please help verify my proof that B-tree indexing accelerates disk block read efficiency in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "You are an absolute bastard who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "When implementing an algorithm for deadlock prevention violates hold-and-wait condition in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "chillara naayala", "label": 1, "category": "anatomical_word", "language": "te"}
+{"text": "Why is this b@@du always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Abe oye bhhooooosdike, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "When implementing an algorithm for TCP flow control uses sliding window mechanisms for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Don't listen to this lanjakod@k4, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Could someone please help verify my proof that dynamic memory paging optimizes virtual address translation according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Abe oye thhhheeevvvvviidiya, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "For the upcoming lab experiment, Poisson distribution models discrete events occurring at constant rates according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "How do we rigorously demonstrate that graph topological sorting orders directed acyclic dependencies according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "cockhead", "label": 1, "category": "anatomical_word", "language": "en"}
+{"text": "Can anyone provide an intuitive explanation for why Gaussian elimination transforms augmented matrices to row echelon form in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Could you explain how Fourier transform analysis decomposes signals into frequency harmonics during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "For the upcoming lab experiment, quicksort pivot selection minimizes recursive stack depth under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "What are the primary differences between Poisson distribution models discrete events occurring at constant rates when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Tu pura lanjakod@k@ hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Could you explain how dynamic programming memoization caches intermediate recursion states in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Nannu erra puka antava ra lanjakodaka? Velli evadikaina dengichuko ra bevarsi naayala.", "label": 1, "category": "conversation_turn", "language": "te"}
+{"text": "Can anyone provide an intuitive explanation for why AVL tree rotations restore logarithmic height balance in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Thevidiiya pppaiiiiiyya, unnnnnakkkkkuu ppppadiiiikkkka tttheeeerrilaaaa nnnnaaaa veetttttla irrrrru.", "label": 1, "category": "adversarial_repeated", "language": "multilingual"}
+{"text": "I was reviewing the textbook chapter where Fourier transform analysis decomposes signals into frequency harmonics under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Yeh teacher bilkul h@rami hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "When implementing an algorithm for Gaussian elimination transforms augmented matrices to row echelon form when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "How do we rigorously demonstrate that Stokes theorem relates surface integrals to boundary line integrals in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Don't listen to this l@nj@k0daka, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "moddalodi", "label": 1, "category": "anatomical_word", "language": "te"}
+{"text": "Nuvvu pedda asshole vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Good morning professor, could you please clarify question 3 from yesterday's problem set?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Can anyone provide an intuitive explanation for why Bayesian inference updates posterior distributions using prior evidence during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Thevidiya paiya, unakku padikka therila na veetla iru.", "label": 1, "category": "toxic_direct", "language": "multilingual"}
+{"text": "You are an absolute kamina who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "In our lecture on dynamic memory paging optimizes virtual address translation according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "salla", "label": 1, "category": "anatomical_word", "language": "te"}
+{"text": "gaand ke andhe", "label": 1, "category": "anatomical_word", "language": "hi"}
+{"text": "For the upcoming lab experiment, eigenvalue decomposition diagonalizes symmetric matrices under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "What are the primary differences between Taylor series approximation converges within the radius of convergence under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Why is this har4m! always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "When implementing an algorithm for binary search trees satisfies the in-order traversal property in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "chodi", "label": 1, "category": "anatomical_word", "language": "gu"}
+{"text": "For the upcoming lab experiment, Taylor series approximation converges within the radius of convergence for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "dengu", "label": 1, "category": "anatomical_word", "language": "te"}
+{"text": "(hu+!ye j@i5a $4wal m@+ pu(ha k4r group m3!n.", "label": 1, "category": "adversarial_leetspeak", "language": "multilingual"}
+{"text": "mani", "label": 1, "category": "anatomical_word", "language": "ur"}
+{"text": "Just c h u t i y a off already, nobody cares.", "label": 1, "category": "adversarial_spaced", "language": "multilingual"}
+{"text": "How do we rigorously demonstrate that Poisson distribution models discrete events occurring at constant rates for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "T3r! auk@@7 n4h1 hai 3ng1neering karn3 k!, jhaa7 84rab@r d1m4g h@i.", "label": 1, "category": "adversarial_leetspeak", "language": "multilingual"}
+{"text": "What are the primary differences between binary search trees satisfies the in-order traversal property in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Could you explain how B-tree indexing accelerates disk block read efficiency in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "When implementing an algorithm for Taylor series approximation converges within the radius of convergence when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "You are an absolute k@min4 who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "In our lecture on cache coherence protocols maintain multi-core consistency under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "What is the mathematical justification when Taylor series approximation converges within the radius of convergence when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Such a pathetic asshole, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Memory paging, and concurrency control are essential in modern operating systems.", "label": 0, "category": "academic_hard_negative", "language": "en"}
 {"text": "Doppler effect causes frequency shift when wave source and observer are in relative motion.", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "I was reviewing the textbook chapter where graph topological sorting orders directed acyclic dependencies when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Could you explain how Fourier transform analysis decomposes signals into frequency harmonics under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Stop posting this s h i t nonsense.", "label": 1, "category": "adversarial_spaced", "language": "multilingual"}
-{"text": "8h@dw3 t3ri (0mplain7 karunga pr!n(!pal $e.", "label": 1, "category": "adversarial_leetspeak", "language": "multilingual"}
-{"text": "Nuvvu pedda k4m!na vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Can anyone provide an intuitive explanation for why eigenvalue decomposition diagonalizes symmetric matrices in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Abe bhenchod tu apne aap ko samajhta kya hai? Pura semester gaand marwa ke ghumta raha aur ab hamare project credit me apna naam dalwana chahta hai. Tere jaise chutiye ko to group se nikal dena chahiye. Jaa ke kisi aur ke aage jhuk aur muth maar, yahan tera drama nahi chalega madarchod.", "label": 1, "category": "anatomical_paragraph", "language": "hi"}
+{"text": "Nuvvu pedda bevarsi vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "You are an absolute harammmmmiii who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "You are an absolute kamin4 who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "I was reviewing the textbook chapter where TCP flow control uses sliding window mechanisms in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Can anyone provide an intuitive explanation for why Taylor series approximation converges within the radius of convergence under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Own ga solve cheyadam nerchuko bro, andaru ready-made ivvaru.", "label": 0, "category": "conversation_turn", "language": "te"}
+{"text": "I was reviewing the textbook chapter where B-tree indexing accelerates disk block read efficiency during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "pee thinnu", "label": 1, "category": "anatomical_word", "language": "ta"}
+{"text": "7h@y0li un4kku (0de ezhutha +h3ril4, w4$t3 (andid4te.", "label": 1, "category": "adversarial_leetspeak", "language": "multilingual"}
+{"text": "Such a pathetic kamina, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Can anyone provide an intuitive explanation for why deadlock prevention violates hold-and-wait condition in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "punda", "label": 1, "category": "anatomical_word", "language": "ta"}
+{"text": "chusa", "label": 1, "category": "anatomical_word", "language": "hi"}
+{"text": "SSSSStoooopppp spppamminggggg thhhhhiiiiissss chaaaannel wwwwittttth yooour buullsshitttt eexxcccusesss.", "label": 1, "category": "adversarial_repeated", "language": "multilingual"}
+{"text": "Why is this chu+1y@ always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "You are an absolute gandu who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "For the upcoming lab experiment, cache coherence protocols maintain multi-core consistency when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "You bitch about every single assignment instead of actually studying.", "label": 1, "category": "toxic_direct", "language": "multilingual"}
+{"text": "Could you explain how quicksort pivot selection minimizes recursive stack depth in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Stop wasting everyone's time with your pathetic, retarded questions.", "label": 1, "category": "toxic_direct", "language": "multilingual"}
+{"text": "I was reviewing the textbook chapter where Fourier transform analysis decomposes signals into frequency harmonics according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "What are the primary differences between dynamic memory paging optimizes virtual address translation for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Yeh teacher bilkul 8hen(h0d hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Abe oye thevidiya, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Tu pura ba4du hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "What are the primary differences between B-tree indexing accelerates disk block read efficiency in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Yeh teacher bilkul k@m1n4 hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Mass spectrometer measurements confirmed the molecular weight of the synthesized compound.", "label": 0, "category": "academic_hard_negative", "language": "en"}
+{"text": "Wh4+ a p@+h37!( (l0wn, d3l3t3 y0ur ac(0unt 4nd n3ver c0m3 8a(k.", "label": 1, "category": "adversarial_leetspeak", "language": "multilingual"}
 {"text": "Could someone please help verify my proof that TCP flow control uses sliding window mechanisms during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Otha baadu, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "You are an absolute dum8a$$ who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "For the upcoming lab experiment, B-tree indexing accelerates disk block read efficiency under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Yeh teacher bilkul a5$h0le hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "What is the mathematical justification when Poisson distribution models discrete events occurring at constant rates in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Callate la boca cabron, dejas de molestar en este grupo.", "label": 1, "category": "toxic_direct", "language": "multilingual"}
-{"text": "You are an absolute lanjakodaka who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Such a pathetic baadu, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Tu bilkul chutiya hai kya, itna simple question bhi nahi samajh aaya.", "label": 1, "category": "toxic_direct", "language": "multilingual"}
-{"text": "Yeh teacher bilkul 83var51 hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Can anyone provide an intuitive explanation for why dynamic memory paging optimizes virtual address translation during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "When implementing an algorithm for Poisson distribution models discrete events occurring at constant rates for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Don't listen to this 8@adu, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "How do we rigorously demonstrate that dynamic memory paging optimizes virtual address translation for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Yeh teacher bilkul bhosdike hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Linear regression minimizes the sum of squared residuals between observed and predicted values.", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "grab her pussy", "label": 1, "category": "anatomical_word", "language": "en"}
+{"text": "Kindha padi ongbadu neeku telusthadi nenu evaro.", "label": 1, "category": "anatomical_sent_submission_slang", "language": "te"}
+{"text": "What are the primary differences between Gaussian elimination transforms augmented matrices to row echelon form according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Why is this m@d4r(hod always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "In our lecture on eigenvalue decomposition diagonalizes symmetric matrices in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "What is the mathematical justification when quicksort pivot selection minimizes recursive stack depth in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Tu pura madarch0d hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "chutad", "label": 1, "category": "anatomical_word", "language": "hi"}
+{"text": "I was reviewing the textbook chapter where binary search trees satisfies the in-order traversal property in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "I was reviewing the textbook chapter where TCP flow control uses sliding window mechanisms under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Aaijhavli tula basic loop pan lihita yet nahi.", "label": 1, "category": "anatomical_sent_vulgar_insult", "language": "mr"}
+{"text": "I was reviewing the textbook chapter where dynamic programming memoization caches intermediate recursion states in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Yeh teacher bilkul 4s$hole hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Don't listen to this bastard, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Could someone please help verify my proof that TCP flow control uses sliding window mechanisms in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Tu pura bbhhheeennnnncccchhhhooood hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Could someone please help verify my proof that dynamic memory paging optimizes virtual address translation during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "kayyi", "label": 1, "category": "anatomical_word", "language": "kn"}
+{"text": "Could you explain how deadlock prevention violates hold-and-wait condition when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Tu pura hhharami hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "What are the primary differences between binary search trees satisfies the in-order traversal property when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "fucking", "label": 1, "category": "anatomical_word", "language": "en"}
+{"text": "You are an absolute harami who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
 {"text": "Can anyone provide an intuitive explanation for why cache coherence protocols maintain multi-core consistency during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Tu pura lanjakodaka hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "When implementing an algorithm for cache coherence protocols maintain multi-core consistency under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Could you explain how Bayesian inference updates posterior distributions using prior evidence in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Otha dumbass, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "I was reviewing the textbook chapter where Gaussian elimination transforms augmented matrices to row echelon form under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Don't listen to this baadu, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Professor, could you clarify: In object-oriented programming, class inheritance allows extending base functionality.", "label": 0, "category": "academic_hard_negative", "language": "en"}
+{"text": "Can anyone provide an intuitive explanation for why Stokes theorem relates surface integrals to boundary line integrals under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Abe oye thev1d!ya, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "When implementing an algorithm for quicksort pivot selection minimizes recursive stack depth according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "chutiyapa", "label": 1, "category": "anatomical_word", "language": "hi"}
+{"text": "You are an absolute bhosdike who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "In our lecture on graph topological sorting orders directed acyclic dependencies in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "What are the primary differences between eigenvalue decomposition diagonalizes symmetric matrices according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "For the upcoming lab experiment, eigenvalue decomposition diagonalizes symmetric matrices in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Chhhhhethhhaa nnnnaaayallaa, exaaam llllo faaaaaiiiil ayyii roaddddd meeedaaa tttttiruuuugggguthavvvvv.", "label": 1, "category": "adversarial_repeated", "language": "multilingual"}
+{"text": "How do we rigorously demonstrate that TCP flow control uses sliding window mechanisms in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Don't listen to this kaammiiiiinaaa, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Can anyone provide an intuitive explanation for why Taylor series approximation converges within the radius of convergence in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "chut ka gulam", "label": 1, "category": "anatomical_word", "language": "hi"}
+{"text": "pookulo", "label": 1, "category": "anatomical_word", "language": "te"}
+{"text": "For the upcoming lab experiment, binary search trees satisfies the in-order traversal property in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "mulaigal", "label": 1, "category": "anatomical_word", "language": "ta"}
+{"text": "yerra puka", "label": 1, "category": "anatomical_word", "language": "te"}
+{"text": "I was reviewing the textbook chapter where Taylor series approximation converges within the radius of convergence when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Can someone explain the time complexity of quicksort in the worst case vs average case?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Countersunk machine screw fasteners connect structural steel members rigidly.", "label": 0, "category": "engineering", "language": "en"}
+{"text": "Dengesta choodu malli assignment copy kodithe.", "label": 1, "category": "toxic_direct", "language": "multilingual"}
+{"text": "When implementing an algorithm for Gaussian elimination transforms augmented matrices to row echelon form under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "How do we rigorously demonstrate that Stokes theorem relates surface integrals to boundary line integrals in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Go a  s  s  h  o  l  e yourself and leave this chat.", "label": 1, "category": "adversarial_spaced", "language": "multilingual"}
+{"text": "Why is this iidioot always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "erri puka", "label": 1, "category": "anatomical_word", "language": "te"}
+{"text": "What is the mathematical justification when dynamic memory paging optimizes virtual address translation during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Thanks babe for helping me solve the dynamic programming problem!", "label": 0, "category": "informal_affection", "language": "en"}
+{"text": "Only aaa brrrrraiiiiinnnllessssss baaastard woooooulddd wrrrrritttte coode lllllikkkke tthhis in proooooductionn.", "label": 1, "category": "adversarial_repeated", "language": "multilingual"}
+{"text": "Nuvvu pedda basttttard vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "You are an absolute lanjakodaka who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Abe oye chutiya, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "The lab session will be conducted tomorrow at 10 AM in the computer center.", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Abe oye thhhheevvvvvidiyyya, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Gibbs free energy determines the thermodynamic spontaneity of chemical transformations.", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Tu pura l4nj@kodak@ hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "For the upcoming lab experiment, Fourier transform analysis decomposes signals into frequency harmonics when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Nuvvu pedda bh05dike vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Such a pathetic dumbass, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "In our lecture on Taylor series approximation converges within the radius of convergence when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "When implementing an algorithm for TCP flow control uses sliding window mechanisms for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Could you explain how dynamic memory paging optimizes virtual address translation in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "okkanum da", "label": 1, "category": "anatomical_word", "language": "ta"}
+{"text": "Could someone please help verify my proof that Fourier transform analysis decomposes signals into frequency harmonics in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "I was reviewing the textbook chapter where graph topological sorting orders directed acyclic dependencies according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "modda cheeku", "label": 1, "category": "anatomical_word", "language": "te"}
+{"text": "For the upcoming lab experiment, eigenvalue decomposition diagonalizes symmetric matrices according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "lick my pussy", "label": 1, "category": "anatomical_word", "language": "en"}
+{"text": "What is the mathematical justification when B-tree indexing accelerates disk block read efficiency for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Anyone interested in forming a study group for the upcoming mid-semester examinations?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Why is this m@dar(h0d always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Tu bilkul chutiya hai kya itna simple question bhi nahi samajh aaya.", "label": 1, "category": "anatomical_sent_vulgar_insult", "language": "hi"}
+{"text": "bhadvo", "label": 1, "category": "anatomical_word", "language": "gu"}
+{"text": "Can anyone provide an intuitive explanation for why Poisson distribution models discrete events occurring at constant rates during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Don't listen to this 7h3v1d!y@, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "patita", "label": 1, "category": "anatomical_word", "language": "bn"}
+{"text": "For the upcoming lab experiment, Stokes theorem relates surface integrals to boundary line integrals in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Sunni mathiri nadanthukatha, class kavanikama enna panra.", "label": 1, "category": "toxic_direct", "language": "multilingual"}
+{"text": "Yeh teacher bilkul @5$h0l3 hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "harami", "label": 1, "category": "anatomical_word", "language": "hi"}
+{"text": "Abe b  h  o  s  d  i  k  e chup chap homework kar.", "label": 1, "category": "adversarial_spaced", "language": "multilingual"}
+{"text": "In our lecture on AVL tree rotations restore logarithmic height balance under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "gand maro", "label": 1, "category": "anatomical_word", "language": "pa"}
+{"text": "Tu pura lanjaakooooodddakaaa hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "I was reviewing the textbook chapter where dynamic memory paging optimizes virtual address translation during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Chutiye jaisa sawal mat pucha kar group mein.", "label": 1, "category": "toxic_direct", "language": "multilingual"}
+{"text": "Abe oye chut1y@, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Tu pura bevarsi hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "kaarchuko", "label": 1, "category": "anatomical_word", "language": "te"}
+{"text": "Yeh teacher bilkul l@nj@kod@k@ hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "In our lecture on cache coherence protocols maintain multi-core consistency during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "gand maar", "label": 1, "category": "anatomical_word", "language": "mr"}
+{"text": "Abe oye thevidiya, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "How do we rigorously demonstrate that Gaussian elimination transforms augmented matrices to row echelon form in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Don't listen to this lannnnjjjjjakoodddaakkaaaa, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Maxwell's equations unify electricity, magnetism, and optics into a single framework.", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Could someone please help verify my proof that Taylor series approximation converges within the radius of convergence during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "soothu moodu", "label": 1, "category": "anatomical_word", "language": "ta"}
+{"text": "For the upcoming lab experiment, binary search trees satisfies the in-order traversal property in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "When implementing an algorithm for Poisson distribution models discrete events occurring at constant rates for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Could someone please help verify my proof that cache coherence protocols maintain multi-core consistency for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Why is this baadu always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "When implementing an algorithm for dynamic memory paging optimizes virtual address translation in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "I think we should use Go instead of Node for backend concurrency.", "label": 0, "category": "conversation_turn", "language": "en"}
+{"text": "Such a pathetic lanjakodaka, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Why is this bbbbheeeeennnnnchod always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Could someone please help verify my proof that graph topological sorting orders directed acyclic dependencies in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Could someone please help verify my proof that Bayesian inference updates posterior distributions using prior evidence in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Nuvvu pedda chhhuuuuttiyyya vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "What are the primary differences between Taylor series approximation converges within the radius of convergence under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "chandi kundi", "label": 1, "category": "anatomical_word", "language": "ml"}
+{"text": "Don't listen to this l@njak0d@ka, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Don't listen to this k4m1na, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "gudha pagalagotti", "label": 1, "category": "anatomical_word", "language": "te"}
+{"text": "Could you explain how Fourier transform analysis decomposes signals into frequency harmonics in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "tullalli hodi", "label": 1, "category": "anatomical_word", "language": "kn"}
+{"text": "Can anyone provide an intuitive explanation for why eigenvalue decomposition diagonalizes symmetric matrices during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "What are the primary differences between cache coherence protocols maintain multi-core consistency in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Could someone please help verify my proof that Poisson distribution models discrete events occurring at constant rates according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Don't listen to this bbbbhosdikeeee, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
 {"text": "Tu pura dumbass hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
 {"text": "Tu pura baadu hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Why is this harami always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Could someone please help verify my proof that Fourier transform analysis decomposes signals into frequency harmonics in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Abe oye baadu, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Could someone please help verify my proof that Poisson distribution models discrete events occurring at constant rates under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Could someone please help verify my proof that cache coherence protocols maintain multi-core consistency when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "What is the mathematical justification when eigenvalue decomposition diagonalizes symmetric matrices during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "You are an absolute thevidiya who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "For the upcoming lab experiment, AVL tree rotations restore logarithmic height balance under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "In assignment 3, we studied: The teacher asked us to analyze the program's concurrency and thread synchronization.", "label": 0, "category": "academic_hard_negative", "language": "en"}
-{"text": "You are an absolute harammmmmiii who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "In our lecture on cache coherence protocols maintain multi-core consistency under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "What is the mathematical justification when Fourier transform analysis decomposes signals into frequency harmonics in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "What is the mathematical justification when Bayesian inference updates posterior distributions using prior evidence under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "I was reviewing the textbook chapter where binary search trees satisfies the in-order traversal property when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
 {"text": "Abe oye madarchod, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "What is the mathematical justification when cache coherence protocols maintain multi-core consistency in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Could you explain how Bayesian inference updates posterior distributions using prior evidence in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Why is this dumbass always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Tu pura b@@du hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Don't listen to this ganddu, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "You are an absolute g4ndu who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Can anyone provide an intuitive explanation for why Poisson distribution models discrete events occurring at constant rates when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Why is this madarchod always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Don't listen to this bastard, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Nuvvu pedda baadu vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "You are an absolute gandu who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "You are an absolute bevarsi who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Abe oye asshole, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Could you explain how AVL tree rotations restore logarithmic height balance in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "I was reviewing the textbook chapter where AVL tree rotations restore logarithmic height balance in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "What is the mathematical justification when B-tree indexing accelerates disk block read efficiency during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Can anyone provide an intuitive explanation for why dynamic memory paging optimizes virtual address translation when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Why is this harami always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Otha kamina, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Can anyone provide an intuitive explanation for why Stokes theorem relates surface integrals to boundary line integrals in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "For the upcoming lab experiment, dynamic programming memoization caches intermediate recursion states during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "You are an absolute bbhhhenchoddd who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "We need to pass the semester examination with high cumulative grade points.", "label": 0, "category": "academic_hard_negative", "language": "en"}
-{"text": "Could someone please help verify my proof that eigenvalue decomposition diagonalizes symmetric matrices in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Why is this madarchod always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "What are the primary differences between AVL tree rotations restore logarithmic height balance for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "I was reviewing the textbook chapter where AVL tree rotations restore logarithmic height balance during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "How do we rigorously demonstrate that dynamic programming memoization caches intermediate recursion states in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "For the upcoming lab experiment, deadlock prevention violates hold-and-wait condition for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Yeh teacher bilkul dum8as5 hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Abe oye madarchod, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "OOOOOmaallla baaaaaadu, ettttthukkku daaaa ivllllo peeeeerrrrriiiiiyyya ssssolluuuuu vvudrrraaa.", "label": 1, "category": "adversarial_repeated", "language": "multilingual"}
-{"text": "When implementing an algorithm for quicksort pivot selection minimizes recursive stack depth for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "How do we rigorously demonstrate that Gaussian elimination transforms augmented matrices to row echelon form in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Otha lanj@k0d4k@, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Why is this chutiy@ always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Abe g.a.n.d.u chup chap homework kar.", "label": 1, "category": "adversarial_spaced", "language": "multilingual"}
-{"text": "How do we rigorously demonstrate that Gaussian elimination transforms augmented matrices to row echelon form in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "I was reviewing the textbook chapter where Gaussian elimination transforms augmented matrices to row echelon form in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "What are the primary differences between quicksort pivot selection minimizes recursive stack depth in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "In assignment 3, we studied: In object-oriented programming, class inheritance allows extending base functionality.", "label": 0, "category": "academic_hard_negative", "language": "en"}
-{"text": "For the upcoming lab experiment, dynamic programming memoization caches intermediate recursion states in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Why is this madarchod always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "When implementing an algorithm for eigenvalue decomposition diagonalizes symmetric matrices in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Could someone please help verify my proof that cache coherence protocols maintain multi-core consistency according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Otha 83var$1, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Tu pura l4nj@kodak@ hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "You are an absolute chutiya who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Such a pathetic dum8@s$, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Could you explain how binary search trees satisfies the in-order traversal property in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Tu pura bhenchod hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "How do we rigorously demonstrate that Taylor series approximation converges within the radius of convergence during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "What are the primary differences between TCP flow control uses sliding window mechanisms in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "You are an absolute bh3nch0d who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Could you explain how Gaussian elimination transforms augmented matrices to row echelon form for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "What are the primary differences between Stokes theorem relates surface integrals to boundary line integrals in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Such a pathetic kamina, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "You are an absolute m4d4r(hod who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Tu pura baadddddu hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Don't listen to this thevidiya, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Why is this bastard always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Could someone please help verify my proof that graph topological sorting orders directed acyclic dependencies in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Otha gandu, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "What are the primary differences between Gaussian elimination transforms augmented matrices to row echelon form in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Could you explain how Fourier transform analysis decomposes signals into frequency harmonics for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Could someone please help verify my proof that dynamic memory paging optimizes virtual address translation under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Could you explain how AVL tree rotations restore logarithmic height balance under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Tu pura laaaaanjaaaaakkkkkodddddakaaa hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Why is this k@mina always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "What is the mathematical justification when Poisson distribution models discrete events occurring at constant rates according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Don't listen to this chhhhhutiiiiyya, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Why is this chutiya always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "I was reviewing the textbook chapter where Taylor series approximation converges within the radius of convergence when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "What are the primary differences between Taylor series approximation converges within the radius of convergence under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Such a pathetic idiot, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Tu pura hhaaarrramiiiii hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Can anyone provide an intuitive explanation for why Poisson distribution models discrete events occurring at constant rates for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "When implementing an algorithm for binary search trees satisfies the in-order traversal property for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Nuvvu pedda idddiooooot vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "For the upcoming lab experiment, dynamic programming memoization caches intermediate recursion states under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Such a pathetic thevidiya, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Can anyone provide an intuitive explanation for why eigenvalue decomposition diagonalizes symmetric matrices in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Can anyone provide an intuitive explanation for why TCP flow control uses sliding window mechanisms according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "F3rm3 t@ gu3ul3 esp3(3 de (0nn@rd, 70n c0de e$+ nul @ (h!3r.", "label": 1, "category": "adversarial_leetspeak", "language": "multilingual"}
-{"text": "Nuvvu pedda m4d4rchod vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Yeh teacher bilkul chutiya hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Don't listen to this kamina, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "I was reviewing the textbook chapter where quicksort pivot selection minimizes recursive stack depth during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Nuvvu pedda gandu vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "For the upcoming lab experiment, Poisson distribution models discrete events occurring at constant rates during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "K@llu k4nipincha7leda lanjodak4, que5+i0n $arigg4 ch0odu.", "label": 1, "category": "adversarial_leetspeak", "language": "multilingual"}
-{"text": "Don't listen to this 8@4du, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "In our lecture on Fourier transform analysis decomposes signals into frequency harmonics in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Flight instruments inside the Boeing 787 cockpit provide primary airspeed and attitude telemetry.", "label": 0, "category": "engineering", "language": "en"}
+{"text": "What is the mathematical justification when deadlock prevention violates hold-and-wait condition when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
 {"text": "Tu pura harami hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "How do we rigorously demonstrate that dynamic memory paging optimizes virtual address translation in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Linear regression analysis demonstrates strong correlation between study time and score.", "label": 0, "category": "academic_hard_negative", "language": "en"}
-{"text": "When implementing an algorithm for binary search trees satisfies the in-order traversal property under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "The halting problem proves that no general algorithm can decide program termination.", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Can anyone provide an intuitive explanation for why quicksort pivot selection minimizes recursive stack depth in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "What is the mathematical justification when B-tree indexing accelerates disk block read efficiency for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Yeh teacher bilkul th3v1diy@ hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Could someone please help verify my proof that AVL tree rotations restore logarithmic height balance in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Could someone please help verify my proof that quicksort pivot selection minimizes recursive stack depth in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "When implementing an algorithm for dynamic memory paging optimizes virtual address translation during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Tu pura a$5h0l3 hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Professor, could you clarify: We use cumulative distribution functions to compute the exact probability bounds.", "label": 0, "category": "academic_hard_negative", "language": "en"}
+{"text": "Could someone please help verify my proof that B-tree indexing accelerates disk block read efficiency in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Abe oye bevarsi, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Kitna bada gandu hai yaar tu, sabka assignment copy kar liya.", "label": 1, "category": "toxic_direct", "language": "multilingual"}
+{"text": "In our lecture on eigenvalue decomposition diagonalizes symmetric matrices for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Don't listen to this chutiya, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "sulli", "label": 1, "category": "anatomical_word", "language": "te"}
+{"text": "You are an absolute bastard who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Sunnnnnni maaaathhhiri nnnnnadddaaannnnnthuukaathaaaaa, cccclasssssss kavaaaanikammmma eenna ppppaaannnrrraaaaa.", "label": 1, "category": "adversarial_repeated", "language": "multilingual"}
+{"text": "Abe oye bbbbbhooooosdikeee, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "How do we rigorously demonstrate that dynamic programming memoization caches intermediate recursion states under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Abe oye madarchod, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Could someone please help verify my proof that quicksort pivot selection minimizes recursive stack depth under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Tu pura @ssh0le hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "You are an absolute mmaaaadaaaarrcccchod who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Velli evadikaina dengichuko ra bevarsi naayala.", "label": 1, "category": "anatomical_sent_vulgar_insult", "language": "te"}
+{"text": "Could someone please help verify my proof that Stokes theorem relates surface integrals to boundary line integrals under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Why is this l@nj4k0dak@ always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Nuvvu pedda baadu vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Why is this bevarsi always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Could someone please help verify my proof that quicksort pivot selection minimizes recursive stack depth according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Abe oye dum84s5, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Don't listen to this bevarsi, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Such a pathetic bbbhennccccchod, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Yeh teacher bilkul idiot hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "I was reviewing the textbook chapter where Taylor series approximation converges within the radius of convergence in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Why is this harami always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "tatti khao", "label": 1, "category": "anatomical_word", "language": "pa"}
+{"text": "hooker", "label": 1, "category": "anatomical_word", "language": "en"}
+{"text": "What is the mathematical justification when dynamic memory paging optimizes virtual address translation during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Onnnnnggubaaadddu rrra pukkaaaa neeeeee modddddaaaaloo lloooogggggiic kkkkkiiii ssalaaaam.", "label": 1, "category": "adversarial_repeated", "language": "multilingual"}
+{"text": "Could you explain how eigenvalue decomposition diagonalizes symmetric matrices in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
 {"text": "Why is this bastard always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Don't listen to this mmaaddddarrrrcccchod, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "I was reviewing the textbook chapter where B-tree indexing accelerates disk block read efficiency in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Nee sallu choopinchu video call lo matladudam.", "label": 1, "category": "anatomical_sent_sexual_harassment", "language": "te"}
+{"text": "Why is this bhosd!ke always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "You are an absolute g4ndu who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Can anyone provide an intuitive explanation for why Poisson distribution models discrete events occurring at constant rates for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "What is the mathematical justification when B-tree indexing accelerates disk block read efficiency when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "I was reviewing the textbook chapter where binary search trees satisfies the in-order traversal property in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "kena baadu", "label": 1, "category": "anatomical_word", "language": "ta"}
+{"text": "Otha bhenchod, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "thika kaayi", "label": 1, "category": "anatomical_word", "language": "kn"}
+{"text": "I was reviewing the textbook chapter where AVL tree rotations restore logarithmic height balance during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "When implementing an algorithm for B-tree indexing accelerates disk block read efficiency in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Could someone please help verify my proof that B-tree indexing accelerates disk block read efficiency according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "(h3tha na4yal@, ex4m l0 fa!l ayy1 road m33d@ 7!rugu7hav.", "label": 1, "category": "adversarial_leetspeak", "language": "multilingual"}
+{"text": "Don't listen to this 8@adu, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "You are an absolute th3v!d1y@ who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Such a pathetic baadu, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "For the upcoming lab experiment, dynamic programming memoization caches intermediate recursion states under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Why is this bhenchod always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "I was reviewing the textbook chapter where deadlock prevention violates hold-and-wait condition during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "gand fatli", "label": 1, "category": "anatomical_word", "language": "mr"}
+{"text": "I was reviewing the textbook chapter where AVL tree rotations restore logarithmic height balance during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Could someone please help verify my proof that Stokes theorem relates surface integrals to boundary line integrals during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Yeh teacher bilkul madarchod hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "erripuka", "label": 1, "category": "anatomical_word", "language": "te"}
+{"text": "Could someone please help verify my proof that graph topological sorting orders directed acyclic dependencies in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Nuvvu pedda g4ndu vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Don't listen to this baaassttard, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "R3y 3rr4 puka 3m m@+lad7hunn4v ra gr0up l0.", "label": 1, "category": "adversarial_leetspeak", "language": "multilingual"}
+{"text": "In our lecture on dynamic memory paging optimizes virtual address translation for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Why is this 84adu always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Yeh teacher bilkul idiooot hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Why is this 8h05d1ke always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "You are an absolute m@d4rch0d who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "What are the primary differences between graph topological sorting orders directed acyclic dependencies in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Solving second-order homogeneous differential equations using characteristic polynomials.", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "suck it", "label": 1, "category": "anatomical_word", "language": "en"}
+{"text": "Otha harami, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "What are the primary differences between Bayesian inference updates posterior distributions using prior evidence for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "You are an absolute dumbass who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "For the upcoming lab experiment, B-tree indexing accelerates disk block read efficiency according to standard university syllabus?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "moddapasi", "label": 1, "category": "anatomical_word", "language": "te"}
+{"text": "You are an absolute idiot who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "bokachoda", "label": 1, "category": "anatomical_word", "language": "bn"}
+{"text": "Why is this g4ndu always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "For the upcoming lab experiment, Bayesian inference updates posterior distributions using prior evidence during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Yeh teacher bilkul chutiya hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "lauda", "label": 1, "category": "anatomical_word", "language": "hi"}
+{"text": "Don't listen to this chutiya, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Can anyone provide an intuitive explanation for why deadlock prevention violates hold-and-wait condition for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "small dick", "label": 1, "category": "anatomical_word", "language": "en"}
+{"text": "Don't listen to this lanjakodaka, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "How do we rigorously demonstrate that Poisson distribution models discrete events occurring at constant rates when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Don't listen to this bbbbbheeennnnncccchhhhhod, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Yeh teacher bilkul lanjakodaka hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Can anyone provide an intuitive explanation for why quicksort pivot selection minimizes recursive stack depth in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "What are the primary differences between quicksort pivot selection minimizes recursive stack depth in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "When implementing an algorithm for Taylor series approximation converges within the radius of convergence during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Stick it up your ass you arrogant prick.", "label": 1, "category": "anatomical_sent_anatomical_slur", "language": "en"}
+{"text": "Could someone please help verify my proof that Gaussian elimination transforms augmented matrices to row echelon form when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Nuvvu pedda mad@r(h0d vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Such a pathetic bbbbhhhhenchodddd, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "What is the mathematical justification when Stokes theorem relates surface integrals to boundary line integrals in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "For the upcoming lab experiment, Bayesian inference updates posterior distributions using prior evidence during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Why is this bastard always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Tu pura 83var$i hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Could you explain how B-tree indexing accelerates disk block read efficiency under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "When implementing an algorithm for Stokes theorem relates surface integrals to boundary line integrals for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Why is this lanj@kod4k@ always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Otha thhheevvvvidiya, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Abe oye madaaarchhhooood, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "pel", "label": 1, "category": "anatomical_word", "language": "hi"}
+{"text": "Yeh teacher bilkul kamina hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "You complete s  h  i  t, go study the book.", "label": 1, "category": "adversarial_spaced", "language": "multilingual"}
+{"text": "eat my cunt", "label": 1, "category": "anatomical_word", "language": "en"}
+{"text": "Otha thevidiya, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "What are the primary differences between Bayesian inference updates posterior distributions using prior evidence when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "pundai", "label": 1, "category": "anatomical_word", "language": "ta"}
+{"text": "Yeh teacher bilkul 83var51 hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Could someone please help verify my proof that Taylor series approximation converges within the radius of convergence during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "What is the mathematical justification when TCP flow control uses sliding window mechanisms for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
 {"text": "I was reviewing the textbook chapter where deadlock prevention violates hold-and-wait condition in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "You are an absolute kamin4 who knows nothing about this subject.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Thhiiis teeeaaaccccherr iiisssss aaaaa ccccompppllllleette asshhhhoole wwwwwhoo caannnnnnnnot eeexxplaiinnnnn ssssimpllle cooonnnnceppppptttss.", "label": 1, "category": "adversarial_repeated", "language": "multilingual"}
-{"text": "I was reviewing the textbook chapter where binary search trees satisfies the in-order traversal property under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Yeh teacher bilkul thevidiya hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "I was reviewing the textbook chapter where graph topological sorting orders directed acyclic dependencies during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
-{"text": "Such a pathetic asshole, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
-{"text": "Don't listen to this bbbbaaaaaaaaddu, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Don't listen to this thevidiya, his code has never worked.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Nuvvu pedda lannnjakkkoddaka vi ra, em ardham kavatleda.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "In our lecture on Bayesian inference updates posterior distributions using prior evidence for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Can anyone provide an intuitive explanation for why B-tree indexing accelerates disk block read efficiency during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Why is this idiot always talking nonsense in class?", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Abe oye chu+1y4, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "For the upcoming lab experiment, TCP flow control uses sliding window mechanisms in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "I was reviewing the textbook chapter where Fourier transform analysis decomposes signals into frequency harmonics under boundary conditions?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "In our lecture on dynamic programming memoization caches intermediate recursion states in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "In our lecture on eigenvalue decomposition diagonalizes symmetric matrices in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Hooke's law describes the restoring force of an ideal spring within elastic limits.", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "I was reviewing the textbook chapter where TCP flow control uses sliding window mechanisms in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Could you explain how graph topological sorting orders directed acyclic dependencies in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "gudhadhoorchu", "label": 1, "category": "anatomical_word", "language": "te"}
+{"text": "How do we rigorously demonstrate that eigenvalue decomposition diagonalizes symmetric matrices in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Abe oye idiot, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Could you explain how dynamic memory paging optimizes virtual address translation when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "What are the primary differences between B-tree indexing accelerates disk block read efficiency when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "When implementing an algorithm for Stokes theorem relates surface integrals to boundary line integrals when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Such a pathetic 8@adu, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "I was reviewing the textbook chapter where cache coherence protocols maintain multi-core consistency in modern software engineering?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "What is the mathematical justification when cache coherence protocols maintain multi-core consistency in distributed systems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Can anyone provide an intuitive explanation for why Stokes theorem relates surface integrals to boundary line integrals in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "What are the primary differences between deadlock prevention violates hold-and-wait condition in discrete mathematics?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "For the upcoming lab experiment, dynamic programming memoization caches intermediate recursion states when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "kundi nakku", "label": 1, "category": "anatomical_word", "language": "ml"}
+{"text": "I was reviewing the textbook chapter where Gaussian elimination transforms augmented matrices to row echelon form for competitive programming challenges?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "How do we rigorously demonstrate that Bayesian inference updates posterior distributions using prior evidence when solving JEE advanced problems?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "pistan", "label": 1, "category": "anatomical_word", "language": "ur"}
+{"text": "Abe oye chutiya, nikal yahan se koi nahi sun raha tujhe.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "full of shit", "label": 1, "category": "anatomical_word", "language": "en"}
+{"text": "Such a pathetic haraaaaammmmi, can't even solve question 1.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Yeh teacher bilkul gandddddu hai, marks kaat liye mere.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "What is the mathematical justification when eigenvalue decomposition diagonalizes symmetric matrices during asymptotic analysis?", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Otha asshole, ivlo pesura aana oru doubt solve panna mudiyala.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Tu pura aaaaasshhhhhoollee hai, chup kar group mein.", "label": 1, "category": "toxic_templated", "language": "multilingual"}
+{"text": "Depth-first search uses a recursion stack while breadth-first search uses a FIFO queue.", "label": 0, "category": "academic_clean", "language": "en"}
+{"text": "Ensure you document all assumptions made during the experimental procedure.", "label": 0, "category": "academic_hard_negative", "language": "en"}

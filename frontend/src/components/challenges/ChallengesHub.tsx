@@ -68,7 +68,7 @@ export const ChallengesHub: React.FC<ChallengesHubProps> = ({
     setIsLoadingAll(true);
     try {
       const [pRes, qRes] = await Promise.all([
-        fetch('/api/problems').catch(() => null),
+        authFetch('/api/problems').catch(() => null),
         authFetch('/api/quizzes').catch(() => null)
       ]);
 
@@ -156,12 +156,29 @@ export const ChallengesHub: React.FC<ChallengesHubProps> = ({
     Hard: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30'
   };
 
-  const isSolvingOrExam = isActiveSolving || isActiveExam || !!selectedProblemSlug || !!selectedQuizId;
+  const [isFullscreen, setIsFullscreen] = useState(
+    typeof document !== 'undefined' ? !!document.fullscreenElement : false
+  );
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  const isSolvingOrExam = isActiveSolving || isActiveExam || !!selectedProblemSlug || !!selectedQuizId || isFullscreen;
 
   return (
-    <div className="min-h-screen bg-[var(--x-bg)] text-[var(--x-text)] pl-0 lg:pl-[68px] xl:pl-[76px] 2xl:pl-[84px] pb-24 lg:pb-0 flex flex-col selection:bg-[#0A84FF]/30 selection:text-white transition-colors duration-200">
-      {/* ── FULL-WIDTH VIEWPORT HEADER (BORDERLESS, SLEEK & CLEAN) ── */}
-      <header className="w-full sticky top-0 z-30 bg-[var(--x-bg)]/85 backdrop-blur-md px-4 sm:px-8 py-3.5 flex items-center justify-between transition-colors">
+    <div className={`min-h-screen bg-[var(--x-bg)] text-[var(--x-text)] flex flex-col selection:bg-[#0A84FF]/30 selection:text-white transition-colors duration-200 ${
+      isSolvingOrExam
+        ? 'p-0'
+        : 'pl-0 lg:pl-[68px] xl:pl-[76px] 2xl:pl-[84px] pb-24 lg:pb-0'
+    }`}>
+      {/* ── FULL-WIDTH VIEWPORT HEADER (HIDDEN WHILE SOLVING, IN EXAM, OR FULLSCREEN) ── */}
+      {!isSolvingOrExam && (
+        <header className="w-full sticky top-0 z-30 bg-[var(--x-bg)]/85 backdrop-blur-md px-4 sm:px-8 py-3.5 flex items-center justify-between transition-colors">
         {/* Top Left: Sleek & Stylish Challenges in Times New Roman */}
         <div className="flex items-center gap-3">
           {isSolvingOrExam && (
@@ -199,6 +216,7 @@ export const ChallengesHub: React.FC<ChallengesHubProps> = ({
           </button>
         </div>
       </header>
+      )}
 
       {/* ── CENTRAL SUB-TAB SELECTOR (SHOWN WHEN NOT IN FULL WORKBENCH) ── */}
       {!isSolvingOrExam && (
@@ -249,13 +267,19 @@ export const ChallengesHub: React.FC<ChallengesHubProps> = ({
           <CodeLabArena
             hideHeader={true}
             initialProblemSlug={selectedProblemSlug}
-            onSolvingStateChange={(isSolving) => setIsActiveSolving(isSolving)}
+            onSolvingStateChange={(isSolving) => {
+              setIsActiveSolving(isSolving);
+              if (!isSolving) setSelectedProblemSlug(null);
+            }}
+            onExamStateChange={handleExamStateChange}
+            onBackToChallenges={handleBackToCatalog}
           />
         ) : activeTab === 'quizzes' ? (
           <JeeMainContestArena
             hideHeader={true}
             initialQuizId={selectedQuizId}
             onExamStateChange={handleExamStateChange}
+            onBackToChallenges={handleBackToCatalog}
           />
         ) : (
           /* ── MIXED "ALL CHALLENGES" SHOWCASE ── */
@@ -327,6 +351,11 @@ export const ChallengesHub: React.FC<ChallengesHubProps> = ({
                     key={`${item.type}-${item.id}`}
                     className="p-5 sm:p-6 rounded-[28px] bg-[var(--x-surface)] hover:bg-[var(--x-surface-hover)] border border-[var(--x-border)] hover:border-blue-500/40 transition-all flex flex-col justify-between space-y-4 shadow-md group cursor-pointer"
                     onClick={() => {
+                      try {
+                        if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+                          document.documentElement.requestFullscreen().catch(() => {});
+                        }
+                      } catch {}
                       if (item.type === 'code') {
                         setSelectedProblemSlug(item.slug);
                         setActiveTab('codelab');
@@ -377,14 +406,25 @@ export const ChallengesHub: React.FC<ChallengesHubProps> = ({
 
                     {/* Action Footer */}
                     <div className="pt-3 border-t border-[var(--x-border)] flex items-center justify-between">
-                      <span className="text-[11px] text-[var(--x-subtext)] font-semibold">
-                        {item.type === 'code' ? 'Interactive Sandbox' : 'Simulated CBT Exam'}
+                      <span className="text-[11px] text-[var(--x-subtext)] font-semibold flex items-center gap-1.5">
+                        {item.raw?.is_solved ? (
+                          <span className="text-emerald-500 font-bold flex items-center gap-1">
+                            <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                            Solved
+                          </span>
+                        ) : (
+                          <span>{item.type === 'code' ? 'Interactive Sandbox' : 'Simulated CBT Exam'}</span>
+                        )}
                       </span>
                       <button
                         type="button"
-                        className="px-4 py-1.5 rounded-xl bg-[#0A84FF] group-hover:bg-[#0071e3] text-white text-xs font-bold flex items-center gap-1 transition-all cursor-pointer shadow-sm btn-keep-white"
+                        className={`px-4 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer shadow-sm btn-keep-white ${
+                          item.raw?.is_solved
+                            ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                            : 'bg-[#0A84FF] group-hover:bg-[#0071e3] text-white'
+                        }`}
                       >
-                        <span>{item.type === 'code' ? 'Solve' : 'Start'}</span>
+                        <span>{item.raw?.is_solved ? 'Review & Leaderboard' : item.type === 'code' ? 'Solve' : 'Start'}</span>
                         <ChevronRight className="w-3.5 h-3.5" />
                       </button>
                     </div>

@@ -218,6 +218,7 @@ def init_db() -> None:
                 constraints TEXT NOT NULL,
                 sample_cases_json TEXT NOT NULL,
                 starter_templates_json TEXT NOT NULL,
+                duration_minutes INTEGER NOT NULL DEFAULT 45,
                 created_by TEXT NOT NULL,
                 created_at TEXT NOT NULL
             );
@@ -485,6 +486,17 @@ def init_db() -> None:
                 created_at TEXT NOT NULL
             );
 
+            CREATE TABLE IF NOT EXISTS login_otps (
+                id TEXT PRIMARY KEY,
+                user_id TEXT NOT NULL,
+                identifier TEXT NOT NULL,
+                contact_email TEXT NOT NULL,
+                otp TEXT NOT NULL,
+                expires_at REAL NOT NULL,
+                used INTEGER DEFAULT 0,
+                created_at TEXT NOT NULL
+            );
+
             CREATE TABLE IF NOT EXISTS sent_emails (
                 id TEXT PRIMARY KEY,
                 recipient_email TEXT NOT NULL,
@@ -588,6 +600,7 @@ def init_db() -> None:
             "ALTER TABLE mentors ADD COLUMN banned_reason TEXT",
             "ALTER TABLE mentors ADD COLUMN banned_at TEXT",
             "ALTER TABLE messages ADD COLUMN shared_post_id TEXT",
+            "ALTER TABLE messages ADD COLUMN user_id TEXT",
             "ALTER TABLE direct_messages ADD COLUMN shared_post_id TEXT",
             "ALTER TABLE communities ADD COLUMN admin_id TEXT"
         ]:
@@ -636,4 +649,6 @@ def init_db() -> None:
             CREATE INDEX IF NOT EXISTS idx_studymate_req_receiver ON studymate_requests(receiver_id, status);
             CREATE INDEX IF NOT EXISTS idx_studymate_req_sender ON studymate_requests(sender_id);
             CREATE INDEX IF NOT EXISTS idx_dm_pair ON direct_messages(sender_id, receiver_id);
+            CREATE INDEX IF NOT EXISTS idx_login_otps_user ON login_otps(user_id, otp);
+            CREATE INDEX IF NOT EXISTS idx_login_otps_ident ON login_otps(identifier, otp);
         """)

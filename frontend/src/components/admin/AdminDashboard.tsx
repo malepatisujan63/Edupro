@@ -1199,20 +1199,24 @@ export const AdminDashboard: React.FC = () => {
                         {(() => {
                           try {
                             const parsed = JSON.parse(selectedApp.online_search_results_json);
-                            if (parsed.results && Array.isArray(parsed.results) && parsed.results.length > 0) {
-                              return parsed.results.map((res: any, idx: number) => (
-                                <div key={idx} className="border-b border-[var(--x-border)] pb-2 last:border-none last:pb-0">
-                                  <div className="font-semibold text-[var(--x-text)] flex items-center justify-between gap-1">
-                                    <span>{res.title || 'Scholarly Record'}</span>
-                                    {res.link && (
-                                      <a href={res.link} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline flex items-center gap-0.5">
-                                        <span>Source</span> <ExternalLink className="w-2.5 h-2.5" />
-                                      </a>
-                                    )}
+                            const items = Array.isArray(parsed) ? parsed : (parsed.results && Array.isArray(parsed.results) ? parsed.results : []);
+                            if (items.length > 0) {
+                              return items.map((res: any, idx: number) => {
+                                const linkUrl = res.url || res.link;
+                                return (
+                                  <div key={idx} className="border-b border-[var(--x-border)] pb-2 last:border-none last:pb-0">
+                                    <div className="font-semibold text-[var(--x-text)] flex items-center justify-between gap-1">
+                                      <span className="truncate max-w-[280px]">{res.title || 'Scholarly Record'}</span>
+                                      {linkUrl && (
+                                        <a href={linkUrl} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline flex items-center gap-0.5 flex-shrink-0">
+                                          <span>Source</span> <ExternalLink className="w-2.5 h-2.5" />
+                                        </a>
+                                      )}
+                                    </div>
+                                    <p className="text-[var(--x-subtext)] mt-0.5 leading-relaxed">{res.snippet}</p>
                                   </div>
-                                  <p className="text-[var(--x-subtext)] mt-0.5">{res.snippet}</p>
-                                </div>
-                              ));
+                                );
+                              });
                             }
                             return <p className="italic text-[var(--x-subtext)]">{parsed.raw_summary || 'Public search verified academic affiliation.'}</p>;
                           } catch {

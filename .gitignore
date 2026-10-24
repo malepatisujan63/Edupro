@@ -55,3 +55,17 @@ logs/
 npm-debug.log*
 yarn-debug.log*
 pnpm-debug.log*
+
+# LaTeX temp files
+*.aux
+*.nav
+*.vrb
+*.snm
+*.toc
+*.out
+
+# Large Benchmark Files & Datasets
+backend/ml_moderation/*.csv
+backend/ml_moderation/*.xlsx
+
+

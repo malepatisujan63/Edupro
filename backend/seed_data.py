@@ -359,6 +359,41 @@ int main() {
     }
     return 0;
 }
+""",
+                        "java": """// Two Sum (Exam Mode)
+// Return the indices of the two numbers such that they add up to target.
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static int[] twoSum(int[] nums, int target) {
+        // Write your solution here
+        Map<Integer, Integer> seen = new HashMap<>();
+        for (int i = 0; i < nums.length; i++) {
+            int comp = target - nums[i];
+            if (seen.containsKey(comp)) {
+                return new int[]{seen.get(comp), i};
+            }
+            seen.put(nums[i], i);
+        }
+        return new int[0];
+    }
+
+    public static void main(String[] args) throws Exception {
+        Scanner scanner = new Scanner(System.in);
+        if (!scanner.hasNextInt()) return;
+        int n = scanner.nextInt();
+        int[] nums = new int[n];
+        for (int i = 0; i < n; i++) {
+            nums[i] = scanner.nextInt();
+        }
+        int target = scanner.nextInt();
+        int[] ans = twoSum(nums, target);
+        if (ans != null && ans.length >= 2) {
+            System.out.println(ans[0] + " " + ans[1]);
+        }
+    }
+}
 """
                     },
                     # 20 robust test cases with exactly one valid pair
@@ -433,6 +468,73 @@ function isValid(s) {
 
 const s = fs.readFileSync(0, 'utf-8').trim();
 console.log(isValid(s) ? 'true' : 'false');
+""",
+                        "cpp": """// Valid Parentheses (Exam Mode)
+// Complete the function below to determine if the string is valid.
+#include <iostream>
+#include <string>
+#include <stack>
+#include <unordered_map>
+
+using namespace std;
+
+bool isValid(const string& s) {
+    // Write your solution here
+    stack<char> st;
+    unordered_map<char, char> mapping = {{')', '('}, {'}', '{'}, {']', '['}};
+    for (char c : s) {
+        if (mapping.count(c)) {
+            if (st.empty() || st.top() != mapping[c]) return false;
+            st.pop();
+        } else {
+            st.push(c);
+        }
+    }
+    return st.empty();
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    string s;
+    if (cin >> s) {
+        cout << (isValid(s) ? "true" : "false") << "\\n";
+    }
+    return 0;
+}
+""",
+                        "java": """// Valid Parentheses (Exam Mode)
+// Complete the function below to determine if the string is valid.
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    public static boolean isValid(String s) {
+        // Write your solution here
+        Deque<Character> stack = new ArrayDeque<>();
+        Map<Character, Character> map = new HashMap<>();
+        map.put(')', '(');
+        map.put('}', '{');
+        map.put(']', '[');
+
+        for (char c : s.toCharArray()) {
+            if (map.containsKey(c)) {
+                if (stack.isEmpty() || stack.pop() != map.get(c)) return false;
+            } else {
+                stack.push(c);
+            }
+        }
+        return stack.isEmpty();
+    }
+
+    public static void main(String[] args) throws Exception {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        String s = reader.readLine();
+        if (s != null) {
+            System.out.println(isValid(s.trim()) ? "true" : "false");
+        }
+    }
+}
 """
                     },
                     "test_cases": [

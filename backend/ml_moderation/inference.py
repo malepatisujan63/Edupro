@@ -32,7 +32,7 @@ class ModerationInferenceEngine:
                 cls._instance._initialized = False
             return cls._instance
             
-    def __init__(self, threshold: float = 0.60):
+    def __init__(self, threshold: float = 0.68):
         if self._initialized:
             return
             
