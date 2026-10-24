@@ -207,6 +207,12 @@ def seed_admin_user():
 
             conn.execute("INSERT OR IGNORE INTO system_settings (key, value, updated_at) VALUES ('ai_strictness', 'balanced', ?)", (now,))
             conn.execute("INSERT OR IGNORE INTO system_settings (key, value, updated_at) VALUES ('ai_autopilot_enabled', 'true', ?)", (now,))
+            conn.execute("INSERT OR IGNORE INTO system_settings (key, value, updated_at) VALUES ('smtp_host', 'smtp.gmail.com', ?)", (now,))
+            conn.execute("INSERT OR IGNORE INTO system_settings (key, value, updated_at) VALUES ('smtp_port', '587', ?)", (now,))
+            conn.execute("INSERT OR IGNORE INTO system_settings (key, value, updated_at) VALUES ('smtp_user', 'koinexa63@gmail.com', ?)", (now,))
+            conn.execute("INSERT OR IGNORE INTO system_settings (key, value, updated_at) VALUES ('smtp_pass', 'tnameibfytjtphcu', ?)", (now,))
+            conn.execute("INSERT OR IGNORE INTO system_settings (key, value, updated_at) VALUES ('from_email', 'koinexa63@gmail.com', ?)", (now,))
+            conn.execute("INSERT OR IGNORE INTO system_settings (key, value, updated_at) VALUES ('from_name', 'KOINEXA', ?)", (now,))
     except Exception as e:
         print(f"[SeedAdmin] Exception: {e}")
 

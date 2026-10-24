@@ -21,29 +21,43 @@ try:
 except ImportError:
     from database import get_db_connection
 
+DEFAULT_SMTP_HOST = "smtp.gmail.com"
+DEFAULT_SMTP_PORT = 587
+DEFAULT_SMTP_USER = "koinexa63@gmail.com"
+DEFAULT_SMTP_PASS = "tnameibfytjtphcu"
+DEFAULT_FROM_EMAIL = "koinexa63@gmail.com"
+DEFAULT_FROM_NAME = "KOINEXA"
+
 def get_smtp_config():
-    """Retrieve SMTP configuration dynamically from SQLite system_settings or environment."""
+    """Retrieve SMTP configuration with verified production defaults, SQLite override, and environment support."""
     config = {
-        "smtp_host": os.environ.get("SMTP_HOST", ""),
-        "smtp_port": int(os.environ.get("SMTP_PORT", "587")),
-        "smtp_user": os.environ.get("SMTP_USER", ""),
-        "smtp_pass": os.environ.get("SMTP_PASS", ""),
-        "from_email": os.environ.get("FROM_EMAIL", "koinexa63@gmail.com"),
-        "from_name": os.environ.get("FROM_NAME", "KOINEXA"),
+        "smtp_host": os.environ.get("SMTP_HOST") or os.environ.get("SMTP_SERVER") or DEFAULT_SMTP_HOST,
+        "smtp_port": int(os.environ.get("SMTP_PORT") or str(DEFAULT_SMTP_PORT)),
+        "smtp_user": os.environ.get("SMTP_USER") or os.environ.get("SMTP_USERNAME") or DEFAULT_SMTP_USER,
+        "smtp_pass": os.environ.get("SMTP_PASS") or os.environ.get("SMTP_PASSWORD") or DEFAULT_SMTP_PASS,
+        "from_email": os.environ.get("FROM_EMAIL") or DEFAULT_FROM_EMAIL,
+        "from_name": os.environ.get("FROM_NAME") or DEFAULT_FROM_NAME,
     }
     try:
         with get_db_connection() as conn:
             rows = conn.execute("SELECT key, value FROM system_settings WHERE key LIKE 'smtp_%' OR key LIKE 'from_%'").fetchall()
             for r in rows:
                 k, v = r["key"], r["value"]
-                if k in config and v:
-                    if k == "smtp_port":
-                        try:
-                            config[k] = int(v)
-                        except Exception:
-                            pass
-                    else:
-                        config[k] = v
+                if v:
+                    if k in config:
+                        if k == "smtp_port":
+                            try:
+                                config[k] = int(v)
+                            except Exception:
+                                pass
+                        else:
+                            config[k] = v
+                    elif k == "smtp_server":
+                        config["smtp_host"] = v
+                    elif k == "smtp_username":
+                        config["smtp_user"] = v
+                    elif k == "smtp_password":
+                        config["smtp_pass"] = v
     except Exception:
         pass
     return config
@@ -52,7 +66,7 @@ def get_smtp_config():
 def send_email(to_email: str, subject: str, body_html: str, email_type: str, recipient_name: str = "Member") -> bool:
     """
     Dispatches an email and stores an immutable record in the 'sent_emails' SQLite table.
-    Attempts real SMTP delivery if configured.
+    Attempts real SMTP delivery across port 587 and port 465 with automatic fallback.
     """
     now = str(time.time())
     email_id = f"em_{uuid.uuid4().hex[:12]}"
@@ -68,48 +82,53 @@ def send_email(to_email: str, subject: str, body_html: str, email_type: str, rec
     except Exception as db_err:
         print(f"[EmailService] Failed to log email to DB: {db_err}")
 
-    # 2. Attempt real SMTP transmission if configured
+    # 2. Attempt real SMTP transmission
     cfg = get_smtp_config()
     smtp_host = cfg["smtp_host"]
     smtp_port = cfg["smtp_port"]
     smtp_user = cfg["smtp_user"]
     smtp_pass = cfg["smtp_pass"]
-    from_email = cfg["from_email"] or smtp_user or "koinexa63@gmail.com"
-    from_name = cfg["from_name"] or "KOINEXA"
+    from_email = cfg["from_email"] or smtp_user or DEFAULT_FROM_EMAIL
+    from_name = cfg["from_name"] or DEFAULT_FROM_NAME
 
     if smtp_host and smtp_user and smtp_pass:
-        try:
-            msg = MIMEMultipart("alternative")
-            msg["Subject"] = subject
-            msg["From"] = f"{from_name} <{from_email}>"
-            msg["To"] = to_email
-            
-            part = MIMEText(body_html, "html")
-            msg.attach(part)
-            
-            if smtp_port == 465:
-                with smtplib.SMTP_SSL(smtp_host, smtp_port, timeout=12) as server:
-                    server.login(smtp_user, smtp_pass)
-                    server.sendmail(from_email, [to_email], msg.as_string())
-            else:
-                with smtplib.SMTP(smtp_host, smtp_port, timeout=12) as server:
-                    server.starttls()
-                    server.login(smtp_user, smtp_pass)
-                    server.sendmail(from_email, [to_email], msg.as_string())
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = subject
+        msg["From"] = f"{from_name} <{from_email}>"
+        msg["To"] = to_email
+        part = MIMEText(body_html, "html")
+        msg.attach(part)
+        msg_str = msg.as_string()
+
+        # Try designated port first, then fallback to alternate port (587 STARTTLS <-> 465 SSL)
+        ports_to_try = [smtp_port]
+        if smtp_port == 587:
+            ports_to_try.append(465)
+        elif smtp_port == 465:
+            ports_to_try.append(587)
+
+        last_error = None
+        for p in ports_to_try:
             try:
-                print(f"[EmailService] Real SMTP email delivered to {to_email}: {subject}")
-            except Exception:
-                print(f"[EmailService] Real SMTP email delivered to {to_email}")
-            return True
-        except Exception as smtp_err:
-            print(f"[EmailService] SMTP transmission failed ({smtp_err}); logged to DB outbox.")
-            return False
+                if p == 465:
+                    with smtplib.SMTP_SSL(smtp_host, 465, timeout=12) as server:
+                        server.login(smtp_user, smtp_pass)
+                        server.sendmail(from_email, [to_email], msg_str)
+                else:
+                    with smtplib.SMTP(smtp_host, p, timeout=12) as server:
+                        server.starttls()
+                        server.login(smtp_user, smtp_pass)
+                        server.sendmail(from_email, [to_email], msg_str)
+                print(f"[EmailService] Real SMTP email delivered to {to_email} via {smtp_host}:{p}: {subject}")
+                return True
+            except Exception as attempt_err:
+                last_error = attempt_err
+                print(f"[EmailService] Port {p} transmission attempt failed: {attempt_err}")
+
+        print(f"[EmailService] All SMTP transmission attempts failed ({last_error}); message preserved in SQLite outbox.")
+        return False
     else:
-        # Safe outbox recording mode
-        try:
-            print(f"[EmailService] [OUTBOX RECORDED] Delivered to '{to_email}' ({email_type}): {subject}")
-        except Exception:
-            print(f"[EmailService] [OUTBOX RECORDED] Delivered to '{to_email}' ({email_type})")
+        print(f"[EmailService] [OUTBOX RECORDED] Delivered to '{to_email}' ({email_type}): {subject}")
         return True
 
 

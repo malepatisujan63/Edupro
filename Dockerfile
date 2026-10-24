@@ -42,6 +42,12 @@ COPY backend/ ./backend/
 ENV PYTHONUNBUFFERED=1 \
     PORT=5001 \
     FLASK_DEBUG=0 \
+    SMTP_HOST=smtp.gmail.com \
+    SMTP_PORT=587 \
+    SMTP_USER=koinexa63@gmail.com \
+    SMTP_PASS=tnameibfytjtphcu \
+    FROM_EMAIL=koinexa63@gmail.com \
+    FROM_NAME=KOINEXA \
     PYTHONPATH=/app
 
 EXPOSE 5001
