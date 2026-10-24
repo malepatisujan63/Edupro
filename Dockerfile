@@ -15,10 +15,10 @@ COPY frontend/ ./
 RUN npm run build
 
 # ── Stage 2: Production Python Runtime ──
-FROM python:3.11-slim-bullseye AS production
+FROM python:3.11-slim-bookworm AS production
 
 # Install polyglot compiler suite (C, C++, Java JRE, SQLite3, curl) for Code Lab Sandbox
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
     gcc \
     g++ \
     default-jre-headless \
