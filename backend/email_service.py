@@ -9,6 +9,7 @@ Supports:
 
 import os
 import smtplib
+import threading
 import time
 import uuid
 from email.mime.text import MIMEText
@@ -63,35 +64,9 @@ def get_smtp_config():
     return config
 
 
-def send_email(to_email: str, subject: str, body_html: str, email_type: str, recipient_name: str = "Member") -> bool:
-    """
-    Dispatches an email and stores an immutable record in the 'sent_emails' SQLite table.
-    Attempts real SMTP delivery across port 587 and port 465 with automatic fallback.
-    """
-    now = str(time.time())
-    email_id = f"em_{uuid.uuid4().hex[:12]}"
-    
-    # 1. Always record in SQLite sent_emails table for UI Outbox & auditability
+def _dispatch_smtp_sync(to_email: str, subject: str, body_html: str, from_name: str, from_email: str, smtp_host: str, smtp_port: int, smtp_user: str, smtp_pass: str) -> bool:
+    """Synchronous network worker executing real SMTP delivery across port 587 and port 465."""
     try:
-        with get_db_connection() as conn:
-            conn.execute(
-                """INSERT INTO sent_emails (id, recipient_email, recipient_name, subject, body_html, email_type, sent_at)
-                   VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                (email_id, to_email, recipient_name, subject, body_html, email_type, now)
-            )
-    except Exception as db_err:
-        print(f"[EmailService] Failed to log email to DB: {db_err}")
-
-    # 2. Attempt real SMTP transmission
-    cfg = get_smtp_config()
-    smtp_host = cfg["smtp_host"]
-    smtp_port = cfg["smtp_port"]
-    smtp_user = cfg["smtp_user"]
-    smtp_pass = cfg["smtp_pass"]
-    from_email = cfg["from_email"] or smtp_user or DEFAULT_FROM_EMAIL
-    from_name = cfg["from_name"] or DEFAULT_FROM_NAME
-
-    if smtp_host and smtp_user and smtp_pass:
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
         msg["From"] = f"{from_name} <{from_email}>"
@@ -102,9 +77,9 @@ def send_email(to_email: str, subject: str, body_html: str, email_type: str, rec
 
         # Try designated port first, then fallback to alternate port (587 STARTTLS <-> 465 SSL)
         ports_to_try = [smtp_port]
-        if smtp_port == 587:
+        if smtp_port == 587 and 465 not in ports_to_try:
             ports_to_try.append(465)
-        elif smtp_port == 465:
+        elif smtp_port == 465 and 587 not in ports_to_try:
             ports_to_try.append(587)
 
         last_error = None
@@ -127,8 +102,52 @@ def send_email(to_email: str, subject: str, body_html: str, email_type: str, rec
 
         print(f"[EmailService] All SMTP transmission attempts failed ({last_error}); message preserved in SQLite outbox.")
         return False
-    else:
+    except Exception as fatal_err:
+        print(f"[EmailService] Unhandled SMTP dispatch exception: {fatal_err}")
+        return False
+
+
+def send_email(to_email: str, subject: str, body_html: str, email_type: str, recipient_name: str = "Member", sync: bool = False) -> bool:
+    """
+    Dispatches an email and stores an immutable record in the 'sent_emails' SQLite table.
+    By default runs asynchronously via background daemon thread so HTTP API responses return in milliseconds!
+    """
+    now = str(time.time())
+    email_id = f"em_{uuid.uuid4().hex[:12]}"
+    
+    # 1. Always record in SQLite sent_emails table immediately for UI Outbox & auditability
+    try:
+        with get_db_connection() as conn:
+            conn.execute(
+                """INSERT INTO sent_emails (id, recipient_email, recipient_name, subject, body_html, email_type, sent_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                (email_id, to_email, recipient_name, subject, body_html, email_type, now)
+            )
+    except Exception as db_err:
+        print(f"[EmailService] Failed to log email to DB: {db_err}")
+
+    # 2. Attempt real SMTP transmission
+    cfg = get_smtp_config()
+    smtp_host = cfg["smtp_host"]
+    smtp_port = cfg["smtp_port"]
+    smtp_user = cfg["smtp_user"]
+    smtp_pass = cfg["smtp_pass"]
+    from_email = cfg["from_email"] or smtp_user or DEFAULT_FROM_EMAIL
+    from_name = cfg["from_name"] or DEFAULT_FROM_NAME
+
+    if not (smtp_host and smtp_user and smtp_pass):
         print(f"[EmailService] [OUTBOX RECORDED] Delivered to '{to_email}' ({email_type}): {subject}")
+        return True
+
+    if sync:
+        return _dispatch_smtp_sync(to_email, subject, body_html, from_name, from_email, smtp_host, smtp_port, smtp_user, smtp_pass)
+    else:
+        # Blazing fast asynchronous background delivery
+        threading.Thread(
+            target=_dispatch_smtp_sync,
+            args=(to_email, subject, body_html, from_name, from_email, smtp_host, smtp_port, smtp_user, smtp_pass),
+            daemon=True
+        ).start()
         return True
 
 

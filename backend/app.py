@@ -550,8 +550,8 @@ def auth_student_register():
     if not is_valid:
         return jsonify({"success": False, "error": char_err}), 400
 
-    # Content moderation
-    is_mod_safe, mod_reason = moderate_content(f"{name} {bio}")
+    # Content moderation across all text fields
+    is_mod_safe, mod_reason = moderate_content(f"{name} {username} {college} {bio}")
     if not is_mod_safe:
         return jsonify({"success": False, "error": mod_reason}), 400
 
@@ -822,7 +822,7 @@ def auth_mentor_register():
     if not is_valid:
         return jsonify({"success": False, "error": char_err}), 400
 
-    is_mod_safe, mod_reason = moderate_content(f"{name} {statement}")
+    is_mod_safe, mod_reason = moderate_content(f"{name} {institution} {department} {designation} {statement}")
     if not is_mod_safe:
         return jsonify({"success": False, "error": mod_reason}), 400
 
@@ -1112,6 +1112,8 @@ def auth_faculty_apply():
 # ─── TWO-FACTOR LOGIN OTP VERIFICATION & RESEND ─────────────────────
 def get_user_by_id_or_identifier(conn, user_id=None, identifier=None):
     clean_id = (identifier or "").strip().lower()
+    clean_no_domain = clean_id.split("@")[0] if "@" in clean_id else clean_id
+    clean_with_bloom = f"{clean_no_domain}@bloom.com"
 
     # 1. Check admin in users table
     if user_id:
@@ -1124,7 +1126,12 @@ def get_user_by_id_or_identifier(conn, user_id=None, identifier=None):
                 return u_dict
 
     if clean_id:
-        u_row = conn.execute("SELECT * FROM users WHERE (LOWER(username) = ? OR LOWER(email) = ?) AND role = 'admin'", (clean_id, clean_id)).fetchone()
+        u_row = conn.execute(
+            """SELECT * FROM users 
+               WHERE (LOWER(username) = ? OR LOWER(email) = ? OR LOWER(contact_email) = ?) 
+                 AND role = 'admin'""",
+            (clean_id, clean_id, clean_id)
+        ).fetchone()
         if u_row:
             u_dict = dict(u_row)
             if "malepatisujan" in str(u_dict.get("username", "")) or "malepatisujan" in str(u_dict.get("email", "")):
@@ -1141,7 +1148,12 @@ def get_user_by_id_or_identifier(conn, user_id=None, identifier=None):
             return s_dict
 
     if clean_id:
-        s_row = conn.execute("SELECT * FROM students WHERE LOWER(username) = ? OR LOWER(email) = ?", (clean_id, clean_id)).fetchone()
+        s_row = conn.execute(
+            """SELECT * FROM students 
+               WHERE LOWER(username) = ? OR LOWER(email) = ? OR LOWER(contact_email) = ?
+                  OR LOWER(username) = ? OR LOWER(email) = ?""",
+            (clean_id, clean_id, clean_id, clean_no_domain, clean_with_bloom)
+        ).fetchone()
         if s_row:
             s_dict = dict(s_row)
             s_dict["role"] = "student"
@@ -1157,7 +1169,12 @@ def get_user_by_id_or_identifier(conn, user_id=None, identifier=None):
             return m_dict
 
     if clean_id:
-        m_row = conn.execute("SELECT * FROM mentors WHERE LOWER(username) = ? OR LOWER(email) = ?", (clean_id, clean_id)).fetchone()
+        m_row = conn.execute(
+            """SELECT * FROM mentors 
+               WHERE LOWER(username) = ? OR LOWER(email) = ? OR LOWER(contact_email) = ?
+                  OR LOWER(username) = ?""",
+            (clean_id, clean_id, clean_id, clean_no_domain)
+        ).fetchone()
         if m_row:
             m_dict = dict(m_row)
             m_dict["role"] = m_dict.get("role") or "university"
@@ -1170,7 +1187,12 @@ def get_user_by_id_or_identifier(conn, user_id=None, identifier=None):
             return dict(u_row)
 
     if clean_id:
-        u_row = conn.execute("SELECT * FROM users WHERE LOWER(username) = ? OR LOWER(email) = ?", (clean_id, clean_id)).fetchone()
+        u_row = conn.execute(
+            """SELECT * FROM users 
+               WHERE LOWER(username) = ? OR LOWER(email) = ? OR LOWER(contact_email) = ?
+                  OR LOWER(username) = ?""",
+            (clean_id, clean_id, clean_id, clean_no_domain)
+        ).fetchone()
         if u_row:
             return dict(u_row)
 
@@ -1191,6 +1213,9 @@ def auth_login_verify_otp():
         return jsonify({"success": False, "error": "Account identifier is required"}), 400
 
     now = time.time()
+    clean_no_domain = identifier.split("@")[0] if "@" in identifier else identifier
+    clean_with_bloom = f"{clean_no_domain}@bloom.com"
+
     with get_db_connection() as conn:
         row = None
         if user_id:
@@ -1204,9 +1229,10 @@ def auth_login_verify_otp():
         if not row and identifier:
             row = conn.execute(
                 """SELECT * FROM login_otps 
-                   WHERE LOWER(identifier) = ? AND otp = ? AND used = 0
+                   WHERE (LOWER(identifier) = ? OR LOWER(contact_email) = ? OR LOWER(identifier) = ? OR LOWER(identifier) = ?) 
+                     AND otp = ? AND used = 0
                    ORDER BY created_at DESC LIMIT 1""",
-                (identifier, otp)
+                (identifier, identifier, clean_no_domain, clean_with_bloom, otp)
             ).fetchone()
 
         if not row:
@@ -1280,7 +1306,7 @@ def auth_login_resend_otp():
 
     client_ip = request.remote_addr or "client"
     rate_key = f"resend_otp_{identifier or user_id}_{client_ip}"
-    if not rate_limiter.is_allowed(rate_key, max_requests=5, window_seconds=60.0):
+    if not rate_limiter.is_allowed(rate_key, max_requests=10, window_seconds=60.0):
         return jsonify({"success": False, "error": "Too many code requests. Please wait 60 seconds before trying again."}), 429
 
     with get_db_connection() as conn:
@@ -1299,29 +1325,34 @@ def auth_forgot_password():
     email = str(data.get("email", "")).strip().lower()
 
     if not email:
-        return jsonify({"success": False, "error": "Email address is required"}), 400
+        return jsonify({"success": False, "error": "Email address or username is required"}), 400
+
+    client_ip = request.remote_addr or "client"
+    rate_key = f"forgot_pwd_{email}_{client_ip}"
+    if not rate_limiter.is_allowed(rate_key, max_requests=10, window_seconds=60.0):
+        return jsonify({"success": False, "error": "Too many reset requests. Please wait 60 seconds before trying again."}), 429
 
     with get_db_connection() as conn:
-        user_row = conn.execute(
-            "SELECT id, name, email, contact_email FROM users WHERE LOWER(email) = ? OR LOWER(username) = ?",
-            (email, email)
-        ).fetchone()
-        if not user_row:
+        user = get_user_by_id_or_identifier(conn, identifier=email)
+        if not user:
             return jsonify({"success": False, "error": "No account registered with this email or username."}), 404
 
-        user = dict(user_row)
         otp = str(secrets.randbelow(900000) + 100000)  # Cryptographically secure 6-digit OTP
         now = time.time()
         expires_at = now + 600  # 10 minutes
         reset_id = f"rst_{uuid.uuid4().hex[:10]}"
 
+        # Invalidate previous unused resets
+        conn.execute("UPDATE password_resets SET used = 1 WHERE LOWER(email) = ? AND used = 0", (user["email"].lower(),))
+
         conn.execute(
             """INSERT INTO password_resets (id, email, otp, expires_at, used, created_at)
                VALUES (?, ?, ?, ?, 0, ?)""",
-            (reset_id, user["email"], otp, expires_at, str(now))
+            (reset_id, user["email"].lower(), otp, expires_at, str(now))
         )
+        conn.commit()
 
-    # Deliver directly to user's registered contact email
+    # Deliver directly to user's registered contact email (asynchronously)
     destination_email = user.get("contact_email") or user.get("email")
     send_otp_email(destination_email, user.get("name", "KOINEXA Member"), otp)
 
@@ -1332,8 +1363,9 @@ def auth_forgot_password():
 
     return jsonify({
         "success": True,
-        "message": f"A 6-digit verification code has been dispatched by Veritas-AI to your registered contact email ({masked_target}).",
+        "message": f"A 6-digit verification code has been dispatched to your contact email ({masked_target}).",
         "account_email": user["email"],
+        "masked_contact_email": masked_target,
         "expires_in_seconds": 600
     })
 
@@ -1349,11 +1381,14 @@ def auth_verify_otp():
 
     now = time.time()
     with get_db_connection() as conn:
+        user = get_user_by_id_or_identifier(conn, identifier=email)
+        account_email = user["email"].lower() if user else email
+
         row = conn.execute(
             """SELECT id, expires_at, used FROM password_resets 
-               WHERE LOWER(email) = ? AND otp = ? AND used = 0
+               WHERE (LOWER(email) = ? OR LOWER(email) = ?) AND otp = ? AND used = 0
                ORDER BY created_at DESC LIMIT 1""",
-            (email, otp)
+            (email, account_email, otp)
         ).fetchone()
 
         if not row:
@@ -1380,11 +1415,14 @@ def auth_reset_password():
 
     now = time.time()
     with get_db_connection() as conn:
+        user = get_user_by_id_or_identifier(conn, identifier=email)
+        account_email = user["email"].lower() if user else email
+
         row = conn.execute(
             """SELECT id, expires_at, used FROM password_resets 
-               WHERE LOWER(email) = ? AND otp = ? AND used = 0
+               WHERE (LOWER(email) = ? OR LOWER(email) = ?) AND otp = ? AND used = 0
                ORDER BY created_at DESC LIMIT 1""",
-            (email, otp)
+            (email, account_email, otp)
         ).fetchone()
 
         if not row:
@@ -1396,7 +1434,10 @@ def auth_reset_password():
         conn.execute("UPDATE password_resets SET used = 1 WHERE id = ?", (row["id"],))
 
         pwd_hash = generate_password_hash(new_password)
-        conn.execute("UPDATE users SET password_hash = ? WHERE LOWER(email) = ?", (pwd_hash, email))
+        conn.execute("UPDATE students SET password_hash = ? WHERE LOWER(email) = ? OR LOWER(contact_email) = ? OR LOWER(username) = ?", (pwd_hash, email, email, email))
+        conn.execute("UPDATE mentors SET password_hash = ? WHERE LOWER(email) = ? OR LOWER(contact_email) = ? OR LOWER(username) = ?", (pwd_hash, email, email, email))
+        conn.execute("UPDATE users SET password_hash = ? WHERE LOWER(email) = ? OR LOWER(contact_email) = ? OR LOWER(username) = ?", (pwd_hash, email, email, email))
+        conn.commit()
 
     return jsonify({"success": True, "message": "Password updated successfully. You can now log in with your new password."})
 
@@ -1897,7 +1938,7 @@ def create_post():
         }), 400
 
     # Multilingual Content Moderation & Automatic Ban Enforcement
-    for field_val in [title, content, why_recommend]:
+    for field_val in [title, content, why_recommend, tags]:
         if field_val:
             is_clean, mod_err = check_content_and_enforce_ban(field_val, user_id=current_user["id"], stage="post_creation")
             if not is_clean:
@@ -2616,8 +2657,9 @@ def direct_messages_api(other_user_id):
         if not text and not code_snippet and not shared_post_id:
             return jsonify({"success": False, "error": "Message content or attachment required"}), 400
 
-        if text:
-            is_valid_chars, disallowed = validate_text_characters(text)
+        msg_text = f"{text or ''} {code_snippet or ''}".strip()
+        if msg_text:
+            is_valid_chars, disallowed = validate_text_characters(msg_text)
             if not is_valid_chars:
                 dis_repr = " ".join(disallowed[:5])
                 return jsonify({
@@ -2625,7 +2667,7 @@ def direct_messages_api(other_user_id):
                     "error": f"Disallowed characters detected: {dis_repr}. Only alphanumeric, whitespace, and permitted symbols allowed."
                 }), 400
 
-            is_clean, mod_err = check_content_and_enforce_ban(text, user_id=current_user["id"], stage="direct_chat")
+            is_clean, mod_err = check_content_and_enforce_ban(msg_text, user_id=current_user["id"], stage="direct_chat")
             if not is_clean:
                 return jsonify({
                     "success": False,
@@ -2633,6 +2675,7 @@ def direct_messages_api(other_user_id):
                     "error": f"{mod_err} Your account has been suspended for violating content policies. Contact administrator to unblock."
                 }), 403
 
+        if text:
             is_link_safe, link_err = verify_text_urls(text)
             if not is_link_safe:
                 return jsonify({
@@ -2747,6 +2790,23 @@ def share_post_to_chats():
     target_studymate_ids = data.get("studymate_ids") or []
     target_channels = data.get("channels") or []
     note = str(data.get("note") or "").strip()
+
+    if note:
+        is_valid_chars, disallowed = validate_text_characters(note)
+        if not is_valid_chars:
+            dis_repr = " ".join(disallowed[:5])
+            return jsonify({
+                "success": False,
+                "error": f"Disallowed characters detected in share note: {dis_repr}. Only alphanumeric, whitespace, and permitted symbols allowed."
+            }), 400
+
+        is_clean, mod_err = check_content_and_enforce_ban(note, user_id=current_user["id"], stage="post_share")
+        if not is_clean:
+            return jsonify({
+                "success": False,
+                "status": "banned",
+                "error": f"{mod_err} Your account has been suspended for violating content policies. Contact administrator to unblock."
+            }), 403
 
     if not post_id or (not target_studymate_ids and not target_channels):
         return jsonify({"success": False, "error": "Post ID and at least one recipient required"}), 400
@@ -3261,6 +3321,22 @@ def rate_quiz(quiz_id):
     rating = max(1, min(5, rating))
     feedback = data.get("feedback", "").strip()
 
+    if feedback:
+        is_valid_chars, disallowed = validate_text_characters(feedback)
+        if not is_valid_chars:
+            dis_repr = " ".join(disallowed[:5])
+            return jsonify({
+                "success": False,
+                "error": f"Disallowed characters detected in feedback: {dis_repr}. Only alphanumeric, whitespace, and permitted symbols allowed."
+            }), 400
+        is_clean, mod_err = check_content_and_enforce_ban(feedback, user_id=current_user["id"], stage="quiz_feedback")
+        if not is_clean:
+            return jsonify({
+                "success": False,
+                "status": "banned",
+                "error": f"{mod_err} Your account has been suspended for violating content policies. Contact administrator to unblock."
+            }), 403
+
     rating_id = f"qr_{uuid.uuid4().hex[:10]}"
     with get_db_connection() as conn:
         conn.execute(
@@ -3301,6 +3377,27 @@ def upload_quiz():
 
     if not title or not questions:
         return jsonify({"success": False, "error": "Title and questions list are required"}), 400
+
+    text_to_check = f"{title} {description}"
+    for q in questions:
+        if isinstance(q, dict):
+            text_to_check += f" {q.get('question', '')} {' '.join(str(opt) for opt in q.get('options', []))} {q.get('explanation', '')}"
+
+    is_valid_chars, disallowed = validate_text_characters(text_to_check)
+    if not is_valid_chars:
+        dis_repr = " ".join(disallowed[:5])
+        return jsonify({
+            "success": False,
+            "error": f"Disallowed characters detected: {dis_repr}. Only alphanumeric, whitespace, and permitted symbols allowed."
+        }), 400
+
+    is_clean, mod_err = check_content_and_enforce_ban(text_to_check, user_id=current_user["id"], stage="quiz_creation")
+    if not is_clean:
+        return jsonify({
+            "success": False,
+            "status": "banned",
+            "error": f"{mod_err} Your account has been suspended for violating content policies. Contact administrator to unblock."
+        }), 403
 
     sections = data.get("sections")
     if not sections:
@@ -3692,6 +3789,23 @@ def upload_problem():
     if not title or not description:
         return jsonify({"success": False, "error": "Title and description are required"}), 400
 
+    text_to_check = f"{title} {description} {constraints}"
+    is_valid_chars, disallowed = validate_text_characters(text_to_check)
+    if not is_valid_chars:
+        dis_repr = " ".join(disallowed[:5])
+        return jsonify({
+            "success": False,
+            "error": f"Disallowed characters detected: {dis_repr}. Only alphanumeric, whitespace, and permitted symbols allowed."
+        }), 400
+
+    is_clean, mod_err = check_content_and_enforce_ban(text_to_check, user_id=current_user["id"], stage="problem_creation")
+    if not is_clean:
+        return jsonify({
+            "success": False,
+            "status": "banned",
+            "error": f"{mod_err} Your account has been suspended for violating content policies. Contact administrator to unblock."
+        }), 403
+
     # Ensure at least 1 sample case exists; preserve all user-provided cases without dummy strings
     if not sample_cases:
         sample_cases = [{
@@ -3899,6 +4013,14 @@ def create_community_channel(community_id):
             "success": False,
             "error": f"Disallowed characters detected: {dis_repr}. Only alphanumeric and hyphen allowed."
         }), 400
+
+    is_clean, mod_err = check_content_and_enforce_ban(name, user_id=current_user["id"], stage="community_channel_creation")
+    if not is_clean:
+        return jsonify({
+            "success": False,
+            "status": "banned",
+            "error": f"{mod_err} Your account has been suspended for violating content policies. Contact administrator to unblock."
+        }), 403
         
     chan_id = f"chan_{uuid.uuid4().hex[:8]}"
     with get_db_connection() as conn:
@@ -3944,8 +4066,9 @@ def channel_messages(community_id, channel_id):
         if not text and not code_snippet and not shared_post_id:
             return jsonify({"success": False, "error": "Message or code snippet required"}), 400
 
-        if text:
-            is_valid_chars, disallowed = validate_text_characters(text)
+        msg_text = f"{text or ''} {code_snippet or ''}".strip()
+        if msg_text:
+            is_valid_chars, disallowed = validate_text_characters(msg_text)
             if not is_valid_chars:
                 dis_repr = " ".join(disallowed[:5])
                 return jsonify({
@@ -3953,7 +4076,7 @@ def channel_messages(community_id, channel_id):
                     "error": f"Disallowed characters detected: {dis_repr}. Only alphanumeric, whitespace, and permitted symbols allowed."
                 }), 400
 
-            is_clean, mod_err = check_content_and_enforce_ban(text, user_id=current_user["id"], stage="channel_chat")
+            is_clean, mod_err = check_content_and_enforce_ban(msg_text, user_id=current_user["id"], stage="channel_chat")
             if not is_clean:
                 return jsonify({
                     "success": False,
@@ -3961,6 +4084,7 @@ def channel_messages(community_id, channel_id):
                     "error": f"{mod_err} Your account has been suspended for violating content policies. Contact administrator to unblock."
                 }), 403
 
+        if text:
             is_link_safe, link_err = verify_text_urls(text)
             if not is_link_safe:
                 return jsonify({
@@ -4237,21 +4361,19 @@ def update_profile():
             if len(new_password) < 6:
                 return jsonify({"success": False, "error": "New password must be at least 6 characters"}), 400
             pw_hash = generate_password_hash(new_password)
-            conn.execute(
-                "UPDATE users SET name = ?, bio = ?, college = ?, avatar = ?, password_hash = ? WHERE id = ?",
-                (name, bio, college, avatar, pw_hash, current_user["id"])
-            )
+            conn.execute("UPDATE users SET name = ?, bio = ?, college = ?, avatar = ?, password_hash = ? WHERE id = ?", (name, bio, college, avatar, pw_hash, current_user["id"]))
+            conn.execute("UPDATE students SET name = ?, bio = ?, college = ?, avatar = ?, password_hash = ? WHERE id = ?", (name, bio, college, avatar, pw_hash, current_user["id"]))
+            conn.execute("UPDATE mentors SET name = ?, bio = ?, college = ?, avatar = ?, password_hash = ? WHERE id = ?", (name, bio, college, avatar, pw_hash, current_user["id"]))
         else:
-            conn.execute(
-                "UPDATE users SET name = ?, bio = ?, college = ?, avatar = ? WHERE id = ?",
-                (name, bio, college, avatar, current_user["id"])
-            )
+            conn.execute("UPDATE users SET name = ?, bio = ?, college = ?, avatar = ? WHERE id = ?", (name, bio, college, avatar, current_user["id"]))
+            conn.execute("UPDATE students SET name = ?, bio = ?, college = ?, avatar = ? WHERE id = ?", (name, bio, college, avatar, current_user["id"]))
+            conn.execute("UPDATE mentors SET name = ?, bio = ?, college = ?, avatar = ? WHERE id = ?", (name, bio, college, avatar, current_user["id"]))
         
         # Also sync post author metadata if name/avatar changed
         conn.execute("UPDATE posts SET user_name = ?, user_avatar = ? WHERE user_id = ?", (name, avatar, current_user["id"]))
         conn.execute("UPDATE classroom_posts SET user_name = ?, user_avatar = ? WHERE user_id = ?", (name, avatar, current_user["id"]))
         
-        updated_user = conn.execute("SELECT id, username, email, name, handle, avatar, bio, college, role, created_at FROM users WHERE id = ?", (current_user["id"],)).fetchone()
+        updated_user = get_user_by_id_or_identifier(conn, user_id=current_user["id"])
 
     return jsonify({"success": True, "user": dict(updated_user) if updated_user else current_user})
 
@@ -5039,8 +5161,9 @@ def create_classroom_post(classroom_id):
             }), 400
 
         # Multilingual Content Moderation & Automatic Ban Enforcement
-        for field_val in [title, content]:
-            is_clean, mod_err = check_content_and_enforce_ban(field_val, user_id=current_user["id"], stage="classroom_post")
+        for field_val in [title, content, tags]:
+            if field_val:
+                is_clean, mod_err = check_content_and_enforce_ban(field_val, user_id=current_user["id"], stage="classroom_post")
             if not is_clean:
                 return jsonify({
                     "success": False,
@@ -5151,6 +5274,21 @@ def classroom_post_comments(classroom_id, post_id):
             if not text:
                 return jsonify({"success": False, "error": "Comment cannot be empty"}), 400
 
+            is_valid_chars, disallowed = validate_text_characters(text)
+            if not is_valid_chars:
+                return jsonify({
+                    "success": False,
+                    "error": f"Disallowed characters detected: {' '.join(disallowed[:5])}. Only alphanumeric, whitespace, and permitted symbols allowed."
+                }), 400
+
+            is_clean, mod_err = check_content_and_enforce_ban(text, user_id=current_user["id"], stage="classroom_post_comment")
+            if not is_clean:
+                return jsonify({
+                    "success": False,
+                    "status": "banned",
+                    "error": f"{mod_err} Your account has been suspended for violating content policies. Contact administrator to unblock."
+                }), 403
+
             comment_id = f"cpc_{uuid.uuid4().hex[:10]}"
             now_ts = str(time.time())
 
@@ -5244,6 +5382,21 @@ def create_classroom_channel(classroom_id):
         if name.startswith("#"):
             name = name[1:]
 
+        is_valid_chars, disallowed = validate_text_characters(name)
+        if not is_valid_chars:
+            return jsonify({
+                "success": False,
+                "error": f"Disallowed characters detected: {' '.join(disallowed[:5])}. Only alphanumeric and hyphen allowed."
+            }), 400
+
+        is_clean, mod_err = check_content_and_enforce_ban(name, user_id=current_user["id"], stage="classroom_channel_creation")
+        if not is_clean:
+            return jsonify({
+                "success": False,
+                "status": "banned",
+                "error": f"{mod_err} Your account has been suspended for violating content policies. Contact administrator to unblock."
+            }), 403
+
         chan_id = f"chan_{uuid.uuid4().hex[:8]}"
         now = str(time.time())
 
@@ -5311,9 +5464,10 @@ def post_classroom_channel_message(classroom_id, channel_id=None):
         if not text and not code_snippet:
             return jsonify({"success": False, "error": "Message text or code snippet is required"}), 400
 
-        # In-App Character Whitelist Validation
-        if text:
-            is_valid_chars, disallowed = validate_text_characters(text)
+        # In-App Character Whitelist Validation & Moderation
+        msg_text = f"{text or ''} {code_snippet or ''}".strip()
+        if msg_text:
+            is_valid_chars, disallowed = validate_text_characters(msg_text)
             if not is_valid_chars:
                 return jsonify({
                     "success": False,
@@ -5321,7 +5475,7 @@ def post_classroom_channel_message(classroom_id, channel_id=None):
                 }), 400
 
             # Multilingual Content Moderation & Automatic Ban Enforcement
-            is_clean, mod_err = check_content_and_enforce_ban(text, user_id=current_user["id"], stage="classroom_chat")
+            is_clean, mod_err = check_content_and_enforce_ban(msg_text, user_id=current_user["id"], stage="classroom_chat")
             if not is_clean:
                 return jsonify({
                     "success": False,
@@ -5481,6 +5635,27 @@ def create_classroom_quiz(classroom_id):
 
         if not title or not questions:
             return jsonify({"success": False, "error": "Title and at least one question required"}), 400
+
+        text_to_check = f"{title} {description}"
+        for q in questions:
+            if isinstance(q, dict):
+                text_to_check += f" {q.get('question', '')} {' '.join(str(opt) for opt in q.get('options', []))} {q.get('explanation', '')}"
+
+        is_valid_chars, disallowed = validate_text_characters(text_to_check)
+        if not is_valid_chars:
+            dis_repr = " ".join(disallowed[:5])
+            return jsonify({
+                "success": False,
+                "error": f"Disallowed characters detected: {dis_repr}. Only alphanumeric, whitespace, and permitted symbols allowed."
+            }), 400
+
+        is_clean, mod_err = check_content_and_enforce_ban(text_to_check, user_id=current_user["id"], stage="classroom_quiz_creation")
+        if not is_clean:
+            return jsonify({
+                "success": False,
+                "status": "banned",
+                "error": f"{mod_err} Your account has been suspended for violating content policies. Contact administrator to unblock."
+            }), 403
 
         quiz_id = f"cquiz_{uuid.uuid4().hex[:10]}"
         now = str(time.time())
@@ -5724,6 +5899,23 @@ def create_classroom_problem(classroom_id):
         if not title or not description:
             return jsonify({"success": False, "error": "Title and description are required"}), 400
 
+        text_to_check = f"{title} {description} {constraints}"
+        is_valid_chars, disallowed = validate_text_characters(text_to_check)
+        if not is_valid_chars:
+            dis_repr = " ".join(disallowed[:5])
+            return jsonify({
+                "success": False,
+                "error": f"Disallowed characters detected: {dis_repr}. Only alphanumeric, whitespace, and permitted symbols allowed."
+            }), 400
+
+        is_clean, mod_err = check_content_and_enforce_ban(text_to_check, user_id=current_user["id"], stage="classroom_problem_creation")
+        if not is_clean:
+            return jsonify({
+                "success": False,
+                "status": "banned",
+                "error": f"{mod_err} Your account has been suspended for violating content policies. Contact administrator to unblock."
+            }), 403
+
         # Auto-synthesize boundary test cases if fewer than 5 provided
         if sample_cases and len(sample_cases) < 5:
             synthetics = EdgeCaseSynthesizer.synthesize_boundary_inputs(category, sample_cases)
@@ -5966,7 +6158,11 @@ def update_classroom(classroom_id):
         text_to_check = f"{name} {department} {description}".strip()
         is_clean, mod_err = check_content_and_enforce_ban(text_to_check, user_id=current_user["id"], stage="classroom_update")
         if not is_clean:
-            return jsonify({"success": False, "error": mod_err}), 403
+            return jsonify({
+                "success": False,
+                "status": "banned",
+                "error": f"{mod_err} Your account has been suspended for violating content policies. Contact administrator to unblock."
+            }), 403
 
         conn.execute("""
             UPDATE classrooms
