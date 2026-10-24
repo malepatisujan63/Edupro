@@ -16,6 +16,9 @@ import time
 import uuid
 import sys
 import re
+import json
+import urllib.request
+import urllib.error
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
