@@ -70,6 +70,37 @@ def get_smtp_config():
     return config
 
 
+_cached_brevo_sender = None
+
+def _get_brevo_verified_sender(brevo_key: str) -> tuple[str, str] | None:
+    """Queries Brevo API to discover the authorized sender name and email on the account."""
+    global _cached_brevo_sender
+    if _cached_brevo_sender:
+        return _cached_brevo_sender
+    try:
+        req = urllib.request.Request(
+            "https://api.brevo.com/v3/senders",
+            headers={
+                "api-key": brevo_key,
+                "accept": "application/json",
+                "User-Agent": "KOINEXA-Mailer/2.0"
+            },
+            method="GET"
+        )
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            if resp.status == 200:
+                body = json.loads(resp.read().decode("utf-8"))
+                senders = body.get("senders") or []
+                for s in senders:
+                    if s.get("active") is not False and s.get("email"):
+                        _cached_brevo_sender = (s.get("name") or "KOINEXA", s.get("email"))
+                        print(f"[EmailService] Discovered Brevo verified sender: {_cached_brevo_sender}")
+                        return _cached_brevo_sender
+    except Exception as e:
+        print(f"[EmailService] Unable to query Brevo senders: {e}")
+    return None
+
+
 def _dispatch_https_api(to_email: str, subject: str, body_html: str, from_name: str, from_email: str) -> bool:
     """
     Delivers email over outbound HTTPS (Port 443), which is never blocked by cloud providers (such as Render free tier).
@@ -99,15 +130,26 @@ def _dispatch_https_api(to_email: str, subject: str, body_html: str, from_name: 
                 if resp.status in (200, 201, 202):
                     print(f"[EmailService] HTTPS delivery via Resend API succeeded for {to_email}")
                     return True
+        except urllib.error.HTTPError as http_err:
+            error_body = http_err.read().decode('utf-8', errors='ignore')
+            print(f"[EmailService] Resend API HTTPError {http_err.code}: {error_body}")
         except Exception as e:
             print(f"[EmailService] Resend API delivery attempt error: {e}")
 
     # 2. Brevo (Sendinblue) API
     brevo_key = os.environ.get("BREVO_API_KEY") or os.environ.get("SENDINBLUE_API_KEY")
     if brevo_key:
+        # Resolve verified sender from Brevo account to avoid 400 sender unverified errors
+        verified_sender = _get_brevo_verified_sender(brevo_key)
+        actual_from_name = from_name
+        actual_from_email = from_email
+        if verified_sender:
+            actual_from_name = from_name or verified_sender[0]
+            actual_from_email = verified_sender[1]
+
         try:
             req_data = json.dumps({
-                "sender": {"name": from_name, "email": from_email},
+                "sender": {"name": actual_from_name, "email": actual_from_email},
                 "to": [{"email": to_email}],
                 "subject": subject,
                 "htmlContent": body_html
@@ -122,10 +164,38 @@ def _dispatch_https_api(to_email: str, subject: str, body_html: str, from_name: 
                 },
                 method="POST"
             )
-            with urllib.request.urlopen(req, timeout=10) as resp:
+            with urllib.request.urlopen(req, timeout=12) as resp:
                 if resp.status in (200, 201, 202):
-                    print(f"[EmailService] HTTPS delivery via Brevo API succeeded for {to_email}")
+                    print(f"[EmailService] HTTPS delivery via Brevo API succeeded for {to_email} (from: {actual_from_email})")
                     return True
+        except urllib.error.HTTPError as http_err:
+            error_body = http_err.read().decode('utf-8', errors='ignore')
+            print(f"[EmailService] Brevo API HTTPError {http_err.code}: {error_body}")
+            # If error was caused by unverified sender, retry once with discovered sender
+            if verified_sender and verified_sender[1] != actual_from_email:
+                try:
+                    retry_data = json.dumps({
+                        "sender": {"name": actual_from_name, "email": verified_sender[1]},
+                        "to": [{"email": to_email}],
+                        "subject": subject,
+                        "htmlContent": body_html
+                    }).encode("utf-8")
+                    retry_req = urllib.request.Request(
+                        "https://api.brevo.com/v3/smtp/email",
+                        data=retry_data,
+                        headers={
+                            "api-key": brevo_key,
+                            "Content-Type": "application/json",
+                            "User-Agent": "KOINEXA-Mailer/2.0"
+                        },
+                        method="POST"
+                    )
+                    with urllib.request.urlopen(retry_req, timeout=12) as retry_resp:
+                        if retry_resp.status in (200, 201, 202):
+                            print(f"[EmailService] Brevo retry succeeded with verified sender {verified_sender[1]}")
+                            return True
+                except Exception as retry_e:
+                    print(f"[EmailService] Brevo retry failed: {retry_e}")
         except Exception as e:
             print(f"[EmailService] Brevo API delivery attempt error: {e}")
 
@@ -329,29 +399,12 @@ def send_test_email(to_email: str) -> tuple[bool, str]:
 </body>
 </html>"""
 
-    try:
-        msg = MIMEMultipart("alternative")
-        msg["Subject"] = subject
-        msg["From"] = f"{from_name} <{from_email}>"
-        msg["To"] = to_email
-        msg.attach(MIMEText(html, "html"))
-
-        if smtp_port == 465:
-            with smtplib.SMTP_SSL(smtp_host, smtp_port, timeout=15) as server:
-                server.login(smtp_user, smtp_pass)
-                server.sendmail(from_email, [to_email], msg.as_string())
-        else:
-            with smtplib.SMTP(smtp_host, smtp_port, timeout=15) as server:
-                server.starttls()
-                server.login(smtp_user, smtp_pass)
-                server.sendmail(from_email, [to_email], msg.as_string())
-        
-        send_email(to_email, subject, html, "system_test", "KOINEXA Member")
-        return True, f"Email successfully dispatched to {to_email} via {smtp_host}:{smtp_port}."
-    except smtplib.SMTPAuthenticationError as auth_err:
-        return False, f"SMTP Authentication failed: {auth_err}. Please ensure 2FA and a 16-character App Password are configured."
-    except Exception as e:
-        return False, f"SMTP connection error: {str(e)}"
+    delivered = _dispatch_smtp_sync(to_email, subject, html, from_name, from_email, smtp_host, smtp_port, smtp_user, smtp_pass)
+    if delivered:
+        send_email(to_email, subject, html, "system_test", "KOINEXA Member", sync=False)
+        return True, f"Diagnostic email successfully transmitted to {to_email}."
+    else:
+        return False, "Failed to deliver diagnostic email across both HTTPS APIs and SMTP gateways. Check logs for details."
 
 
 def send_otp_email(to_email: str, recipient_name: str, otp_code: str) -> bool:

@@ -1720,6 +1720,39 @@ def admin_send_test_email():
     })
 
 
+@app.route("/api/test/email-status", methods=["GET"])
+def test_email_status():
+    brevo_key = os.environ.get("BREVO_API_KEY")
+    resend_key = os.environ.get("RESEND_API_KEY")
+    cfg = get_smtp_config()
+    
+    brevo_senders = []
+    if brevo_key:
+        try:
+            req = urllib.request.Request(
+                "https://api.brevo.com/v3/senders",
+                headers={"api-key": brevo_key, "accept": "application/json", "User-Agent": "KOINEXA-Mailer/2.0"},
+                method="GET"
+            )
+            with urllib.request.urlopen(req, timeout=6) as resp:
+                if resp.status == 200:
+                    data = json.loads(resp.read().decode("utf-8"))
+                    brevo_senders = data.get("senders", [])
+        except Exception as e:
+            brevo_senders = [f"Error querying senders: {e}"]
+
+    recent_sent = get_sent_emails(5)
+    return jsonify({
+        "success": True,
+        "brevo_configured": bool(brevo_key),
+        "brevo_senders": brevo_senders,
+        "resend_configured": bool(resend_key),
+        "smtp_host": cfg.get("smtp_host"),
+        "from_email": cfg.get("from_email"),
+        "recent_sent_count": len(recent_sent),
+        "recent_sent": recent_sent
+    })
+
 
 # ─── BANNED ACCOUNTS & UNBLOCK MANAGEMENT ───────────────────────────
 @app.route("/api/admin/banned-users", methods=["GET"])
