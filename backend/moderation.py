@@ -411,7 +411,20 @@ BENIGN_ALLOWLIST = {
     "struct", "interface", "type", "module", "package", "import", "export", "file", "folder",
     "pass", "passed", "fail", "failed", "error", "warning", "debug", "run", "execute", "output", "input",
     "compiler", "sandbox", "memory", "cpu", "time", "space", "complexity", "analysis", "analytics",
-    
+
+    # Study Materials, Books, Career & Educational Keywords
+    "book", "books", "textbook", "textbooks", "notebook", "notebooks", "handbook", "guidebook", "workbook",
+    "hook", "hooks", "webhook", "webhooks", "crack", "cracking", "cracker",
+    "aptitude", "roadmap", "roadmaps", "website", "websites", "session", "sessions", "informative",
+    "recommended", "recommendation", "recommendations", "curator", "curated", "review", "reviews",
+    "job", "jobs", "career", "careers", "placement", "placements", "interview", "interviews", "internship", "internships",
+    "boot", "boots", "bootstrap", "bootstrapping", "reboot", "rebooting",
+    "shift", "shifts", "bitshift", "shirt", "shirts", "shoot", "shooting", "troubleshoot", "troubleshooting",
+    "guide", "guides", "tutorial", "tutorials", "prep", "preparation", "cheat", "cheatsheet", "cheatsheets",
+    "doc", "docs", "documentation", "document", "documents", "summary", "summaries",
+    "lock", "locks", "block", "blocks", "dock", "docker", "dockerfile", "container", "containers",
+    "port", "ports", "portal", "portals", "shortcut", "shortcuts", "short", "shorts",
+
     # Specific Anti-Scunthorpe hard negative protective tokens
     "assume", "assumed", "assumption", "grass", "bass", "mass", "compass", "assessment",
     "asset", "assets", "assert", "assertion", "assign", "assignment", "associate", "association",

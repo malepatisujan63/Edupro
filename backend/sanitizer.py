@@ -142,8 +142,11 @@ def verify_and_sanitize_media_url(url: str, claimed_title: str = "") -> Tuple[bo
         try:
             import urllib.request
             import json
-            req = urllib.request.Request(oembed_url, headers={"User-Agent": "Koinexa-EdTech-Platform/1.0"})
-            with urllib.request.urlopen(req, timeout=3.0) as resp:
+            req = urllib.request.Request(
+                oembed_url,
+                headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
+            )
+            with urllib.request.urlopen(req, timeout=5.0) as resp:
                 yt_data = json.loads(resp.read().decode("utf-8"))
                 real_title = yt_data.get("title", "").strip()
                 author_name = yt_data.get("author_name", "").strip()
