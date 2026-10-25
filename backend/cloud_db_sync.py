@@ -96,12 +96,27 @@ def get_or_create_release() -> Optional[Dict[str, Any]]:
     return None
 
 
-def restore_db_from_cloud() -> bool:
+_daemon_started: bool = False
+
+
+def restore_db_from_cloud(force: bool = False) -> bool:
     """
     Downloads and restores the latest cloud database snapshot on server boot.
     Returns True if a valid snapshot was restored, False otherwise.
     """
     db_path = get_db_path()
+
+    # If database already exists, is non-trivial, and passes integrity, avoid redundant network pull
+    if not force and db_path.exists() and db_path.stat().st_size > 4096:
+        try:
+            with sqlite3.connect(str(db_path)) as conn:
+                check = conn.execute("PRAGMA integrity_check").fetchone()
+                if check and check[0] == "ok":
+                    print(f"[CloudDBSync] Local database verified healthy ({db_path.stat().st_size} bytes). Skipping redundant download.")
+                    return True
+        except Exception:
+            pass
+
     release = get_or_create_release()
     if not release:
         print("[CloudDBSync] Warning: Could not access cloud release for restore.")
@@ -133,20 +148,47 @@ def restore_db_from_cloud() -> bool:
             return False
 
         # Verify integrity in temp file before replacing live DB
-        temp_restore = db_path.parent / f"restore_temp_{int(time.time())}.db"
+        temp_restore = db_path.parent / f"restore_temp_{os.getpid()}_{int(time.time())}.db"
         with open(temp_restore, "wb") as f:
             f.write(db_bytes)
 
-        with sqlite3.connect(str(temp_restore)) as test_conn:
+        # Verify and close connection explicitly
+        test_conn = sqlite3.connect(str(temp_restore))
+        try:
             res = test_conn.execute("PRAGMA integrity_check").fetchone()
             if not res or res[0] != "ok":
                 print(f"[CloudDBSync] Downloaded DB failed integrity check: {res}")
-                if temp_restore.exists():
-                    temp_restore.unlink()
                 return False
+            # Checkpoint WAL into main database file
+            test_conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+        finally:
+            test_conn.close()
+
+        # Remove temporary sidecar files created during verification
+        for ext in ["-wal", "-shm", "-journal"]:
+            sidecar = Path(str(temp_restore) + ext)
+            if sidecar.exists():
+                try:
+                    sidecar.unlink()
+                except Exception:
+                    pass
+
+        # Remove existing target database sidecars before replacing main file
+        for ext in ["-wal", "-shm", "-journal"]:
+            sidecar = Path(str(db_path) + ext)
+            if sidecar.exists():
+                try:
+                    sidecar.unlink()
+                except Exception:
+                    pass
 
         # Replace active database safely
         shutil.move(str(temp_restore), str(db_path))
+        try:
+            os.chmod(str(db_path), 0o666)
+        except Exception:
+            pass
+
         print(f"[CloudDBSync] Successfully restored persistent database from cloud state ({len(db_bytes)} bytes)!")
         return True
 
@@ -166,8 +208,11 @@ def backup_db_to_cloud(force: bool = False) -> bool:
 
         try:
             # Checkpoint WAL to flush all transactions into main file
-            with sqlite3.connect(str(db_path)) as conn:
+            conn = sqlite3.connect(str(db_path))
+            try:
                 conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+            finally:
+                conn.close()
         except Exception as e:
             print(f"[CloudDBSync] Notice during WAL checkpoint: {e}")
 
@@ -239,6 +284,11 @@ def start_periodic_sync_daemon(interval_seconds: float = 45.0) -> None:
     Background daemon thread that periodically checks if koinexa.db
     has been modified and syncs it to the cloud release.
     """
+    global _daemon_started
+    if _daemon_started:
+        return
+    _daemon_started = True
+
     def _loop():
         global _last_synced_mtime
         # Wait initial delay on boot

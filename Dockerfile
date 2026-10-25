@@ -43,6 +43,7 @@ COPY backend/ ./backend/
 ENV PYTHONUNBUFFERED=1 \
     PORT=10000 \
     FLASK_DEBUG=0 \
+    DATABASE_PATH=/app/backend/koinexa.db \
     SMTP_HOST=smtp.gmail.com \
     SMTP_PORT=587 \
     SMTP_USER=koinexa63@gmail.com \
@@ -58,5 +59,5 @@ EXPOSE 5001
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
   CMD curl -f http://localhost:${PORT:-10000}/api/health || curl -f http://localhost:5001/api/health || exit 1
 
-# Production WSGI startup via Gunicorn bound to Render's injected PORT (default 10000)
-CMD ["sh", "-c", "exec python3 -m gunicorn --bind 0.0.0.0:${PORT:-10000} --workers 2 --threads 4 --timeout 120 backend.app:app"]
+# Pre-boot cloud restore and production WSGI startup via single-worker multi-threaded Gunicorn
+CMD ["sh", "-c", "python3 -c 'from backend.cloud_db_sync import restore_db_from_cloud; restore_db_from_cloud()' && exec python3 -m gunicorn --bind 0.0.0.0:${PORT:-10000} --workers 1 --threads 8 --timeout 120 backend.app:app"]

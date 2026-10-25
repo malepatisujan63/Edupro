@@ -43,16 +43,46 @@ _db_local = threading.local()
 
 def get_db_connection() -> sqlite3.Connection:
     conn = getattr(_db_local, "conn", None)
-    if conn is None:
-        conn = sqlite3.connect(str(DATABASE_PATH), check_same_thread=False)
-        conn.row_factory = sqlite3.Row
-        conn.execute("PRAGMA foreign_keys = ON")
-        conn.execute("PRAGMA journal_mode = WAL")
-        conn.execute("PRAGMA synchronous = NORMAL")
-        conn.execute("PRAGMA busy_timeout = 10000")
-        conn.execute("PRAGMA cache_size = -32000")
-        conn.execute("PRAGMA temp_store = MEMORY")
-        _db_local.conn = conn
+    if conn is not None:
+        try:
+            conn.execute("SELECT 1")
+            return conn
+        except Exception:
+            try:
+                conn.close()
+            except Exception:
+                pass
+            _db_local.conn = None
+
+    def _open_connection():
+        c = sqlite3.connect(str(DATABASE_PATH), check_same_thread=False, timeout=30.0)
+        c.row_factory = sqlite3.Row
+        c.execute("PRAGMA foreign_keys = ON")
+        c.execute("PRAGMA journal_mode = WAL")
+        c.execute("PRAGMA synchronous = NORMAL")
+        c.execute("PRAGMA busy_timeout = 30000")
+        c.execute("PRAGMA cache_size = -32000")
+        c.execute("PRAGMA temp_store = MEMORY")
+        return c
+
+    try:
+        conn = _open_connection()
+    except sqlite3.OperationalError as e:
+        err_msg = str(e).lower()
+        if "disk i/o error" in err_msg or "malformed" in err_msg or "database is locked" in err_msg:
+            print(f"[Database] SQLite OperationalError ({e}). Cleaning stale sidecars and retrying...")
+            for ext in ["-wal", "-shm", "-journal"]:
+                p = Path(str(DATABASE_PATH) + ext)
+                if p.exists():
+                    try:
+                        p.unlink()
+                    except Exception:
+                        pass
+            conn = _open_connection()
+        else:
+            raise
+
+    _db_local.conn = conn
     return conn
 
 def init_db() -> None:
