@@ -12,6 +12,7 @@ Features:
 - Data integrity verification: Checks SQLite header and PRAGMA integrity
   before applying snapshots.
 """
+from __future__ import annotations
 
 import os
 import sys
@@ -23,7 +24,7 @@ import threading
 import urllib.request
 import urllib.parse
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Tuple
 
 REPO_OWNER = "malepatisujan63"
 REPO_NAME = "Edupro"
