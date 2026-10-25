@@ -2170,6 +2170,7 @@ def create_post():
         title=title or "",
         content=f"{content or ''} {why_recommend or ''}".strip(),
         youtube_url=youtube_url,
+        course_url=course_url,
         post_type=post_type
     )
 
@@ -2193,6 +2194,10 @@ def create_post():
             title = vmeta["title"]
         if not image_url and vmeta.get("thumbnail_url"):
             image_url = vmeta["thumbnail_url"]
+    elif post_type == "hackathon" and sentinel_res.get("contest_meta"):
+        cmeta = sentinel_res["contest_meta"]
+        if not title and cmeta.get("portal_title"):
+            title = cmeta["portal_title"]
 
     post_id = f"p_{uuid.uuid4().hex[:10]}"
     now_ts = str(time.time())
