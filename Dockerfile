@@ -5,7 +5,7 @@
 # ========================================================
 
 # ── Stage 1: Build Frontend ──
-FROM node:20-alpine AS frontend-builder
+FROM node:22-bookworm-slim AS frontend-builder
 WORKDIR /app/frontend
 
 COPY frontend/package*.json ./
@@ -40,7 +40,7 @@ COPY backend/ ./backend/
 
 # Set production environment variables
 ENV PYTHONUNBUFFERED=1 \
-    PORT=5001 \
+    PORT=10000 \
     FLASK_DEBUG=0 \
     SMTP_HOST=smtp.gmail.com \
     SMTP_PORT=587 \
@@ -50,11 +50,12 @@ ENV PYTHONUNBUFFERED=1 \
     FROM_NAME=KOINEXA \
     PYTHONPATH=/app
 
+EXPOSE 10000
 EXPOSE 5001
 
-# Healthcheck
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD curl -f http://localhost:5001/api/health || exit 1
+# Dynamic Healthcheck accommodating Render default port 10000 or custom port 5001
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+  CMD curl -f http://localhost:${PORT:-10000}/api/health || curl -f http://localhost:5001/api/health || exit 1
 
-# Production WSGI startup via Gunicorn
-CMD exec gunicorn --bind 0.0.0.0:${PORT:-5001} --workers 2 --threads 4 --timeout 120 backend.app:app
+# Production WSGI startup via Gunicorn bound to Render's injected PORT (default 10000)
+CMD ["sh", "-c", "exec gunicorn --bind 0.0.0.0:${PORT:-10000} --workers 2 --threads 4 --timeout 120 backend.app:app"]
