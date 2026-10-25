@@ -292,7 +292,8 @@ class AgenticAcademicSentinel:
         for cat_name, patterns in NON_EDUCATIONAL_PATTERNS.items():
             for pat in patterns:
                 if re.search(pat, full_text):
-                    detected_non_edu_signals.append(f"{cat_name}: {pat.strip(r'\\b')}")
+                    clean_sig = pat.replace(r"\b", "").strip()
+                    detected_non_edu_signals.append(f"{cat_name}: {clean_sig}")
 
         # ── Step C: Academic Keyword Scanning ──
         academic_matches = []
