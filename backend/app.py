@@ -829,7 +829,7 @@ def initiate_login_otp(conn, user_dict, identifier):
 @app.route("/api/auth/student/login", methods=["POST"])
 def auth_student_login():
     data = request.get_json() or {}
-    identifier = str(data.get("username") or data.get("email") or "").strip().lower()
+    identifier = str(data.get("username") or data.get("email") or data.get("identifier") or "").strip().lower()
     password = str(data.get("password", "")).strip()
 
     client_ip = request.remote_addr or "client"
@@ -1087,7 +1087,7 @@ def auth_mentor_register():
 @app.route("/api/auth/mentor/login", methods=["POST"])
 def auth_mentor_login():
     data = request.get_json() or {}
-    identifier = str(data.get("username") or data.get("email") or "").strip().lower()
+    identifier = str(data.get("username") or data.get("email") or data.get("identifier") or "").strip().lower()
     password = str(data.get("password", "")).strip()
 
     if not identifier or not password:
@@ -1215,7 +1215,7 @@ def auth_login():
         return auth_mentor_login()
 
     # If portal_type omitted (generic client), check students DB first, then mentors DB, then admin
-    identifier = str(data.get("username") or data.get("email") or "").strip().lower()
+    identifier = str(data.get("username") or data.get("email") or data.get("identifier") or "").strip().lower()
     with get_db_connection() as conn:
         s_row = conn.execute("SELECT id FROM students WHERE username = ? OR email = ?", (identifier, identifier)).fetchone()
         if s_row:

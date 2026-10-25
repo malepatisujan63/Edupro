@@ -28,21 +28,73 @@ except ImportError:
 
 def seed_database():
     with get_db_connection() as conn:
-        # ── 1. SEED USERS ───────────────────────────────────────────────
+        # ── 1. SEED USERS, STUDENTS & MENTORS ─────────────────────────
         users_count = conn.execute("SELECT COUNT(*) as c FROM users").fetchone()["c"]
-        if users_count == 0:
-            default_pwd_hash = generate_password_hash("password123")
-            now_ts = str(time.time())
-            users = [
-                ("u_sujan", "sujan12345", default_pwd_hash, "sujan@peerbloom.edu", "Sujan M", "@sujan_m", "https://api.dicebear.com/7.x/bottts/svg?seed=Sujan", "Computer Science & Engineering | Passionate about System Design & Algorithmic problem solving", "IIT Madras", "student", "active", now_ts),
-                ("u_ananya", "ananya_code", default_pwd_hash, "ananya@bits.edu", "Ananya Sharma", "@ananya_codes", "https://api.dicebear.com/7.x/avataaars/svg?seed=Ananya", "Software Engineer @ Google | DSA Mentor & Content Creator", "BITS Pilani", "student", "active", now_ts),
-                ("u_rohit", "rohit_ai", default_pwd_hash, "rohit@iiit.edu", "Rohit Verma", "@rohit_ai", "https://api.dicebear.com/7.x/avataaars/svg?seed=Rohit", "ML Researcher & Open Source Contributor | Hackathon Enthusiast", "IIIT Hyderabad", "student", "active", now_ts),
-                ("u_shreya", "shreya_dev", default_pwd_hash, "shreya@nit.edu", "Shreya Sen", "@shreya_dev", "https://api.dicebear.com/7.x/avataaars/svg?seed=Shreya", "Full-Stack Dev & Competitive Programmer | 5★ on CodeChef", "NIT Trichy", "student", "active", now_ts),
-            ]
-            conn.executemany(
-                "INSERT INTO users (id, username, password_hash, email, name, handle, avatar, bio, college, role, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                users
+        default_pwd_hash = generate_password_hash("password123")
+        now_ts = str(time.time())
+
+        # Seed Students
+        seed_students = [
+            ("u_sujan", "sujan12345", default_pwd_hash, "sujan@bloom.com", "sujan@gmail.com", "Sujan M", "@sujan_m", "https://api.dicebear.com/7.x/bottts/svg?seed=Sujan", "Computer Science & Engineering | System Design Enthusiast", "IIT Madras", "student", "active", now_ts),
+            ("u_ananya", "ananya_code", default_pwd_hash, "ananya@bloom.com", "ananya@gmail.com", "Ananya Sharma", "@ananya_codes", "https://api.dicebear.com/7.x/avataaars/svg?seed=Ananya", "Software Engineer @ Google | DSA Mentor & Content Creator", "BITS Pilani", "student", "active", now_ts),
+            ("u_rohit", "rohit_ai", default_pwd_hash, "rohit@bloom.com", "rohit@gmail.com", "Rohit Verma", "@rohit_ai", "https://api.dicebear.com/7.x/avataaars/svg?seed=Rohit", "ML Researcher & Open Source Contributor | Hackathon Enthusiast", "IIIT Hyderabad", "student", "active", now_ts),
+            ("u_shreya", "shreya_dev", default_pwd_hash, "shreya@bloom.com", "shreya@gmail.com", "Shreya Sen", "@shreya_dev", "https://api.dicebear.com/7.x/avataaars/svg?seed=Shreya", "Full-Stack Dev & Competitive Programmer | 5★ on CodeChef", "NIT Trichy", "student", "active", now_ts),
+            ("u_aravind", "aravind", default_pwd_hash, "aravind@bloom.com", "aravind@gmail.com", "Aravind Kumar", "@aravind", "https://api.dicebear.com/7.x/avataaars/svg?seed=Aravind", "Competitive Programming & Web Systems | Looking for Study Mates", "IIT Delhi", "student", "active", now_ts),
+        ]
+        for s in seed_students:
+            conn.execute(
+                """INSERT OR REPLACE INTO students (id, username, password_hash, email, contact_email, name, handle, avatar, bio, college, role, status, created_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                s
             )
+            conn.execute(
+                """INSERT OR REPLACE INTO users (id, username, password_hash, email, contact_email, name, handle, avatar, bio, college, role, status, created_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                s
+            )
+
+        # Seed Faculty Mentor: Prof. K. Raghavan
+        raghavan_tuple = (
+            "u_faculty_1", "prof_raghavan", default_pwd_hash, "raghavan@bloom.com", "raghavan@gmail.com",
+            "Prof. K. Raghavan", "@prof_raghavan", "https://api.dicebear.com/7.x/bottts/svg?seed=raghavan",
+            "Professor of Computer Science & Engineering | Distributed Systems & Algorithms",
+            "IIT Madras", "Computer Science & Engineering", "IIT Madras", "Professor",
+            "https://iitm.ac.in/faculty/raghavan", "https://scholar.google.com/citations?user=raghavan",
+            "Senior academic faculty specializing in amortized analysis and distributed computing.",
+            "university", "approved", now_ts
+        )
+        conn.execute(
+            """INSERT OR REPLACE INTO mentors (id, username, password_hash, email, contact_email, name, handle, avatar, bio,
+                                               institution, department, college, designation, proof_link_1, proof_link_2,
+                                               statement_of_purpose, role, status, created_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            raghavan_tuple
+        )
+        conn.execute(
+            """INSERT OR REPLACE INTO users (id, username, password_hash, email, contact_email, name, handle, avatar, bio, college, role, status, created_at)
+               VALUES ('u_faculty_1', 'prof_raghavan', ?, 'raghavan@bloom.com', 'raghavan@gmail.com',
+                       'Prof. K. Raghavan', '@prof_raghavan', 'https://api.dicebear.com/7.x/bottts/svg?seed=raghavan',
+                       'Professor of Computer Science & Engineering | Distributed Systems & Algorithms',
+                       'IIT Madras', 'university', 'active', ?)""",
+            (default_pwd_hash, now_ts)
+        )
+
+        # Seed Superadmins
+        admin_sujan_hash = generate_password_hash("malepatisujankoinexaadmin_password")
+        conn.execute(
+            """INSERT OR REPLACE INTO users (id, username, password_hash, email, contact_email, name, handle, avatar, bio, college, role, status, created_at)
+               VALUES ('u_admin_sujan', 'malepatisujan_koinexaadmin', ?, 'malepatisujan_koinexaadmin@bloom.com', 'malepatisujan463@gmail.com',
+                       'Sujan Malepati (Superadmin)', '@malepatisujan_koinexaadmin', 'https://api.dicebear.com/7.x/bottts/svg?seed=malepatisujan_koinexaadmin',
+                       'Koinexa Chief Administrator & Veritas-AI Overseer', 'Koinexa HQ', 'admin', 'active', ?)""",
+            (admin_sujan_hash, now_ts)
+        )
+        conn.execute(
+            """INSERT OR REPLACE INTO users (id, username, password_hash, email, contact_email, name, handle, avatar, bio, college, role, status, created_at)
+               VALUES ('u_admin_peerbloom', 'peerbloom', ?, 'peerbloom@koinexa.com', 'malepatisujan463@gmail.com',
+                       'PeerBloom Superadmin', '@peerbloom', 'https://api.dicebear.com/7.x/bottts/svg?seed=peerbloom',
+                       'Platform Administrator', 'Koinexa HQ', 'admin', 'active', ?)""",
+            (default_pwd_hash, now_ts)
+        )
 
         # ── 2. SEED POSTS (YouTube Recommendation, Hackathon, Tweet) ─────
         posts_count = conn.execute("SELECT COUNT(*) as c FROM posts").fetchone()["c"]
