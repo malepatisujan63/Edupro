@@ -616,6 +616,18 @@ button.bg-indigo-600 *,
   color: var(--x-btn-primary-text) !important;
 }
 
+/* Dark Mode White Button Enhancement: Ensure buttons with white backgrounds display crisp black text */
+html:not(.light) button.dark\:bg-white,
+html:not(.light) button.dark\:bg-white *,
+html:not(.light) button[class*="dark:bg-white"],
+html:not(.light) button[class*="dark:bg-white"] *,
+[data-theme="dark"] button.dark\:bg-white,
+[data-theme="dark"] button.dark\:bg-white *,
+[data-theme="dark"] button[class*="dark:bg-white"],
+[data-theme="dark"] button[class*="dark:bg-white"] * {
+  color: #000000 !important;
+}
+
 /* Light Mode Tinted Text Enhancement: Ensure all pastel/light text colors are rich and sharp on white */
 html.light .text-blue-100,
 html.light .text-blue-200,

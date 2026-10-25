@@ -82,6 +82,7 @@ def init_db() -> None:
                 bio TEXT,
                 institution TEXT NOT NULL,
                 department TEXT NOT NULL,
+                college TEXT,
                 designation TEXT,
                 proof_link_1 TEXT,
                 proof_link_2 TEXT,
@@ -336,6 +337,7 @@ def init_db() -> None:
                 likes_count INTEGER DEFAULT 0,
                 comments_count INTEGER DEFAULT 0,
                 reposts_count INTEGER DEFAULT 0,
+                is_pinned INTEGER DEFAULT 0,
                 created_at TEXT NOT NULL,
                 FOREIGN KEY (classroom_id) REFERENCES classrooms(id) ON DELETE CASCADE
             );
@@ -590,6 +592,8 @@ def init_db() -> None:
             "ALTER TABLE mentors ADD COLUMN role TEXT DEFAULT 'university'",
             "ALTER TABLE mentors ADD COLUMN proof_link_1 TEXT",
             "ALTER TABLE mentors ADD COLUMN proof_link_2 TEXT",
+            "ALTER TABLE mentors ADD COLUMN college TEXT",
+            "ALTER TABLE classroom_posts ADD COLUMN is_pinned INTEGER DEFAULT 0",
             "ALTER TABLE users ADD COLUMN banned INTEGER NOT NULL DEFAULT 0",
             "ALTER TABLE users ADD COLUMN banned_reason TEXT",
             "ALTER TABLE users ADD COLUMN banned_at TEXT",

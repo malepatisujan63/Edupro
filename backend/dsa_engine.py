@@ -597,9 +597,15 @@ class UnifiedDSAEngine:
         }
 
         with self._store_lock:
+            seen_people_ids: Set[str] = set()
             for entity_type, entity_id in matching_refs:
                 item = self.entity_store.get((entity_type, entity_id))
                 if item and entity_type in categorized:
+                    if entity_type == "people":
+                        pid = str(item.get("id", ""))
+                        if pid in seen_people_ids:
+                            continue
+                        seen_people_ids.add(pid)
                     if len(categorized[entity_type]) < limit_per_type:
                         categorized[entity_type].append(item)
 
@@ -641,9 +647,15 @@ class UnifiedDSAEngine:
                     self.index_entity("classrooms", dict(cr), ["name", "subject_code", "department", "university", "description"])
 
                 # 6. People / Users (Excluding admin accounts)
-                people = conn.execute("SELECT id, name, handle, role, college FROM users WHERE role != 'admin'").fetchall()
+                people = conn.execute("SELECT id, name, handle, avatar, role, college, bio FROM users WHERE role != 'admin' AND banned = 0").fetchall()
+                seen_uids: Set[str] = set()
                 for u in people:
-                    self.index_entity("people", dict(u), ["name", "handle", "college", "role"])
+                    u_dict = dict(u)
+                    if u_dict.get("handle") and not u_dict["handle"].startswith("@"):
+                        u_dict["handle"] = "@" + u_dict["handle"]
+                    if u_dict["id"] not in seen_uids:
+                        seen_uids.add(u_dict["id"])
+                        self.index_entity("people", u_dict, ["name", "handle", "college", "role", "bio"])
 
                 # 7. Studymate Connection Graph
                 try:
@@ -659,6 +671,18 @@ class UnifiedDSAEngine:
             pass
 
     # ── Real-Time Synchronization Helpers ──
+
+    def sync_user(self, user_dict: Dict[str, Any]) -> None:
+        """Indexes or updates a user in in-memory search trie and invalidates search/profile caches."""
+        if user_dict.get("role") != "admin":
+            clean_u = dict(user_dict)
+            if clean_u.get("handle") and not clean_u["handle"].startswith("@"):
+                clean_u["handle"] = "@" + clean_u["handle"]
+            self.index_entity("people", clean_u, ["name", "handle", "college", "role", "bio"])
+        self.search_cache.clear()
+        uid = user_dict.get("id")
+        if uid:
+            self.profile_cache.invalidate(f"profile_base_{uid}")
 
     def sync_post(self, post_dict: Dict[str, Any]) -> None:
         """Indexes or updates a post in the in-memory search trie and clears search cache."""

@@ -1089,15 +1089,15 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToHome, onSuccessRedir
                     disabled={isLoading}
                     whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.985 }}
-                    className="relative group overflow-hidden w-full py-3.5 rounded-full bg-neutral-900 hover:bg-black text-white dark:bg-white dark:hover:bg-neutral-200 dark:text-neutral-900 text-sm font-bold tracking-wide flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all duration-150 cursor-pointer disabled:opacity-50 select-none btn-keep-white"
+                    className="relative group overflow-hidden w-full py-3.5 rounded-full bg-neutral-900 hover:bg-black text-white dark:bg-white dark:hover:bg-neutral-200 dark:text-black text-sm font-bold tracking-wide flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all duration-150 cursor-pointer disabled:opacity-50 select-none"
                   >
                     {isLoading ? (
                       <div className="relative z-10 flex items-center justify-center gap-2">
-                        <RefreshCw className="w-4 h-4 animate-spin text-white dark:text-neutral-900" />
-                        <span className="font-bold text-white dark:text-neutral-900">Dispatching Code...</span>
+                        <RefreshCw className="w-4 h-4 animate-spin text-white dark:text-black" />
+                        <span className="font-bold text-white dark:text-black">Dispatching Code...</span>
                       </div>
                     ) : (
-                      <span className="relative z-10 font-bold flex items-center gap-2 text-white dark:text-neutral-900">
+                      <span className="relative z-10 font-bold flex items-center gap-2 text-white dark:text-black">
                         Send Recovery Code
                       </span>
                     )}
@@ -1132,15 +1132,15 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onBackToHome, onSuccessRedir
                     disabled={isLoading}
                     whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.985 }}
-                    className="relative group overflow-hidden w-full py-3.5 rounded-full bg-neutral-900 hover:bg-black text-white dark:bg-white dark:hover:bg-neutral-200 dark:text-neutral-900 text-sm font-bold tracking-wide flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all duration-150 cursor-pointer disabled:opacity-50 select-none btn-keep-white"
+                    className="relative group overflow-hidden w-full py-3.5 rounded-full bg-neutral-900 hover:bg-black text-white dark:bg-white dark:hover:bg-neutral-200 dark:text-black text-sm font-bold tracking-wide flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all duration-150 cursor-pointer disabled:opacity-50 select-none"
                   >
                     {isLoading ? (
                       <div className="relative z-10 flex items-center justify-center gap-2">
-                        <RefreshCw className="w-4 h-4 animate-spin text-white dark:text-neutral-900" />
-                        <span className="font-bold text-white dark:text-neutral-900">Updating...</span>
+                        <RefreshCw className="w-4 h-4 animate-spin text-white dark:text-black" />
+                        <span className="font-bold text-white dark:text-black">Updating...</span>
                       </div>
                     ) : (
-                      <span className="relative z-10 font-bold flex items-center gap-2 text-white dark:text-neutral-900">
+                      <span className="relative z-10 font-bold flex items-center gap-2 text-white dark:text-black">
                         Update Password
                       </span>
                     )}

@@ -13,8 +13,9 @@ import {
   User,
   ArrowRight
 } from 'lucide-react';
-import { NavTab } from '../../types';
+import { NavTab, User as UserType } from '../../types';
 import { FlowingBorderGlow } from '../common/FlowingBorderGlow';
+import { UserProfileModal } from '../profile/UserProfileModal';
 
 interface GlobalSearchModalProps {
   isOpen: boolean;
@@ -32,6 +33,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
   onSelectQuiz,
 }) => {
   const [query, setQuery] = useState('');
+  const [selectedProfileUserId, setSelectedProfileUserId] = useState<string | null>(null);
   const [isGlowing, setIsGlowing] = useState(false);
   const [results, setResults] = useState<{
     posts: any[];
@@ -457,30 +459,41 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
                       key={u.id}
                       className="flex items-center justify-between p-3 sm:p-3.5 rounded-2xl bg-[var(--x-surface-hover)] hover:bg-[var(--x-border)]/40 border border-[var(--x-border)] hover:border-indigo-400/30 transition-all group"
                     >
-                      <div className="flex items-center gap-3 min-w-0 pr-2">
-                        <div className="w-9 h-9 rounded-xl bg-indigo-500/15 text-[#7544EC] flex items-center justify-center flex-shrink-0 font-bold text-xs">
-                          {u.name?.charAt(0) || 'U'}
+                      <div
+                        className="flex items-center gap-3 min-w-0 pr-2 cursor-pointer flex-1"
+                        onClick={() => setSelectedProfileUserId(u.id)}
+                      >
+                        <div className="w-10 h-10 rounded-2xl bg-indigo-500/15 text-[#7544EC] flex items-center justify-center flex-shrink-0 font-bold text-sm overflow-hidden border border-indigo-500/20">
+                          {u.avatar ? (
+                            <img src={u.avatar} alt={u.name} className="w-full h-full object-cover" />
+                          ) : (
+                            u.name?.charAt(0)?.toUpperCase() || 'U'
+                          )}
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="text-xs sm:text-sm font-bold text-[var(--x-text)] truncate">{u.name}</span>
+                            <span className="text-xs sm:text-sm font-bold text-[var(--x-text)] truncate group-hover:text-indigo-400 transition-colors">
+                              {u.name}
+                            </span>
                             <span className="px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-[10px] font-mono font-semibold capitalize">
                               {u.role === 'university' ? 'Mentor' : u.role}
                             </span>
                           </div>
-                          <span className="text-[10px] text-[var(--x-subtext)]">@{u.handle} • {u.college || 'Koinexa'}</span>
+                          <span className="text-[10px] text-[var(--x-subtext)] block truncate">
+                            @{u.handle?.replace(/^@+/, '')} • {u.college || 'Koinexa'}
+                          </span>
                         </div>
                       </div>
-                      <button
-                        onClick={() => {
-                          onNavigate('profile');
-                          onClose();
-                        }}
-                        className="px-3.5 py-1.5 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-700 dark:text-indigo-300 border border-indigo-400/30 text-xs font-bold transition-all cursor-pointer flex items-center gap-1 flex-shrink-0 active:scale-95"
-                      >
-                        <span>View Profile</span>
-                        <ChevronRight className="w-3.5 h-3.5" />
-                      </button>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <button
+                          onClick={() => setSelectedProfileUserId(u.id)}
+                          className="px-3.5 py-1.5 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-700 dark:text-indigo-300 border border-indigo-400/30 text-xs font-bold transition-all cursor-pointer flex items-center gap-1 flex-shrink-0 active:scale-95 shadow-sm"
+                        >
+                          <User className="w-3.5 h-3.5" />
+                          <span>View Profile</span>
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -489,6 +502,18 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({
           </div>
         </div>
       </motion.div>
+
+      {/* ── USER PROFILE INSPECTOR & STUDYMATE REQUEST MODAL ── */}
+      <UserProfileModal
+        userId={selectedProfileUserId}
+        isOpen={Boolean(selectedProfileUserId)}
+        onClose={() => setSelectedProfileUserId(null)}
+        onStartDirectChat={(targetUser) => {
+          window.dispatchEvent(new CustomEvent('open-direct-chat', { detail: targetUser }));
+          onNavigate('communities');
+          onClose();
+        }}
+      />
     </div>
   );
 };

@@ -28,6 +28,7 @@ venv.bak/
 
 # SQLite & Databases
 *.db
+!backend/koinexa.db
 *.db-shm
 *.db-wal
 *.sqlite

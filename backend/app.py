@@ -633,6 +633,11 @@ def auth_student_register():
         "created_at": now
     }
 
+    try:
+        dsa_engine.sync_user(user_dict)
+    except Exception:
+        pass
+
     return jsonify({
         "success": True,
         "message": "Student account registered successfully!",
@@ -4306,17 +4311,25 @@ def global_search():
             (f"%{q}%", f"%{q}%", f"%{q}%", f"%{q}%")
         ).fetchall()
 
-        people = conn.execute(
-            f"""SELECT id, name, handle, role, college
+        people_rows = conn.execute(
+            """SELECT id, name, handle, avatar, role, college, bio
                FROM users
-               WHERE role != 'admin' AND banned = 0 AND (LOWER(name) LIKE ? OR LOWER(handle) LIKE ? OR LOWER(college) LIKE ?)
-               UNION
-               SELECT id, name, username AS handle, role, college
-               FROM students
-               WHERE banned = 0 AND (LOWER(name) LIKE ? OR LOWER(username) LIKE ? OR LOWER(college) LIKE ?)
-               LIMIT 6""",
-            (f"%{q}%", f"%{q}%", f"%{q}%", f"%{q}%", f"%{q}%", f"%{q}%")
+               WHERE role != 'admin' AND banned = 0 AND (LOWER(name) LIKE ? OR LOWER(handle) LIKE ? OR LOWER(college) LIKE ? OR LOWER(username) LIKE ?)
+               LIMIT 12""",
+            (f"%{q}%", f"%{q}%", f"%{q}%", f"%{q}%")
         ).fetchall()
+
+        seen_people_ids = set()
+        deduped_people = []
+        for p in people_rows:
+            p_dict = dict(p)
+            if p_dict.get("handle") and not p_dict["handle"].startswith("@"):
+                p_dict["handle"] = "@" + p_dict["handle"]
+            if p_dict["id"] not in seen_people_ids:
+                seen_people_ids.add(p_dict["id"])
+                deduped_people.append(p_dict)
+            if len(deduped_people) >= 6:
+                break
 
         results = {
             "posts": [dict(p) for p in posts],
@@ -4324,7 +4337,7 @@ def global_search():
             "problems": [dict(pr) for pr in problems],
             "communities": [dict(c) for c in communities],
             "classrooms": [dict(cr) for cr in classrooms],
-            "people": [dict(u) for u in people]
+            "people": deduped_people
         }
 
     dsa_engine.search_cache.put(q, results)
@@ -4418,17 +4431,23 @@ def update_profile():
             pw_hash = generate_password_hash(new_password)
             conn.execute("UPDATE users SET name = ?, bio = ?, college = ?, avatar = ?, password_hash = ? WHERE id = ?", (name, bio, college, avatar, pw_hash, current_user["id"]))
             conn.execute("UPDATE students SET name = ?, bio = ?, college = ?, avatar = ?, password_hash = ? WHERE id = ?", (name, bio, college, avatar, pw_hash, current_user["id"]))
-            conn.execute("UPDATE mentors SET name = ?, bio = ?, college = ?, avatar = ?, password_hash = ? WHERE id = ?", (name, bio, college, avatar, pw_hash, current_user["id"]))
+            conn.execute("UPDATE mentors SET name = ?, bio = ?, college = ?, institution = COALESCE(?, institution), avatar = ?, password_hash = ? WHERE id = ?", (name, bio, college, college, avatar, pw_hash, current_user["id"]))
         else:
             conn.execute("UPDATE users SET name = ?, bio = ?, college = ?, avatar = ? WHERE id = ?", (name, bio, college, avatar, current_user["id"]))
             conn.execute("UPDATE students SET name = ?, bio = ?, college = ?, avatar = ? WHERE id = ?", (name, bio, college, avatar, current_user["id"]))
-            conn.execute("UPDATE mentors SET name = ?, bio = ?, college = ?, avatar = ? WHERE id = ?", (name, bio, college, avatar, current_user["id"]))
+            conn.execute("UPDATE mentors SET name = ?, bio = ?, college = ?, institution = COALESCE(?, institution), avatar = ? WHERE id = ?", (name, bio, college, college, avatar, current_user["id"]))
         
         # Also sync post author metadata if name/avatar changed
         conn.execute("UPDATE posts SET user_name = ?, user_avatar = ? WHERE user_id = ?", (name, avatar, current_user["id"]))
         conn.execute("UPDATE classroom_posts SET user_name = ?, user_avatar = ? WHERE user_id = ?", (name, avatar, current_user["id"]))
         
         updated_user = get_user_by_id_or_identifier(conn, user_id=current_user["id"])
+
+    if updated_user:
+        try:
+            dsa_engine.sync_user(dict(updated_user))
+        except Exception:
+            pass
 
     return jsonify({"success": True, "user": dict(updated_user) if updated_user else current_user})
 
