@@ -50,8 +50,10 @@ try:
     from backend.email_service import (
         send_email, send_otp_email, send_login_otp_email, send_faculty_acceptance_email,
         send_faculty_rejection_email, get_sent_emails, send_test_email, get_smtp_config,
-        send_account_suspension_email, send_faculty_registration_acknowledgement_email
+        send_account_suspension_email, send_faculty_registration_acknowledgement_email,
+        send_agentic_academic_violation_email
     )
+    from backend.academic_moderation_agent import academic_sentinel
     from backend.veritas_agent import (
         evaluate_faculty_application, DISPOSABLE_EMAIL_DOMAINS, ACADEMIC_TLD_PATTERNS
     )
@@ -70,8 +72,10 @@ except ImportError:
     from email_service import (
         send_email, send_otp_email, send_login_otp_email, send_faculty_acceptance_email,
         send_faculty_rejection_email, get_sent_emails, send_test_email, get_smtp_config,
-        send_account_suspension_email, send_faculty_registration_acknowledgement_email
+        send_account_suspension_email, send_faculty_registration_acknowledgement_email,
+        send_agentic_academic_violation_email
     )
+    from academic_moderation_agent import academic_sentinel
     from veritas_agent import (
         evaluate_faculty_application, DISPOSABLE_EMAIL_DOMAINS, ACADEMIC_TLD_PATTERNS
     )
@@ -390,6 +394,108 @@ def check_content_and_enforce_ban(text: str, user_id: str = None, stage: str = "
     return True, None
 
 
+def enforce_academic_policy_violation(user: dict, sentinel_res: dict, content_snippet: str = ""):
+    """
+    Enforces strict Academic Content Policy violation:
+    1. Logs violation in moderation_violations table.
+    2. Dispatches formal SMTP account termination email with clear reason, category, and policy notice.
+    3. Purges all user data permanently (cascading hard delete) via purge_user_data_hard.
+    """
+    if not user:
+        return
+    user_id = user.get("id")
+    if not user_id:
+        return
+
+    # Superadmin accounts are exempt from auto-purge
+    if user.get("role") == "admin":
+        return
+
+    reason = sentinel_res.get("reason") or "Strict Educational Content Policy Violation"
+    category = sentinel_res.get("category") or "Non-Educational Media / Entertainment"
+    video_meta = sentinel_res.get("video_meta") or {}
+    video_title = video_meta.get("title", "")
+    dest_email = user.get("contact_email") or user.get("email")
+    user_name = user.get("name") or "User"
+    now_str = str(time.time())
+
+    # Invalidate DSA search and messages cache immediately
+    try:
+        dsa_engine.search_cache.clear()
+        dsa_engine.messages_cache.clear()
+    except Exception:
+        pass
+
+    # 1. Log violation in moderation_violations table before purging
+    try:
+        with get_db_connection() as conn:
+            conn.execute("""
+                INSERT INTO moderation_violations (
+                    id, user_id, user_name, user_email, user_role,
+                    detected_word, detected_language, content_snippet,
+                    stage, confidence, timestamp
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                f"viol_acad_{secrets.token_hex(8)}",
+                user_id,
+                user_name,
+                dest_email or "",
+                user.get("role", "student"),
+                category,
+                "agentic_academic_sentinel",
+                str(content_snippet or video_title)[:250],
+                "academic_content_moderation",
+                sentinel_res.get("confidence", 0.99),
+                now_str
+            ))
+            conn.commit()
+    except Exception as e:
+        print(f"[AcademicSentinel] Failed to log violation: {e}")
+
+    # 2. Dispatch formal SMTP Disciplinary & Termination Email
+    if dest_email:
+        try:
+            send_agentic_academic_violation_email(
+                to_email=dest_email,
+                recipient_name=user_name,
+                violation_reason=reason,
+                content_snippet=str(content_snippet or video_title)[:250],
+                category=category,
+                video_title=video_title
+            )
+            print(f"[AcademicSentinel] Dispatched disciplinary termination email to {dest_email}")
+        except Exception as mail_err:
+            print(f"[AcademicSentinel] Failed to dispatch termination email: {mail_err}")
+
+    # 3. Permanently hard-purge user account and all associated data
+    try:
+        purge_user_data_hard(user_id)
+        print(f"[AcademicSentinel] Account {user_name} ({user_id}) permanently purged and banned.")
+    except Exception as purge_err:
+        print(f"[AcademicSentinel] Error during hard purge: {purge_err}")
+
+
+@app.route("/api/moderation/academic-test", methods=["POST"])
+def api_test_academic_moderation():
+    """Diagnostic endpoint to evaluate content against the Agentic Academic Sentinel."""
+    data = request.get_json(silent=True) or {}
+    title = data.get("title", "")
+    content = data.get("content", "")
+    youtube_url = data.get("youtube_url")
+    post_type = data.get("post_type", "tweet")
+
+    res = academic_sentinel.evaluate_academic_content(
+        title=title,
+        content=content,
+        youtube_url=youtube_url,
+        post_type=post_type
+    )
+    return jsonify({
+        "success": True,
+        **res
+    })
+
+
 @app.route("/api/moderation/test", methods=["POST"])
 def api_test_moderation():
     """Diagnostic endpoint to test text against PSAD Speech-Act & MLF moderation engine."""
@@ -488,7 +594,7 @@ def get_current_user():
     with get_db_connection() as conn:
         # 1. Check admin/legacy users table first
         row = conn.execute(
-            """SELECT u.id, u.username, u.email, u.name, u.handle, u.avatar, u.bio, u.college, u.role, u.status, u.banned, u.banned_reason, u.rejection_reason, u.created_at
+            """SELECT u.id, u.username, u.email, u.contact_email, u.name, u.handle, u.avatar, u.bio, u.college, u.role, u.status, u.banned, u.banned_reason, u.rejection_reason, u.created_at
                FROM users u
                JOIN auth_tokens t ON u.id = t.user_id
                WHERE t.token = ?""",
@@ -501,7 +607,7 @@ def get_current_user():
 
         # 2. Check students table
         student_row = conn.execute(
-            """SELECT s.id, s.username, s.email, s.name, s.handle, s.avatar, s.bio, s.college,
+            """SELECT s.id, s.username, s.email, s.contact_email, s.name, s.handle, s.avatar, s.bio, s.college,
                       'student' AS role, 'active' AS status, s.banned, s.banned_reason, NULL AS rejection_reason, s.created_at
                FROM students s
                JOIN auth_tokens t ON s.id = t.user_id
@@ -515,7 +621,7 @@ def get_current_user():
 
         # 3. Check mentors table
         mentor_row = conn.execute(
-            """SELECT m.id, m.username, m.email, m.name, m.handle, m.avatar, m.bio, m.institution AS college,
+            """SELECT m.id, m.username, m.email, m.contact_email, m.name, m.handle, m.avatar, m.bio, m.institution AS college,
                       COALESCE(m.role, 'university') AS role, m.status, m.banned, m.banned_reason, m.rejection_reason, m.created_at
                FROM mentors m
                JOIN auth_tokens t ON m.id = t.user_id
@@ -2059,6 +2165,35 @@ def create_post():
                     "error": f"Invalid URL in {txt_name}: {link_err}"
                 }), 400
 
+    # ── AGENTIC AI ACADEMIC SENTINEL: STRICT EDUCATIONAL ENFORCEMENT ──
+    sentinel_res = academic_sentinel.evaluate_academic_content(
+        title=title or "",
+        content=f"{content or ''} {why_recommend or ''}".strip(),
+        youtube_url=youtube_url,
+        post_type=post_type
+    )
+
+    if not sentinel_res.get("is_educational") or sentinel_res.get("verdict") == "BAN":
+        violation_reason = sentinel_res.get("reason", "Strict Educational Content Policy Violation")
+        enforce_academic_policy_violation(
+            user=current_user,
+            sentinel_res=sentinel_res,
+            content_snippet=f"{title or ''} {content or ''}".strip()
+        )
+        return jsonify({
+            "success": False,
+            "status": "banned",
+            "error": f"Educational Content Policy Violation: {violation_reason} Your account has been permanently purged and terminated as per KOINEXA Terms & Conditions. An official disciplinary notice has been dispatched to your registered email."
+        }), 403
+
+    # Backfill title/thumbnail from verified video metadata if user didn't supply them
+    if post_type == "youtube_course" and sentinel_res.get("video_meta"):
+        vmeta = sentinel_res["video_meta"]
+        if not title and vmeta.get("title"):
+            title = vmeta["title"]
+        if not image_url and vmeta.get("thumbnail_url"):
+            image_url = vmeta["thumbnail_url"]
+
     post_id = f"p_{uuid.uuid4().hex[:10]}"
     now_ts = str(time.time())
 
@@ -2158,6 +2293,24 @@ def post_comments(post_id):
                 "success": False,
                 "status": "banned",
                 "error": f"{mod_err} Your account has been suspended for violating content policies. Contact administrator to unblock."
+            }), 403
+
+        # Agentic AI Academic Sentinel: Content Moderation for Comments
+        comm_sentinel = academic_sentinel.evaluate_academic_content(
+            content=text,
+            youtube_url=text if ("youtube.com" in text or "youtu.be" in text) else None,
+            post_type="tweet"
+        )
+        if not comm_sentinel.get("is_educational") or comm_sentinel.get("verdict") == "BAN":
+            enforce_academic_policy_violation(
+                user=current_user,
+                sentinel_res=comm_sentinel,
+                content_snippet=text
+            )
+            return jsonify({
+                "success": False,
+                "status": "banned",
+                "error": f"Academic Policy Violation: {comm_sentinel.get('reason')}. Your account has been permanently purged and terminated."
             }), 403
 
         c_id = f"c_{uuid.uuid4().hex[:10]}"
@@ -2298,6 +2451,8 @@ def send_studymate_request():
 
         # Notify recipient
         notif_id = f"notif_{uuid.uuid4().hex[:10]}"
+        sender_handle = str(current_user.get("handle") or current_user.get("username") or "")
+        handle_display = sender_handle if sender_handle.startswith("@") else f"@{sender_handle}"
         conn.execute(
             """INSERT INTO notifications (id, user_id, sender_id, sender_name, type, title, message, data_json, is_read, created_at)
                VALUES (?, ?, ?, ?, 'studymate_request', 'New Study Mate Request', ?, ?, 0, ?)""",
@@ -2306,12 +2461,12 @@ def send_studymate_request():
                 target_user_id,
                 current_user["id"],
                 current_user["name"],
-                f"{current_user['name']} (@{current_user['handle']}) sent you a Study Mate request.",
+                f"{current_user['name']} ({handle_display}) sent you a Study Mate request.",
                 json.dumps({
                     "sender_id": current_user["id"],
                     "sender_name": current_user["name"],
                     "sender_avatar": current_user["avatar"],
-                    "sender_handle": current_user["handle"]
+                    "sender_handle": handle_display
                 }),
                 now_ts
             )
@@ -2348,6 +2503,17 @@ def respond_studymate_request():
         ).fetchone()
 
         if not req_row:
+            # Check if already mutual study mates or accepted earlier
+            is_conn = conn.execute(
+                "SELECT 1 FROM studymate_connections WHERE user_id = ? AND target_user_id = ?",
+                (current_user["id"], sender_id)
+            ).fetchone()
+            if is_conn:
+                conn.execute(
+                    "UPDATE notifications SET is_read = 1, type = 'studymate_accepted', title = 'Study Mate Connected', message = 'You and ' || sender_name || ' are now Study Mates!' WHERE user_id = ? AND type = 'studymate_request' AND sender_id = ?",
+                    (current_user["id"], sender_id)
+                )
+                return jsonify({"success": True, "status": "accepted", "message": "Already connected as Study Mates!"})
             return jsonify({"success": False, "error": "No pending request found from this user"}), 404
 
         if action == "accept":
@@ -2368,7 +2534,7 @@ def respond_studymate_request():
             except Exception:
                 pass
             conn.execute(
-                "UPDATE notifications SET is_read = 1 WHERE user_id = ? AND type = 'studymate_request' AND sender_id = ?",
+                "UPDATE notifications SET is_read = 1, type = 'studymate_accepted', title = 'Study Mate Connected', message = 'You and ' || sender_name || ' are now Study Mates!' WHERE user_id = ? AND type = 'studymate_request' AND sender_id = ?",
                 (current_user["id"], sender_id)
             )
             notif_id = f"notif_{uuid.uuid4().hex[:10]}"
@@ -2402,10 +2568,10 @@ def respond_studymate_request():
                 (now_ts, req_row["id"])
             )
             conn.execute(
-                "UPDATE notifications SET is_read = 1 WHERE user_id = ? AND type = 'studymate_request' AND sender_id = ?",
+                "UPDATE notifications SET is_read = 1, type = 'studymate_rejected', title = 'Study Mate Request Declined', message = 'Declined Study Mate request from ' || sender_name WHERE user_id = ? AND type = 'studymate_request' AND sender_id = ?",
                 (current_user["id"], sender_id)
             )
-            return jsonify({"success": True, "status": "none", "message": "Request declined"})
+            return jsonify({"success": True, "status": "rejected", "message": "Study Mate request declined"})
 
 
 @app.route("/api/studymates/status/<target_user_id>", methods=["GET"])
@@ -5251,12 +5417,31 @@ def create_classroom_post(classroom_id):
         for field_val in [title, content, tags]:
             if field_val:
                 is_clean, mod_err = check_content_and_enforce_ban(field_val, user_id=current_user["id"], stage="classroom_post")
-            if not is_clean:
-                return jsonify({
-                    "success": False,
-                    "status": "banned",
-                    "error": f"{mod_err} Your account has been suspended for violating content policies. Contact administrator to unblock."
-                }), 403
+                if not is_clean:
+                    return jsonify({
+                        "success": False,
+                        "status": "banned",
+                        "error": f"{mod_err} Your account has been suspended for violating content policies. Contact administrator to unblock."
+                    }), 403
+
+        # Agentic AI Academic Sentinel: Strict Educational Content Policy
+        cr_sentinel = academic_sentinel.evaluate_academic_content(
+            title=title or "",
+            content=content or "",
+            youtube_url=youtube_url,
+            post_type="youtube_course" if youtube_url else "tweet"
+        )
+        if not cr_sentinel.get("is_educational") or cr_sentinel.get("verdict") == "BAN":
+            enforce_academic_policy_violation(
+                user=current_user,
+                sentinel_res=cr_sentinel,
+                content_snippet=f"{title} - {content}"
+            )
+            return jsonify({
+                "success": False,
+                "status": "banned",
+                "error": f"Educational Content Policy Violation: {cr_sentinel.get('reason')}. Your account has been permanently purged and terminated as per KOINEXA Terms & Conditions. An official disciplinary notice has been sent to your registered email."
+            }), 403
 
         post_id = f"cp_{uuid.uuid4().hex[:10]}"
         now = str(time.time())
@@ -5374,6 +5559,24 @@ def classroom_post_comments(classroom_id, post_id):
                     "success": False,
                     "status": "banned",
                     "error": f"{mod_err} Your account has been suspended for violating content policies. Contact administrator to unblock."
+                }), 403
+
+            # Agentic AI Academic Sentinel: Content Moderation for Classroom Comments
+            cr_comm_sentinel = academic_sentinel.evaluate_academic_content(
+                content=text,
+                youtube_url=text if ("youtube.com" in text or "youtu.be" in text) else None,
+                post_type="tweet"
+            )
+            if not cr_comm_sentinel.get("is_educational") or cr_comm_sentinel.get("verdict") == "BAN":
+                enforce_academic_policy_violation(
+                    user=current_user,
+                    sentinel_res=cr_comm_sentinel,
+                    content_snippet=text
+                )
+                return jsonify({
+                    "success": False,
+                    "status": "banned",
+                    "error": f"Educational Content Policy Violation: {cr_comm_sentinel.get('reason')}. Your account has been permanently purged and terminated."
                 }), 403
 
             comment_id = f"cpc_{uuid.uuid4().hex[:10]}"

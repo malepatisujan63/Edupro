@@ -93,6 +93,20 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
     if (!classroomId || !memberId) return;
 
     setActionLoadingId(notif.id);
+    setNotifications((prev) =>
+      prev.map((item) =>
+        item.id === notif.id
+          ? {
+              ...item,
+              type: action === 'accept' ? 'join_accepted' : 'join_rejected',
+              is_read: 1,
+              title: action === 'accept' ? 'Student Accepted' : 'Join Request Declined',
+              message: action === 'accept' ? 'Student accepted into classroom.' : 'Join request declined.',
+            }
+          : item
+      )
+    );
+
     try {
       const res = await authFetch(
         `/api/classrooms/${classroomId}/requests/${memberId}/decide`,
@@ -102,12 +116,11 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
           body: JSON.stringify({ action, decision: action })
         }
       );
-      const data = await res.json();
-      if (data.success) {
-        await handleMarkOneRead(notif.id);
+      await res.json();
+      if (onRefreshUnread) onRefreshUnread();
+      setTimeout(() => {
         fetchNotifications();
-        if (onRefreshUnread) onRefreshUnread();
-      }
+      }, 1500);
     } catch (err) {
       console.error('Failed to process join request', err);
     } finally {
@@ -123,18 +136,35 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
     if (!senderId) return;
 
     setActionLoadingId(notif.id);
+    // Optimistically update notification card state so buttons immediately disappear and card updates
+    setNotifications((prev) =>
+      prev.map((item) =>
+        item.id === notif.id
+          ? {
+              ...item,
+              type: action === 'accept' ? 'studymate_accepted' : 'studymate_rejected',
+              is_read: 1,
+              title: action === 'accept' ? 'Study Mate Connected' : 'Study Mate Request Declined',
+              message: action === 'accept'
+                ? `You and ${item.sender_name || 'your peer'} are now Study Mates! You can chat 1-on-1.`
+                : `Declined request from ${item.sender_name || 'peer'}.`,
+            }
+          : item
+      )
+    );
+
     try {
       const res = await authFetch('/api/studymates/respond', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sender_id: senderId, action })
       });
-      const data = await res.json();
-      if (data.success) {
-        await handleMarkOneRead(notif.id);
+      await res.json();
+      window.dispatchEvent(new CustomEvent('studymate-updated', { detail: { senderId, action } }));
+      if (onRefreshUnread) onRefreshUnread();
+      setTimeout(() => {
         fetchNotifications();
-        if (onRefreshUnread) onRefreshUnread();
-      }
+      }, 1500);
     } catch (err) {
       console.error('Failed to process studymate request', err);
     } finally {
@@ -309,6 +339,20 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                               <UserX className="w-3.5 h-3.5" />
                               <span>Decline</span>
                             </button>
+                          </div>
+                        )}
+
+                        {/* Study Mate Accepted Confirmation Pill */}
+                        {isStudyMateAccepted && (
+                          <div className="mt-2.5 flex items-center gap-1.5 text-xs text-emerald-500 font-bold bg-emerald-500/10 px-2.5 py-1 rounded-xl w-fit border border-emerald-500/20">
+                            <UserCheck className="w-3.5 h-3.5" />
+                            <span>Connected as Study Mates</span>
+                          </div>
+                        )}
+                        {n.type === 'studymate_rejected' && (
+                          <div className="mt-2.5 flex items-center gap-1.5 text-xs text-rose-400 font-semibold bg-rose-500/10 px-2.5 py-1 rounded-xl w-fit border border-rose-500/20">
+                            <X className="w-3.5 h-3.5" />
+                            <span>Request Declined</span>
                           </div>
                         )}
 

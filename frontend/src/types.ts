@@ -464,7 +464,7 @@ export interface NotificationItem {
   user_id: string;
   sender_id?: string;
   sender_name?: string;
-  type: 'join_request' | 'join_accepted' | 'join_rejected' | 'new_post' | 'new_contest' | 'new_challenge' | 'studymate_request' | 'studymate_accepted' | 'cbt_proctor_alert';
+  type: 'join_request' | 'join_accepted' | 'join_rejected' | 'new_post' | 'new_contest' | 'new_challenge' | 'studymate_request' | 'studymate_accepted' | 'studymate_rejected' | 'cbt_proctor_alert';
   title: string;
   message: string;
   data?: Record<string, any>;

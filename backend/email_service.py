@@ -796,6 +796,86 @@ def send_faculty_registration_acknowledgement_email(to_email: str, recipient_nam
     return send_email(to_email, subject, html, "faculty_registration_ack", recipient_name)
 
 
+def send_agentic_academic_violation_email(
+    to_email: str,
+    recipient_name: str,
+    violation_reason: str,
+    content_snippet: str = "",
+    category: str = "Entertainment / Non-Educational",
+    video_title: str = ""
+) -> bool:
+    """
+    Sends formal notification when an account is permanently purged and terminated
+    by the Agentic Academic Content Moderation Sentinel for violating educational terms.
+    """
+    subject = "URGENT: KOINEXA Account Terminated - Non-Educational Content Policy Violation"
+    snippet_content = content_snippet or video_title or "Unspecified content"
+    snippet_display = f'<div style="background: #ffffff; border: 1px solid #fecaca; border-radius: 6px; padding: 10px 14px; font-family: monospace; font-size: 11px; color: #991b1b; margin-top: 8px; word-break: break-word;">"{snippet_content}"</div>'
+
+    html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Terminated</title>
+</head>
+<body style="margin: 0; padding: 40px 16px; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #334155;">
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 520px; margin: 0 auto;">
+    <tr>
+      <td>
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 36px 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+          <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 24px;">
+            <tr>
+              <td>
+                <span style="font-size: 15px; font-weight: 700; color: #0f172a; letter-spacing: -0.2px;">KOINEXA</span>
+              </td>
+              <td align="right">
+                <span style="display: inline-block; font-size: 11px; font-weight: 700; color: #dc2626; background: #fef2f2; border: 1px solid #fee2e2; padding: 3px 10px; border-radius: 9999px;">
+                  TERMINATION NOTICE
+                </span>
+              </td>
+            </tr>
+          </table>
+
+          <h1 style="margin: 0 0 14px 0; font-size: 21px; font-weight: 800; color: #991b1b; letter-spacing: -0.3px; line-height: 1.3;">
+            Account Terminated &amp; Data Purged
+          </h1>
+          
+          <p style="margin: 0 0 18px 0; font-size: 14px; line-height: 1.6; color: #475569;">
+            Dear <strong>{recipient_name}</strong>,<br><br>
+            Your KOINEXA account associated with <strong>{to_email}</strong> has been automatically terminated and all associated session tokens have been revoked by the <strong>Veritas Academic Sentinel</strong>.
+          </p>
+
+          <div style="background: #fef2f2; border-left: 4px solid #dc2626; border-radius: 6px; padding: 14px 16px; margin: 0 0 20px 0;">
+            <div style="font-size: 11px; font-weight: 700; color: #991b1b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Detected Violation:</div>
+            <div style="font-size: 13px; font-weight: 600; color: #7f1d1d; line-height: 1.5;">{violation_reason}</div>
+            <div style="font-size: 12px; color: #b91c1c; margin-top: 6px;">Classification: <strong>{category}</strong></div>
+            {snippet_display}
+          </div>
+
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; margin: 0 0 20px 0; font-size: 12.5px; color: #475569; line-height: 1.6;">
+            <strong style="color: #0f172a;">Strict Educational-Only Policy:</strong><br>
+            KOINEXA is an exclusively academic, scientific, and engineering learning platform for university students and faculty. Under our Terms of Service (Section 4.2), posting entertainment, commercial pop music, gaming walkthroughs, movies, gossip, or non-educational content is strictly prohibited.
+          </div>
+
+          <p style="margin: 0 0 24px 0; font-size: 13px; line-height: 1.55; color: #64748b;">
+            All active posts, messages, and login tokens associated with your identity have been permanently purged. If you believe this automated decision was in error regarding an accredited educational lecture or syllabus tutorial, you may reply to <strong>koinexa63@gmail.com</strong> with official academic documentation for review by the moderation board.
+          </p>
+
+          <div style="border-top: 1px solid #f1f5f9; padding-top: 18px;">
+            <p style="margin: 0; font-size: 11px; line-height: 1.5; color: #94a3b8;">
+              KOINEXA Trust &amp; Safety &bull; Autonomous Academic Sentinel &bull; Automated Enforcement
+            </p>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
+    return send_email(to_email, subject, html, "agentic_academic_violation", recipient_name)
+
+
 def get_sent_emails(limit: int = 50):
     """Retrieve recent sent emails for the Admin Outbox Inspector."""
     with get_db_connection() as conn:
