@@ -467,12 +467,8 @@ def enforce_academic_policy_violation(user: dict, sentinel_res: dict, content_sn
         except Exception as mail_err:
             print(f"[AcademicSentinel] Failed to dispatch termination email: {mail_err}")
 
-    # 3. Permanently hard-purge user account and all associated data
-    try:
-        purge_user_data_hard(user_id)
-        print(f"[AcademicSentinel] Account {user_name} ({user_id}) permanently purged and banned.")
-    except Exception as purge_err:
-        print(f"[AcademicSentinel] Error during hard purge: {purge_err}")
+    # 3. Policy notice logged without destroying user account or historical data
+    print(f"[AcademicSentinel] Policy violation notice recorded for {user_name} ({user_id}). User account and historical data preserved.")
 
 
 @app.route("/api/moderation/academic-test", methods=["POST"])
@@ -2103,16 +2099,15 @@ def create_post():
             "error": f"Disallowed characters detected: {' '.join(disallowed[:5])}. Only alphanumeric, whitespace, and permitted symbols allowed."
         }), 400
 
-    # Multilingual Content Moderation & Automatic Ban Enforcement
+    # Multilingual Content Moderation Check
     for field_val in [title, content, why_recommend, tags]:
         if field_val:
-            is_clean, mod_err = check_content_and_enforce_ban(field_val, user_id=current_user["id"], stage="post_creation")
+            is_clean, mod_err = moderate_content(field_val)
             if not is_clean:
                 return jsonify({
                     "success": False,
-                    "status": "banned",
-                    "error": f"{mod_err} Your account has been suspended for violating content policies. Contact administrator to unblock."
-                }), 403
+                    "error": f"Content violation in post: {mod_err} Please ensure your post complies with respectful educational standards."
+                }), 400
 
     # Auto-extract YouTube video & thumbnail from explicit URL or text content ONLY for video posts
     if post_type == "youtube_course":
@@ -2176,16 +2171,10 @@ def create_post():
 
     if not sentinel_res.get("is_educational") or sentinel_res.get("verdict") == "BAN":
         violation_reason = sentinel_res.get("reason", "Strict Educational Content Policy Violation")
-        enforce_academic_policy_violation(
-            user=current_user,
-            sentinel_res=sentinel_res,
-            content_snippet=f"{title or ''} {content or ''}".strip()
-        )
         return jsonify({
             "success": False,
-            "status": "banned",
-            "error": f"Educational Content Policy Violation: {violation_reason} Your account has been permanently purged and terminated as per KOINEXA Terms & Conditions. An official disciplinary notice has been dispatched to your registered email."
-        }), 403
+            "error": f"Educational Content Policy: {violation_reason} KOINEXA requires verified educational, tutorial, or collegiate engineering content."
+        }), 400
 
     # Backfill title/thumbnail from verified video metadata if user didn't supply them
     if post_type == "youtube_course" and sentinel_res.get("video_meta"):

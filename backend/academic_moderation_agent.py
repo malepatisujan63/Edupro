@@ -38,7 +38,11 @@ ACADEMIC_DOMAINS = {
         "compilers", "operating system", "operating systems", "virtual memory", "cybersecurity", "cryptography",
         "leetcode", "codeforces", "competitive programming", "object oriented", "oop", "computer networks",
         "tcp/ip", "git", "github", "software engineering", "code", "coding", "html", "css", "vue", "angular",
-        "django", "flask", "fastapi", "express", "nodejs", "node.js", "pandas", "numpy", "pytorch", "tensorflow"
+        "django", "flask", "fastapi", "express", "nodejs", "node.js", "pandas", "numpy", "pytorch", "tensorflow",
+        "mcp", "model context protocol", "llm", "llms", "large language model", "large language models",
+        "ai agent", "ai agents", "rag", "retrieval augmented generation", "vector database", "vector db",
+        "embedding", "embeddings", "prompt engineering", "langchain", "langgraph", "anthropic", "openai",
+        "claude", "gpt", "transformer", "transformers", "fine tuning", "finetuning", "lora"
     ],
     "mathematics": [
         "calculus", "linear algebra", "discrete mathematics", "probability", "statistics",
@@ -496,16 +500,48 @@ class AgenticAcademicSentinel:
             if len(query_candidate.split()) >= 2:
                 search_queries.append(query_candidate)
 
+        STOP_WORDS = {
+            "what", "is", "are", "how", "to", "for", "in", "on", "the", "a", "an",
+            "and", "or", "of", "with", "best", "place", "understand", "all", "you",
+            "need", "know", "about", "guide", "tutorial", "top", "good", "new"
+        }
+
         search_evidence = []
         for sq in search_queries[:2]:
             evidence_items = self.query_online_knowledge(sq)
-            search_evidence.extend(evidence_items)
+            sq_substantive = set(re.findall(r"\b[a-zA-Z0-9_-]+\b", sq.lower())) - STOP_WORDS
+            for it in evidence_items:
+                it_title = it.get("title", "")
+                it_snippet = it.get("snippet", "")
+                it_title_tokens = set(re.findall(r"\b[a-zA-Z0-9_-]+\b", it_title.lower()))
+                it_text = f"{it_title} {it_snippet}".lower()
+
+                # Relevance filter: the Wikipedia article title or snippet MUST contain at least one substantive token
+                # from the search query. This completely filters out random stop-word clutter (e.g. '1987 album' for 'What is MCP').
+                is_relevant = True
+                if sq_substantive:
+                    has_title_overlap = bool(sq_substantive & it_title_tokens)
+                    has_text_term = any(f" {t} " in f" {it_text} " or f"({t})" in it_text for t in sq_substantive)
+                    is_relevant = has_title_overlap or has_text_term
+
+                if is_relevant:
+                    search_evidence.append(it)
 
         # Evaluate online search engine findings
         for item in search_evidence:
             item_title = item.get("title", "").lower()
             snippet = item.get("snippet", "").lower()
             combined_search_item = f"{item_title} {snippet}"
+
+            # Check if online search discovered an explicit educational entity (e.g. Model Context Protocol)
+            academic_search_pat = (
+                r"\b(open standard|open-source framework|protocol|programming language|"
+                r"software framework|software library|artificial intelligence|computer science|"
+                r"machine learning|software engineering|algorithm|data structure|"
+                r"university|research institute|academic journal|curriculum|operating system)\b"
+            )
+            if re.search(academic_search_pat, combined_search_item):
+                academic_matches.append(item.get("title", ""))
 
             # Check if online search discovered that this entity is entertainment, music, or gaming
             non_edu_search_pat = (
@@ -522,6 +558,8 @@ class AgenticAcademicSentinel:
                 detected_non_edu_signals.append(
                     f"online_intelligence_classified: '{item.get('title')}' is recognized online as non-educational entertainment ({m.group(1)})"
                 )
+
+        academic_count = len(academic_matches)
 
         # ── Step F: Synthesis & Strict Educational Verdict ──
         non_edu_count = len(detected_non_edu_signals)
