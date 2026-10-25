@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: koinexa
+    name: edupro
     runtime: docker
     plan: free
     region: oregon

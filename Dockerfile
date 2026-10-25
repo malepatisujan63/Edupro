@@ -18,7 +18,8 @@ RUN npm run build
 FROM python:3.11-slim-bookworm AS production
 
 # Install polyglot compiler suite (C, C++, Java JRE, SQLite3, curl) for Code Lab Sandbox
-RUN apt-get update --fix-missing && apt-get install -y --no-install-recommends \
+RUN mkdir -p /usr/share/man/man1 /usr/share/man/man2 && \
+    apt-get update --fix-missing && apt-get install -y --no-install-recommends \
     gcc \
     g++ \
     default-jre-headless \
@@ -58,4 +59,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
   CMD curl -f http://localhost:${PORT:-10000}/api/health || curl -f http://localhost:5001/api/health || exit 1
 
 # Production WSGI startup via Gunicorn bound to Render's injected PORT (default 10000)
-CMD ["sh", "-c", "exec gunicorn --bind 0.0.0.0:${PORT:-10000} --workers 2 --threads 4 --timeout 120 backend.app:app"]
+CMD ["sh", "-c", "exec python3 -m gunicorn --bind 0.0.0.0:${PORT:-10000} --workers 2 --threads 4 --timeout 120 backend.app:app"]
