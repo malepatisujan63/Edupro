@@ -508,23 +508,39 @@ export const WhatsAppCommunities: React.FC = () => {
           </span>
         </div>
 
-        {/* Media Thumbnail with Video Badge */}
-        {sharedPost.image_url && (
+        {/* Media Thumbnail with Video / Contest Badge */}
+        {sharedPost.image_url ? (
           <div className="relative w-full aspect-video max-h-36 overflow-hidden bg-black/25 group/thumb">
             <img
               src={sharedPost.image_url}
               alt={sharedPost.title || 'Shared media'}
               className="w-full h-full object-cover group-hover/thumb:scale-105 transition-transform duration-300"
             />
-            {sharedPost.youtube_url && (
+            {sharedPost.youtube_url && sharedPost.post_type === 'youtube_course' && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/35">
                 <div className="w-9 h-9 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg">
                   <Play className="w-4 h-4 fill-current translate-x-0.5" />
                 </div>
               </div>
             )}
+            {sharedPost.post_type === 'hackathon' && (
+              <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-amber-400 text-black text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 shadow">
+                <Trophy className="w-2.5 h-2.5" />
+                <span>Contest</span>
+              </div>
+            )}
           </div>
-        )}
+        ) : sharedPost.post_type === 'hackathon' ? (
+          <div className="p-3 bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-amber-950/20 flex items-center gap-2.5 border-b border-amber-500/20">
+            <div className="w-8 h-8 rounded-lg bg-amber-400/20 border border-amber-400/40 flex items-center justify-center text-amber-400 flex-shrink-0">
+              <Trophy className="w-4 h-4" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider block">Hackathon & Contest</span>
+              <p className="text-xs font-semibold text-neutral-900 dark:text-neutral-100 truncate">{sharedPost.title || 'Registration Open'}</p>
+            </div>
+          </div>
+        ) : null}
 
         {/* Post Body Snippet */}
         <div className="p-3 space-y-1.5">

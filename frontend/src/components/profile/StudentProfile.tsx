@@ -265,8 +265,10 @@ export const StudentProfile: React.FC = () => {
                   className="p-4 border-b border-[var(--x-border)] hover:bg-[var(--x-surface-hover)] transition-colors space-y-2 cursor-pointer"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[var(--x-accent)] uppercase tracking-wider">
-                      {p.post_type.replace('_', ' ')}
+                    <span className={`text-xs font-bold uppercase tracking-wider ${
+                      p.post_type === 'hackathon' ? 'text-amber-400' : 'text-[var(--x-accent)]'
+                    }`}>
+                      {p.post_type === 'hackathon' ? 'Hackathon / Contest' : p.post_type === 'youtube_course' ? 'Course Video' : 'Discussion'}
                     </span>
                     <span className="text-xs text-[var(--x-subtext)]">
                       {new Date(parseFloat(p.created_at) * 1000).toLocaleDateString()}
@@ -275,6 +277,21 @@ export const StudentProfile: React.FC = () => {
 
                   {p.title && <h3 className="text-[15px] font-bold text-[var(--x-text)]">{p.title}</h3>}
                   <p className="text-[14px] text-[var(--x-text)] leading-relaxed whitespace-pre-line">{p.content}</p>
+
+                  {p.post_type === 'hackathon' && p.course_url && (
+                    <div className="pt-1">
+                      <a
+                        href={p.course_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-500 hover:bg-amber-400 hover:text-black font-bold text-xs transition-colors"
+                      >
+                        <span>Registration Link</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  )}
 
                   <div className="flex items-center gap-6 pt-2 text-xs text-[var(--x-subtext)]">
                     <span className="flex items-center gap-1.5 hover:text-rose-500 transition-colors cursor-pointer">

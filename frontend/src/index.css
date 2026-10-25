@@ -616,15 +616,35 @@ button.bg-indigo-600 *,
   color: var(--x-btn-primary-text) !important;
 }
 
-/* Dark Mode White Button Enhancement: Ensure buttons with white backgrounds display crisp black text */
+/* Dark Mode White Button Enhancement: Ensure buttons, links and action elements with white backgrounds display crisp black text */
 html:not(.light) button.dark\:bg-white,
 html:not(.light) button.dark\:bg-white *,
 html:not(.light) button[class*="dark:bg-white"],
 html:not(.light) button[class*="dark:bg-white"] *,
+html:not(.light) a[class*="dark:bg-white"],
+html:not(.light) a[class*="dark:bg-white"] *,
+html:not(.light) [role="button"][class*="dark:bg-white"],
+html:not(.light) [role="button"][class*="dark:bg-white"] *,
+html:not(.light) button.bg-white:not(.btn-keep-white),
+html:not(.light) button.bg-white:not(.btn-keep-white) *,
+html:not(.light) button[class~="bg-white"]:not(.btn-keep-white),
+html:not(.light) button[class~="bg-white"]:not(.btn-keep-white) *,
+html:not(.light) a[class~="bg-white"]:not(.btn-keep-white),
+html:not(.light) a[class~="bg-white"]:not(.btn-keep-white) *,
 [data-theme="dark"] button.dark\:bg-white,
 [data-theme="dark"] button.dark\:bg-white *,
 [data-theme="dark"] button[class*="dark:bg-white"],
-[data-theme="dark"] button[class*="dark:bg-white"] * {
+[data-theme="dark"] button[class*="dark:bg-white"] *,
+[data-theme="dark"] a[class*="dark:bg-white"],
+[data-theme="dark"] a[class*="dark:bg-white"] *,
+[data-theme="dark"] [role="button"][class*="dark:bg-white"],
+[data-theme="dark"] [role="button"][class*="dark:bg-white"] *,
+[data-theme="dark"] button.bg-white:not(.btn-keep-white),
+[data-theme="dark"] button.bg-white:not(.btn-keep-white) *,
+[data-theme="dark"] button[class~="bg-white"]:not(.btn-keep-white),
+[data-theme="dark"] button[class~="bg-white"]:not(.btn-keep-white) *,
+[data-theme="dark"] a[class~="bg-white"]:not(.btn-keep-white),
+[data-theme="dark"] a[class~="bg-white"]:not(.btn-keep-white) * {
   color: #000000 !important;
 }
 

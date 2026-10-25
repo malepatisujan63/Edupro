@@ -17,7 +17,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
   onClose,
   onProfileUpdated,
 }) => {
-  const { user, authFetch } = useAuth();
+  const { user, authFetch, refreshUser } = useAuth();
   const [name, setName] = useState(user?.name || '');
   const [bio, setBio] = useState(user?.bio || '');
   const [college, setCollege] = useState(user?.college || '');
@@ -69,11 +69,12 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
       const data = await res.json();
       if (res.ok && data.success) {
+        await refreshUser();
         setSuccessMsg('Profile updated successfully!');
         setTimeout(() => {
           onProfileUpdated();
           onClose();
-        }, 900);
+        }, 600);
       } else {
         setError(data.error || 'Failed to update profile.');
       }

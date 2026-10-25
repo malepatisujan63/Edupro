@@ -57,8 +57,11 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
     setIsSubmitting(true);
 
-    const effectiveYoutubeUrl = youtubeUrl.trim() || (videoId ? `https://www.youtube.com/watch?v=${videoId}` : undefined);
-    const effectiveImageUrl = imageUrl.trim() || (videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : undefined);
+    const isYoutubePost = postType === 'youtube_course';
+    const effectiveYoutubeUrl = isYoutubePost
+      ? (youtubeUrl.trim() || (videoId ? `https://www.youtube.com/watch?v=${videoId}` : undefined))
+      : undefined;
+    const effectiveImageUrl = imageUrl.trim() || (isYoutubePost && videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : undefined);
 
     try {
       const res = await authFetch('/api/posts', {
@@ -68,9 +71,9 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
           post_type: postType,
           title: title.trim() || undefined,
           content: content.trim(),
-          why_recommend: whyRecommend.trim() || undefined,
+          why_recommend: isYoutubePost ? (whyRecommend.trim() || undefined) : undefined,
           youtube_url: effectiveYoutubeUrl,
-          course_url: courseUrl.trim() || undefined,
+          course_url: (postType === 'hackathon' || postType === 'youtube_course') ? (courseUrl.trim() || undefined) : undefined,
           image_url: effectiveImageUrl,
           tags: tags.trim() || undefined,
         }),
@@ -137,7 +140,10 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
             <div className="px-5 pt-3 pb-2 flex gap-2">
               <button
                 type="button"
-                onClick={() => setPostType('youtube_course')}
+                onClick={() => {
+                  setPostType('youtube_course');
+                  setError('');
+                }}
                 className={`flex-1 py-2 px-3 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                   postType === 'youtube_course'
                     ? 'bg-[#FF3B30] text-white shadow-md'
@@ -150,7 +156,11 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
               <button
                 type="button"
-                onClick={() => setPostType('tweet')}
+                onClick={() => {
+                  setPostType('tweet');
+                  setYoutubeUrl('');
+                  setError('');
+                }}
                 className={`flex-1 py-2 px-3 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                   postType === 'tweet'
                     ? 'bg-[var(--x-accent)] text-black shadow-md'
@@ -163,7 +173,12 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
               <button
                 type="button"
-                onClick={() => setPostType('hackathon')}
+                onClick={() => {
+                  setPostType('hackathon');
+                  setYoutubeUrl('');
+                  setWhyRecommend('');
+                  setError('');
+                }}
                 className={`flex-1 py-2 px-3 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                   postType === 'hackathon'
                     ? 'bg-amber-400 text-black shadow-md'

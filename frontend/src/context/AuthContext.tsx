@@ -81,6 +81,7 @@ interface AuthContextType {
   resetPassword: (data: { email: string; otp: string; new_password: string }) => Promise<{ success: boolean; message?: string; error?: string }>;
   logout: () => Promise<void>;
   authFetch: (url: string, init?: RequestInit) => Promise<Response>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -153,6 +154,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     verifySession();
   }, []);
+
+  const refreshUser = async () => {
+    const storedToken = token || localStorage.getItem('koinexa_token');
+    if (!storedToken) return;
+    try {
+      const res = await fetch('/api/auth/me', {
+        headers: {
+          Authorization: `Bearer ${storedToken}`,
+        },
+      });
+      const data = await res.json();
+      if (data.success && data.user) {
+        setUser(data.user);
+      }
+    } catch {
+      // keep existing user on network error
+    }
+  };
 
   const commitUser = (userData: User, authToken: string) => {
     setUser(userData);
@@ -481,6 +500,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         resetPassword,
         logout,
         authFetch,
+        refreshUser,
       }}
     >
       {children}

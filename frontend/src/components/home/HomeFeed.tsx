@@ -346,9 +346,15 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                 const isLong = post.content && post.content.length > 200;
                 const isExpanded = expandedPosts[post.id];
 
-                const detectedVideoId = extractYouTubeVideoId(post.youtube_url) || extractYouTubeVideoId(post.content);
+                const isYoutube = post.post_type === 'youtube_course';
+                const isHackathon = post.post_type === 'hackathon';
+                const detectedVideoId = isYoutube
+                  ? (extractYouTubeVideoId(post.youtube_url) || extractYouTubeVideoId(post.content))
+                  : null;
                 const effectiveImageUrl = post.image_url || (detectedVideoId ? `https://img.youtube.com/vi/${detectedVideoId}/hqdefault.jpg` : null);
-                const effectiveYoutubeUrl = post.youtube_url || (detectedVideoId ? `https://www.youtube.com/watch?v=${detectedVideoId}` : null);
+                const effectiveYoutubeUrl = isYoutube
+                  ? (post.youtube_url || (detectedVideoId ? `https://www.youtube.com/watch?v=${detectedVideoId}` : null))
+                  : null;
 
                 return (
                   <article
@@ -504,10 +510,10 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                       </div>
                     )}
 
-                    {/* Media Attachment Card */}
-                    {(effectiveImageUrl || effectiveYoutubeUrl) && (
-                      <div className="mt-3.5 rounded-2xl overflow-hidden bg-[var(--x-surface)] border border-[var(--x-border)] w-full">
-                        <div className="relative w-full aspect-video sm:max-h-[380px] overflow-hidden group/media flex items-center justify-center bg-black/20">
+                    {/* Media / Hackathon / Video Attachment Card */}
+                    {(effectiveImageUrl || (isYoutube && effectiveYoutubeUrl) || (isHackathon && post.course_url)) && (
+                      <div className="mt-3.5 rounded-2xl overflow-hidden bg-[var(--x-surface)] border border-[var(--x-border)] w-full shadow-sm">
+                        <div className="relative w-full aspect-video sm:max-h-[360px] overflow-hidden group/media flex items-center justify-center bg-black/20">
                           {effectiveImageUrl ? (
                             <img
                               src={effectiveImageUrl}
@@ -522,13 +528,25 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                                 }
                               }}
                             />
-                          ) : (
+                          ) : isHackathon ? (
+                            <div className="w-full h-full min-h-[200px] flex flex-col items-center justify-center p-6 bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-amber-950/20 text-center select-none">
+                              <div className="w-14 h-14 rounded-2xl bg-amber-400/20 border border-amber-400/40 flex items-center justify-center text-amber-400 mb-2.5 shadow-inner">
+                                <Trophy className="w-7 h-7" />
+                              </div>
+                              <p className="font-extrabold text-base sm:text-lg text-[var(--x-text)] line-clamp-2 max-w-md px-4">
+                                {post.title || 'Hackathon & Coding Contest'}
+                              </p>
+                              <span className="mt-2 text-[11px] font-bold text-amber-500 dark:text-amber-400 uppercase tracking-wider bg-amber-500/15 px-3 py-0.5 rounded-full border border-amber-500/30">
+                                Registration Open
+                              </span>
+                            </div>
+                          ) : isYoutube ? (
                             <div className="w-full h-full flex items-center justify-center bg-[var(--x-surface)] text-[var(--x-subtext)]">
                               <YoutubeIcon className="w-16 h-16 text-red-500/80" />
                             </div>
-                          )}
+                          ) : null}
 
-                          {effectiveYoutubeUrl && (
+                          {isYoutube && effectiveYoutubeUrl && (
                             <a
                               href={effectiveYoutubeUrl}
                               target="_blank"
@@ -542,52 +560,70 @@ export const HomeFeed: React.FC<HomeFeedProps> = ({
                             </a>
                           )}
 
-                          {(post.post_type === 'youtube_course' || effectiveYoutubeUrl) && (
+                          {isYoutube && (
                             <div className="absolute top-3 left-3 px-2.5 py-1 rounded-lg video-badge backdrop-blur-sm text-[10px] font-bold uppercase flex items-center gap-1.5 shadow pointer-events-none">
                               <YoutubeIcon className="w-3.5 h-3.5 text-[#FF3B30]" />
                               <span>YouTube Video</span>
                             </div>
                           )}
-                          {post.post_type === 'hackathon' && (
-                            <div className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-amber-500 text-black text-[10px] font-bold uppercase flex items-center gap-1 shadow pointer-events-none">
-                              <Trophy className="w-3 h-3" />
-                              <span>Contest</span>
+
+                          {isHackathon && (
+                            <div className="absolute top-3 left-3 px-2.5 py-1 rounded-lg bg-amber-400 text-black text-[10px] font-extrabold uppercase flex items-center gap-1.5 shadow pointer-events-none">
+                              <Trophy className="w-3.5 h-3.5" />
+                              <span>Hackathon & Contest</span>
                             </div>
                           )}
                         </div>
 
-                        {(post.title || post.course_url || effectiveYoutubeUrl) && (
+                        {(post.title || post.course_url || (isYoutube && effectiveYoutubeUrl)) && (
                           <div className="p-3 bg-[var(--x-surface)] border-t border-[var(--x-border)] flex items-center justify-between gap-3">
                             <div className="min-w-0 flex-1">
                               {post.title && (
                                 <p className="text-sm font-bold text-[var(--x-text)] truncate">{post.title}</p>
                               )}
                               <span className="text-[12px] text-[var(--x-subtext)] truncate block">
-                                {effectiveYoutubeUrl || post.course_url || 'koinexa.edu'}
+                                {isHackathon && post.course_url
+                                  ? post.course_url.replace(/^https?:\/\//, '')
+                                  : (effectiveYoutubeUrl || post.course_url || 'koinexa.edu')}
                               </span>
                             </div>
-                            {effectiveYoutubeUrl && (
+
+                            {isYoutube && effectiveYoutubeUrl && (
                               <a
                                 href={effectiveYoutubeUrl}
                                 target="_blank"
                                 rel="noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className="x-btn-primary text-xs px-3.5 py-1.5"
+                                className="x-btn-primary text-xs px-3.5 py-1.5 flex items-center gap-1.5 cursor-pointer"
                               >
                                 <Play className="w-3 h-3 fill-current" />
                                 <span>Watch</span>
                               </a>
                             )}
-                            {post.course_url && !effectiveYoutubeUrl && (
+
+                            {isHackathon && post.course_url && (
                               <a
                                 href={post.course_url}
                                 target="_blank"
                                 rel="noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className="x-btn-secondary text-xs px-3.5 py-1.5"
+                                className="px-4 py-1.5 rounded-full bg-amber-400 hover:bg-amber-300 text-black font-bold text-xs flex items-center gap-1.5 shadow transition-all active:scale-95 cursor-pointer flex-shrink-0"
+                              >
+                                <span>Register Now</span>
+                                <ExternalLink className="w-3.5 h-3.5" />
+                              </a>
+                            )}
+
+                            {!isHackathon && !isYoutube && post.course_url && (
+                              <a
+                                href={post.course_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="x-btn-secondary text-xs px-3.5 py-1.5 flex items-center gap-1.5 cursor-pointer"
                               >
                                 <span>Visit</span>
-                                <ExternalLink className="w-3 h-3" />
+                                <ExternalLink className="w-3.5 h-3.5" />
                               </a>
                             )}
                           </div>

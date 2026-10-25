@@ -1943,8 +1943,8 @@ def get_posts():
         feed = []
         for p in posts:
             p_dict = dict(p)
-            # Auto-populate video thumbnail if missing from DB
-            if not p_dict.get("image_url"):
+            # Auto-populate video thumbnail if missing from DB (strictly for youtube_course posts)
+            if p_dict.get("post_type") == "youtube_course" and not p_dict.get("image_url"):
                 detected_url, detected_thumb, _ = extract_youtube_info(p_dict.get("youtube_url"), p_dict.get("content"))
                 if detected_thumb:
                     p_dict["image_url"] = detected_thumb
@@ -2008,21 +2008,31 @@ def create_post():
                     "error": f"{mod_err} Your account has been suspended for violating content policies. Contact administrator to unblock."
                 }), 403
 
-    # Auto-extract YouTube video & thumbnail from explicit URL or text content
-    detected_yt_url, detected_thumb, _ = extract_youtube_info(youtube_url, content)
-    if detected_yt_url:
-        youtube_url = youtube_url or detected_yt_url
-        if post_type == 'tweet' and not youtube_url:
+    # Auto-extract YouTube video & thumbnail from explicit URL or text content ONLY for video posts
+    if post_type == "youtube_course":
+        detected_yt_url, detected_thumb, _ = extract_youtube_info(youtube_url, content)
+        if detected_yt_url:
+            youtube_url = youtube_url or detected_yt_url
+        if detected_thumb and not image_url:
+            image_url = detected_thumb
+    elif post_type == "tweet":
+        detected_yt_url, detected_thumb, _ = extract_youtube_info(youtube_url, content)
+        if detected_yt_url:
             youtube_url = detected_yt_url
-    if detected_thumb and not image_url:
-        image_url = detected_thumb
+        if detected_thumb and not image_url:
+            image_url = detected_thumb
+    elif post_type == "hackathon":
+        # Hackathons have registration portal links (course_url). Never treat as YouTube course!
+        if youtube_url and not course_url:
+            course_url = youtube_url
+        youtube_url = None
 
     # Deceptive Link & Video Media Verification Pipeline
     urls_to_verify = []
     if youtube_url:
         urls_to_verify.append(("YouTube Video", youtube_url))
     if course_url:
-        urls_to_verify.append(("Course Link", course_url))
+        urls_to_verify.append(("Registration / Course Link", course_url))
 
     for label, u in urls_to_verify:
         is_safe, link_err, meta = verify_and_sanitize_media_url(u, claimed_title=title)
@@ -2031,9 +2041,12 @@ def create_post():
                 "success": False,
                 "error": f"{label} verification failed: {link_err}"
             }), 400
-        if meta.get("clean_url") and (u == youtube_url or not youtube_url):
-            youtube_url = meta.get("clean_url")
-        if meta.get("thumbnail") and not image_url:
+        if meta.get("clean_url"):
+            if u == youtube_url:
+                youtube_url = meta.get("clean_url")
+            elif u == course_url:
+                course_url = meta.get("clean_url")
+        if meta.get("thumbnail") and not image_url and post_type == "youtube_course":
             image_url = meta.get("thumbnail")
 
     # Verify any embedded URLs in content & recommendation text

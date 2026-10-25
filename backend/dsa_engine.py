@@ -647,7 +647,7 @@ class UnifiedDSAEngine:
                     self.index_entity("classrooms", dict(cr), ["name", "subject_code", "department", "university", "description"])
 
                 # 6. People / Users (Excluding admin accounts)
-                people = conn.execute("SELECT id, name, handle, avatar, role, college, bio FROM users WHERE role != 'admin' AND banned = 0").fetchall()
+                people = conn.execute("SELECT id, name, username, handle, avatar, role, college, bio FROM users WHERE role != 'admin' AND banned = 0").fetchall()
                 seen_uids: Set[str] = set()
                 for u in people:
                     u_dict = dict(u)
@@ -655,7 +655,7 @@ class UnifiedDSAEngine:
                         u_dict["handle"] = "@" + u_dict["handle"]
                     if u_dict["id"] not in seen_uids:
                         seen_uids.add(u_dict["id"])
-                        self.index_entity("people", u_dict, ["name", "handle", "college", "role", "bio"])
+                        self.index_entity("people", u_dict, ["name", "username", "handle", "college", "role", "bio"])
 
                 # 7. Studymate Connection Graph
                 try:
@@ -678,7 +678,7 @@ class UnifiedDSAEngine:
             clean_u = dict(user_dict)
             if clean_u.get("handle") and not clean_u["handle"].startswith("@"):
                 clean_u["handle"] = "@" + clean_u["handle"]
-            self.index_entity("people", clean_u, ["name", "handle", "college", "role", "bio"])
+            self.index_entity("people", clean_u, ["name", "username", "handle", "college", "role", "bio"])
         self.search_cache.clear()
         uid = user_dict.get("id")
         if uid:
