@@ -19,43 +19,46 @@ from typing import Dict, Any, List, Tuple, Optional
 # Educational Keywords & Categories
 ACADEMIC_DOMAINS = {
     "computer_science": [
-        "algorithm", "data structure", "dsa", "programming", "python", "javascript", "typescript",
-        "c++", "cpp", "java", "rust", "golang", "sql", "nosql", "database", "system design",
-        "machine learning", "deep learning", "artificial intelligence", "neural network",
-        "web development", "react", "nextjs", "backend", "frontend", "api", "rest api", "graphql",
-        "docker", "kubernetes", "cloud", "aws", "devops", "linux", "compiler", "operating system",
-        "cybersecurity", "cryptography", "leetcode", "codeforces", "competitive programming",
-        "object oriented", "oop", "computer networks", "tcp/ip", "git", "github", "software engineering"
+        "algorithm", "algorithms", "data structure", "data structures", "dsa", "programming", "python",
+        "javascript", "typescript", "c++", "cpp", "java", "rust", "golang", "sql", "nosql", "database",
+        "databases", "system design", "machine learning", "deep learning", "artificial intelligence",
+        "neural network", "neural networks", "web development", "react", "nextjs", "backend", "frontend",
+        "api", "rest api", "graphql", "docker", "kubernetes", "cloud", "aws", "devops", "linux", "compiler",
+        "compilers", "operating system", "operating systems", "virtual memory", "cybersecurity", "cryptography",
+        "leetcode", "codeforces", "competitive programming", "object oriented", "oop", "computer networks",
+        "tcp/ip", "git", "github", "software engineering", "code", "coding"
     ],
     "mathematics": [
         "calculus", "linear algebra", "discrete mathematics", "probability", "statistics",
         "differential equations", "number theory", "algebra", "geometry", "trigonometry",
         "matrices", "eigenvalues", "vectors", "combinatorics", "integration", "derivatives",
-        "fourier transform", "laplace transform", "complex analysis", "real analysis"
+        "fourier transform", "laplace transform", "complex analysis", "real analysis", "math", "maths"
     ],
     "natural_sciences": [
         "physics", "chemistry", "biology", "thermodynamics", "quantum mechanics", "electromagnetism",
         "organic chemistry", "inorganic chemistry", "physical chemistry", "biochemistry", "genetics",
-        "cell biology", "optics", "kinematics", "astronomy", "astrophysics"
+        "cell biology", "optics", "kinematics", "astronomy", "astrophysics", "science"
     ],
     "engineering": [
         "electrical engineering", "mechanical engineering", "civil engineering", "electronics",
         "vlsi", "embedded systems", "microcontroller", "robotics", "control systems", "signal processing",
-        "aerospace engineering", "chemical engineering", "cad", "solidworks", "circuit analysis"
+        "aerospace engineering", "chemical engineering", "cad", "solidworks", "circuit analysis", "engineering"
     ],
     "competitive_exams_academics": [
-        "jee main", "jee advanced", "neet", "gate exam", "cat exam", "upsc", "sat prep", "gre prep",
-        "olympiad", "cbse", "icse", "board exam", "class 11", "class 12", "university syllabus",
-        "lecture", "textbook", "solved paper", "previous year questions", "pyqs", "formula sheet",
-        "engineering mathematics", "college lecture", "professor", "curriculum"
+        "jee main", "jee advanced", "jee prep", "jee", "neet", "gate exam", "gate", "cat exam", "upsc",
+        "sat prep", "gre prep", "sat", "gre", "olympiad", "cbse", "icse", "board exam", "class 11",
+        "class 12", "university syllabus", "lecture", "lectures", "textbook", "textbooks", "solved paper",
+        "previous year questions", "pyqs", "formula sheet", "engineering mathematics", "college lecture",
+        "professor", "curriculum", "preparation", "prep"
     ],
     "study_and_collegiate": [
-        "study", "studymate", "study mate", "exam", "examination", "homework", "assignment",
-        "syllabus", "revision", "course", "learning", "notes", "university", "college", "school",
-        "student", "tutorial", "documentation", "research", "thesis", "paper", "campus",
-        "library", "professor", "mentor", "faculty", "classroom", "education", "science",
-        "technology", "robotics", "coding", "hackathon", "developer", "problem solving",
-        "academics", "curriculum", "scholarship", "internship", "seminar", "workshop"
+        "study", "studying", "studymate", "study mate", "study partner", "study group", "exam", "exams",
+        "examination", "homework", "assignment", "assignments", "syllabus", "revision", "course", "courses",
+        "learning", "notes", "university", "college", "school", "student", "students", "tutorial", "tutorials",
+        "documentation", "research", "thesis", "paper", "papers", "campus", "library", "professor", "professors",
+        "mentor", "mentors", "faculty", "classroom", "classrooms", "education", "educational", "science",
+        "technology", "robotics", "coding", "hackathon", "hackathons", "developer", "developers",
+        "problem solving", "academics", "academic", "curriculum", "scholarship", "internship", "seminar", "workshop"
     ]
 }
 
@@ -68,7 +71,8 @@ NON_EDUCATIONAL_PATTERNS = {
         r"\bspotify\b", r"\bvevo\b", r"\bpop song\b", r"\bhip hop\b", r"\brap song\b",
         r"\bbollywood song\b", r"\bpunjabi song\b", r"\bt-series\b", r"\bslowed and reverb\b",
         r"\blive concert\b", r"\bguitar cover\b", r"\bk-pop\b", r"\bbts\b", r"\btaylor swift\b",
-        r"\bed sheeran\b", r"\bdrake\b", r"\barjit singh\b", r"\bsidhu moose\b", r"\bdiss track\b"
+        r"\bed sheeran\b", r"\bdrake\b", r"\barjit singh\b", r"\bsidhu moose\b", r"\bdiss track\b",
+        r"\btrack\b", r"\bbeats\b", r"\bplaylist\b", r"\bkaraoke\b"
     ],
     "gaming": [
         r"\bgameplay\b", r"\bwalkthrough\b", r"\bplaythrough\b", r"\blet's play\b", r"\bspeedrun\b",
@@ -76,20 +80,30 @@ NON_EDUCATIONAL_PATTERNS = {
         r"\bvalorant\b", r"\bpubg\b", r"\bbgmi\b", r"\bfree fire\b", r"\bcall of duty\b",
         r"\bclash royale\b", r"\bclash of clans\b", r"\bapex legends\b", r"\bps5\b", r"\bxbox\b",
         r"\bnintendo switch\b", r"\bgaming montage\b", r"\bkill montage\b", r"\besports highlights\b",
-        r"\bboss fight\b", r"\bgaming stream\b", r"\bgaming clips\b", r"\bclutch gameplay\b"
+        r"\bboss fight\b", r"\bgaming stream\b", r"\bgaming clips\b", r"\bclutch gameplay\b",
+        r"\bfifa\b", r"\bstreamer\b", r"\btwitch\b", r"\bgamer\b", r"\besports\b"
     ],
     "movies_and_entertainment": [
         r"\bofficial trailer\b", r"\bteaser trailer\b", r"\btrailer\b", r"\bteaser\b",
-        r"\bfull movie\b", r"\bmovie scene\b", r"\bweb series\b", r"\bcelebrity gossip\b",
-        r"\bmovie review\b", r"\bcinema\b", r"\bhollywood\b", r"\bbollywood\b", r"\bactor\b",
-        r"\bactress\b", r"\bbox office\b", r"\bnetflix\b", r"\bepisode\b", r"\bbehind the scenes\b",
-        r"\banime episode\b", r"\bmanga chapter\b"
+        r"\bfull movie\b", r"\bmovie scene\b", r"\bmovie\b", r"\bmovies\b", r"\bfilm\b", r"\bfilms\b",
+        r"\bweb series\b", r"\bcelebrity gossip\b", r"\bmovie review\b", r"\bcinema\b",
+        r"\bhollywood\b", r"\bbollywood\b", r"\bactor\b", r"\bactress\b", r"\bbox office\b",
+        r"\bnetflix\b", r"\bepisode\b", r"\bbehind the scenes\b", r"\banime episode\b",
+        r"\bmanga chapter\b", r"\bpopcorn\b", r"\bsuperhero\b", r"\bmarvel\b"
     ],
     "comedy_and_vlogs": [
         r"\bprank\b", r"\broast\b", r"\bcomedy sketch\b", r"\bstandup comedy\b", r"\bfunny moments\b",
         r"\bmemes compilation\b", r"\btiktok compilation\b", r"\bdaily vlog\b", r"\bshopping haul\b",
         r"\bmakeup tutorial\b", r"\bskincare routine\b", r"\bootd\b", r"\bgrwm\b", r"\bunboxing\b",
-        r"\b24 hours challenge\b", r"\brelationship advice\b", r"\bdating tips\b", r"\bmukbang\b"
+        r"\b24 hours challenge\b", r"\brelationship advice\b", r"\bdating tips\b", r"\bmukbang\b",
+        r"\bvlogger\b", r"\binfluencer\b"
+    ],
+    "lifestyle_and_chatter": [
+        r"\blunch\b", r"\bdinner\b", r"\bbreakfast\b", r"\bpizza\b", r"\bburger\b", r"\bfoodie\b",
+        r"\bparty\b", r"\bclubbing\b", r"\bweekend vibes\b", r"\bchilling\b", r"\bhangout\b",
+        r"\bcrush\b", r"\bgirlfriend\b", r"\bboyfriend\b", r"\bdating\b", r"\bshopping\b",
+        r"\bgym workout\b", r"\bfashion\b", r"\bgossip\b", r"\bfollow me\b",
+        r"\bsubscribe to my\b", r"\bgiveaway\b", r"\bmrbeast\b"
     ],
     "gambling_and_scams": [
         r"\bcasino\b", r"\bbetting\b", r"\brummy\b", r"\bdream11\b", r"\bcrypto pump\b",
@@ -301,75 +315,77 @@ class AgenticAcademicSentinel:
             for kw in keywords:
                 if re.search(r"\b" + re.escape(kw) + r"\b", full_text):
                     academic_matches.append(kw)
+        academic_count = len(academic_matches)
 
         # ── Step D: Search Engine Verification for Ambiguous Content ──
         search_evidence = []
         search_query = ""
         if video_meta.get("title"):
             search_query = video_meta["title"]
-        elif title:
-            search_query = title
-        elif content:
-            search_query = content.split("\n")[0][:100].strip()
+        elif academic_count == 0 and (title or content):
+            search_query = (title or content.split("\n")[0])[:80].strip()
 
-        if search_query:
+        if search_query and len(search_query.split()) >= 2:
             search_evidence = self.query_online_knowledge(search_query)
 
+        query_tokens = set(re.findall(r"\w+", search_query.lower()))
         for item in search_evidence:
-            item_text = (item["title"] + " " + item["snippet"]).lower()
-            # If search engine evidence explicitly declares this is a pop song, video game, movie, or pop band:
-            if re.search(r"\b(is a song|lead single|studio album|recorded by|pop song|music video|first-person shooter|video game developed by|film directed by|superhero film|released as a single|singer-songwriter|concert tour|concert film|american rapper|rock band|boy band|girl group|k-pop|hip hop artist|comedian|stand-up comedian|reality television|soap opera|professional wrestler|wwe wrestler|fashion model|action role-playing game|multiplayer online battle arena|battle royale game|third-person shooter)\b", item_text):
-                detected_non_edu_signals.append(f"search_engine_classified: {item['title']} ({item['snippet'][:80]})")
+            item_title_tokens = set(re.findall(r"\w+", item.get("title", "").lower()))
+            # Ensure the Wikipedia article actually pertains to the queried title (token overlap)
+            if query_tokens & item_title_tokens:
+                item_text = (item["title"] + " " + item.get("snippet", "")).lower()
+                if re.search(r"\b(is a song|lead single|studio album|recorded by|pop song|music video|first-person shooter|video game developed by|film directed by|superhero film|released as a single|singer-songwriter|concert tour|concert film|american rapper|rock band|boy band|girl group|k-pop|hip hop artist|comedian|stand-up comedian|reality television|soap opera|professional wrestler|wwe wrestler|fashion model|action role-playing game|multiplayer online battle arena|battle royale game|third-person shooter)\b", item_text):
+                    detected_non_edu_signals.append(f"search_engine_classified: {item['title']} ({item.get('snippet', '')[:80]})")
 
-        # ── Step E: Synthesis & Final Verdict ──
+        # ── Step E: Synthesis & Strict Educational Verdict ──
         non_edu_count = len(detected_non_edu_signals)
         academic_count = len(academic_matches)
 
-        # Hard rules:
-        # 1. Any confirmed music/gameplay/movie pattern when post has 0 academic matches = INSTANT BAN
-        if non_edu_count > 0 and academic_count == 0:
+        # ── RULE 1: Zero-Tolerance on Confirmed Non-Educational Signals ──
+        # If any music, gaming, movie, vlogging, gossip, or entertainment signal is confirmed:
+        # It is IMMEDIATELY BANNED, even if the user added token academic words!
+        if non_edu_count > 0:
+            first_signal = detected_non_edu_signals[0]
             return {
                 "is_educational": False,
                 "verdict": "BAN",
-                "category": "Non-Educational Media / Entertainment",
-                "confidence": 0.98,
-                "reason": f"Content was identified as non-educational entertainment ({detected_non_edu_signals[0]}). KOINEXA terms strictly prohibit entertainment, gaming, and non-academic pop culture.",
+                "category": "Non-Educational Content Violation",
+                "confidence": 0.99,
+                "reason": f"Content was identified as non-educational entertainment or casual banter ({first_signal}). KOINEXA terms strictly prohibit entertainment, gaming, vlogs, and non-academic topics.",
                 "video_meta": video_meta
             }
 
-        # 2. For video courses: If video has non-educational signals or no academic terminology:
-        if post_type == "youtube_course" or extracted_vid:
-            if non_edu_count > academic_count or academic_count == 0:
-                # If genre is explicitly Education, give benefit of the doubt only if no non-edu signals
-                if genre not in ["education", "science & technology"]:
-                    violating_signal = detected_non_edu_signals[0] if detected_non_edu_signals else "Lack of verified educational/technical syllabus"
-                    return {
-                        "is_educational": False,
-                        "verdict": "BAN",
-                        "category": "Non-Educational Video Material",
-                        "confidence": 0.95,
-                        "reason": f"Video does not meet KOINEXA academic tutorial and collegiate standards ({violating_signal}).",
-                        "video_meta": video_meta
-                    }
+        # ── RULE 2: Strict Educational Substance Requirement ──
+        # KOINEXA requires positive educational, scientific, engineering, or collegiate substance.
+        # If a post contains 0 academic/study concepts, it is rejected/banned as non-educational!
+        if academic_count == 0:
+            return {
+                "is_educational": False,
+                "verdict": "BAN",
+                "category": "Lack of Educational / Collegiate Purpose",
+                "confidence": 0.97,
+                "reason": "Content lacks verifiable educational, scientific, or collegiate academic value. KOINEXA terms strictly permit verified tutorials, engineering coursework, exam prep, and collegiate study collaboration only.",
+                "video_meta": video_meta
+            }
 
-        # 3. For tweets/posts: If purely non-educational chatter/gaming/entertainment:
-        if post_type in ["tweet", "hackathon"]:
-            if non_edu_count > 0 and academic_count == 0:
+        # ── RULE 3: YouTube Videos - Strict Genre & Syllabus Verification ──
+        if post_type == "youtube_course" or extracted_vid:
+            if genre and genre not in ["education", "science & technology"]:
                 return {
                     "is_educational": False,
                     "verdict": "BAN",
-                    "category": "Non-Educational Discussion",
-                    "confidence": 0.96,
-                    "reason": f"Content violates educational terms: Non-academic topic detected ({detected_non_edu_signals[0]}).",
+                    "category": f"Non-Educational Video Genre ({genre.title()})",
+                    "confidence": 0.99,
+                    "reason": f"Video genre is registered as '{genre.title()}' on YouTube. KOINEXA strictly mandates verified educational tutorial material.",
                     "video_meta": video_meta
                 }
 
-        # Passes educational verification
+        # Passes strict educational verification
         return {
             "is_educational": True,
             "verdict": "ALLOW",
             "category": "Academic / Educational Learning Material",
-            "confidence": 0.95 if academic_count > 0 else 0.80,
+            "confidence": 0.98,
             "reason": "Content verified as educational, engineering, or collegiate learning material.",
             "video_meta": video_meta
         }
