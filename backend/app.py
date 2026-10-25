@@ -155,8 +155,24 @@ def handle_preflight():
         res.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
         return res
 
+# ─── AUTONOMOUS ZERO-COST CLOUD PERSISTENCE LAYER (RENDER FREE TIER SAFE) ───
+try:
+    from backend.cloud_db_sync import restore_db_from_cloud, start_periodic_sync_daemon, schedule_cloud_sync
+except ImportError:
+    from cloud_db_sync import restore_db_from_cloud, start_periodic_sync_daemon, schedule_cloud_sync
+
+try:
+    restore_db_from_cloud()
+except Exception as e:
+    print(f"[CloudDBSync] Boot sync notice: {e}")
+
 # Initialize database schema
 init_db()
+
+try:
+    start_periodic_sync_daemon(interval_seconds=45.0)
+except Exception as e:
+    print(f"[CloudDBSync] Notice starting periodic sync daemon: {e}")
 # seed_database()  # Disabled: keeping database clean of mock/seed data
 
 import threading
@@ -737,6 +753,7 @@ def auth_student_register():
 
     try:
         dsa_engine.sync_user(user_dict)
+        schedule_cloud_sync(3.0)
     except Exception:
         pass
 
@@ -2216,6 +2233,7 @@ def create_post():
         }, ["title", "content", "user_name"])
         dsa_engine.search_cache.clear()
         dsa_engine.profile_cache.invalidate(f"profile_base_{current_user['id']}")
+        schedule_cloud_sync(3.0)
     except Exception:
         pass
 
