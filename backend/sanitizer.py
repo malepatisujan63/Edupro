@@ -23,9 +23,15 @@ GREEK_SYMBOLS = (
     "αβγδεζηθικλμνξοπρστυφχψω"
     "ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ"
 )
+LATIN_ACCENTED = (
+    "áàâäãåçéèêëíìîïñóòôöõúùûüýÿæøœ"
+    "ÁÀÂÄÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸÆØŒ"
+)
+
 TYPOGRAPHIC_AND_CURRENCY = (
-    "“”‘’—–…•·§¶©®™"
+    "“”‘’—–―−…•·§¶©®™«»‹›„‚"
     "$€£₹¥¢"
+    "\u00a0\u202f\u2009\u200a"
 )
 
 # Build comprehensive character set safely
@@ -38,6 +44,7 @@ ALLOWED_CHARS_SET = set(
     "-_:;\'\"@#+=*%$~`^"
     + STEM_MATH_SYMBOLS
     + GREEK_SYMBOLS
+    + LATIN_ACCENTED
     + TYPOGRAPHIC_AND_CURRENCY
 )
 
@@ -56,14 +63,17 @@ def validate_text_characters(text: str) -> Tuple[bool, List[str]]:
     if not text:
         return True, []
 
-    lower = text.lower()
+    # Normalize zero-width and non-breaking web artifacts
+    normalized = text.replace("\u00a0", " ").replace("\u202f", " ").replace("\ufeff", "").replace("\u200b", "")
+
+    lower = normalized.lower()
     for tag in MALICIOUS_TAG_PATTERNS:
         if tag in lower:
             return False, [f"Disallowed script pattern '{tag}'"]
 
     disallowed = []
     seen = set()
-    for char in text:
+    for char in normalized:
         if char not in ALLOWED_CHARS_SET:
             if char not in seen:
                 disallowed.append(char)

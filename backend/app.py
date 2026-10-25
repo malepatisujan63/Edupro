@@ -672,7 +672,8 @@ def auth_student_register():
     # Validate character whitelist
     is_valid, char_err = validate_text_characters(f"{name} {college} {bio}")
     if not is_valid:
-        return jsonify({"success": False, "error": char_err}), 400
+        chars_preview = ", ".join(repr(c) for c in char_err[:5])
+        return jsonify({"success": False, "error": f"Disallowed characters detected: {chars_preview}. Please use standard text characters."}), 400
 
     # Content moderation across all text fields
     is_mod_safe, mod_reason = moderate_content(f"{name} {username} {college} {bio}")
@@ -958,7 +959,8 @@ def auth_mentor_register():
     # Character whitelist and moderation
     is_valid, char_err = validate_text_characters(f"{name} {institution} {department} {designation} {statement}")
     if not is_valid:
-        return jsonify({"success": False, "error": char_err}), 400
+        chars_preview = ", ".join(repr(c) for c in char_err[:5])
+        return jsonify({"success": False, "error": f"Disallowed characters detected: {chars_preview}. Please use standard text characters."}), 400
 
     is_mod_safe, mod_reason = moderate_content(f"{name} {institution} {department} {designation} {statement}")
     if not is_mod_safe:

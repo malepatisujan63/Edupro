@@ -183,7 +183,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const safeParseJson = async (res: Response) => {
     const text = await res.text();
     try {
-      return JSON.parse(text);
+      const parsed = JSON.parse(text);
+      if (parsed && parsed.error && typeof parsed.error !== 'string') {
+        parsed.error = Array.isArray(parsed.error) ? parsed.error.join(', ') : JSON.stringify(parsed.error);
+      }
+      return parsed;
     } catch {
       return { success: false, error: res.ok ? 'Unexpected response format from server' : `Server error (${res.status})` };
     }
