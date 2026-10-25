@@ -4,12 +4,40 @@ Koinexa Database Persistence Layer
 SQLite3 WAL-mode database with thread-safe pooling.
 """
 
+import os
+import shutil
 import sqlite3
 import threading
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
-DATABASE_PATH = BASE_DIR / "koinexa.db"
+
+def resolve_database_path() -> Path:
+    env_path = os.environ.get("DATABASE_PATH") or os.environ.get("KOINEXA_DB_PATH")
+    if env_path:
+        target = Path(env_path)
+    elif Path("/data").is_dir() and os.access("/data", os.W_OK):
+        target = Path("/data") / "koinexa.db"
+    elif Path("/var/data").is_dir() and os.access("/var/data", os.W_OK):
+        target = Path("/var/data") / "koinexa.db"
+    else:
+        target = BASE_DIR / "koinexa.db"
+
+    # If a persistent volume exists and the database file does not exist yet,
+    # copy the seed template once. Subsequent deploys will never overwrite it.
+    if not target.exists():
+        try:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            template_db = BASE_DIR / "koinexa.db"
+            if template_db.exists() and template_db != target:
+                shutil.copy2(template_db, target)
+                print(f"[Database] Bootstrapped persistent database at: {target}")
+        except Exception as e:
+            print(f"[Database] Notice during persistent storage bootstrap: {e}")
+
+    return target
+
+DATABASE_PATH = resolve_database_path()
 
 _db_local = threading.local()
 
